@@ -1,0 +1,6 @@
+----------------- change log -----------------
+V0.2 
+ Create a file system where the script can parse other file and get class and function.
+ Optimie Interprenter
+ Append Posision to function and method call
+ If the object or class has a method call toString() the name can be use as string variabel.
