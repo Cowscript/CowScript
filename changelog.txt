@@ -4,3 +4,5 @@ V0.2
  Optimie Interprenter
  Append Posision to function and method call
  If the object or class has a method call toString() the name can be use as string variabel.
+ optimizes the class parser
+ Remove StringVariabel and write a static method there create a object of the class String. 
