@@ -33,6 +33,9 @@ namespace script.help
             if (type == "function" && var.type() == "method")
                 return true;//method can also be a function :)
 
+            if (type == "string" && var.type() == "int")
+                return true;//int can be convertet to string :)
+
             return var.type().Equals(type) || var is ObjectVariabel && type == ((ObjectVariabel)var).Name;
         }
     }
