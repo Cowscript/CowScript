@@ -23,3 +23,5 @@ V0.2
  Append new plugin to get details of functions and method.
  Append method 'toLower()' and 'toUpper()' to string. toLower() will change HEY to hey and toUpper will change hey to HEY.
  
+ --V0.1 is testet to time: 60547,4869ms in test case
+ 
