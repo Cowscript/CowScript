@@ -14,6 +14,7 @@ namespace script.plugin
             container.Add("array", new Array());
             container.Add("regex", new Regex());
             container.Add("base64", new Base64());
+            container.Add("time", new Time());
         }
 
         public bool exists(string name)
