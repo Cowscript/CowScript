@@ -2,6 +2,10 @@
 V0.3
  Change ParserInterface so end is removed.
  Change so parseres not is interlize every time.
+ Allow _ invariabels name.
+ Add ^ to math section 2^3 = 8 
+ Create function as name = function(){}; or test(function(){});
+ 
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
