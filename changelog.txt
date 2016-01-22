@@ -1,6 +1,7 @@
 ----------------- change log -----------------
 V0.3
  Change ParserInterface so end is removed.
+ Change so parseres not is interlize every time.
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
