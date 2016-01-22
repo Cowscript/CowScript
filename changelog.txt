@@ -1,4 +1,7 @@
 ----------------- change log -----------------
+V0.3
+ Change ParserInterface so end is removed.
+
 V0.2 
  Create a file system where the script can parse other file and get class and function.
  Optimie Interprenter
