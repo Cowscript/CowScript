@@ -5,6 +5,7 @@ V0.3
  Allow _ invariabels name.
  Add ^ to math section 2^3 = 8 
  Create function as name = function(){}; or test(function(){});
+ Append new tokens break and continue. Break stop current task and continue break the running task and jump to next if there are any
  
 
 V0.2 
