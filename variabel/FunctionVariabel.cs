@@ -14,7 +14,7 @@ namespace script.variabel
             this.func = func;
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             return false;
         }
@@ -24,9 +24,19 @@ namespace script.variabel
             return func.agument;
         }
 
-        public virtual CVar call(CallAgumentStack call, EnegyData data)
+        public virtual int agumentSize()
         {
-            CVar r = func.call.call(call, data);
+            return func.agument.size();
+        }
+
+        public virtual VariabelDatabase getShadowVariabelDatabase(VariabelDatabase db)
+        {
+            return db.createShadow();
+        }
+
+        public virtual CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
+        {
+            CVar r = func.callFunction(call, db, data, pos);
 
             if (r == null)
                 return new NullVariabel();
@@ -34,33 +44,33 @@ namespace script.variabel
             return r;
         }
 
-        public virtual CVar call(EnegyData data, params object[] parameters)
+        public virtual CVar call(EnegyData data, VariabelDatabase db, params object[] parameters)
         {
-            CallAgumentStack stack = new CallAgumentStack();
-            VariabelDatabase vd = data.VariabelDatabase.createShadow();
-            
-            for(int i = 0; i < parameters.Length && i <= func.agument.size(); i++)
+            CVar[] stack = new CVar[func.agument.size()];
+            VariabelDatabase vd = db.createShadow();
+            int i = 0;
+            for(; i < parameters.Length && i <= func.agument.size(); i++)
             {
                 CVar context = ScriptConverter.convert(parameters[i]);
                 if (func.agument.get(i).hasType() && !CallScriptFunction.compare(context, func.agument.get(i).Type))
                     throw new ScriptError("Cant convert " + context.type() + " to " + func.agument.get(i).Type.ToString(), new Posision(0, 0));
 
                 //okay let cache the parameters :)
-                stack.push(context);
+                stack[i] = context;
                 vd.push(func.agument.get(i).Name, context);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
-            for(int i = stack.size(); i < func.agument.size(); i++)
+            for(; i < func.agument.size(); i++)
             {
                 if (!func.agument.get(i).hasValue())
                     throw new ScriptError("Missing agument to " + func.Name, new Posision(0, 0));
 
-                stack.push(func.agument.get(i).Value);
-                vd.push(func.agument.get(i).Name, func.agument.get(i).Value);
+                stack[i] = func.agument.get(i).Value;
+                vd.push(func.agument.get(i).Name, stack[i]);
             }
 
-            return call(stack, new EnegyData(vd, new Interprenter(), data.Plugin, data.Error, data));
+            return call(stack, db, data, new Posision(0,0));
         }
 
         public override string type()

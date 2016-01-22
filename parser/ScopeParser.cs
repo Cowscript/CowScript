@@ -5,7 +5,7 @@ namespace script.parser
 {
     class ScopeParser
     {
-        public static TokenCache getScope(Token token)
+        public static TokenCache getScope(Token token, EnegyData data, VariabelDatabase db)
         {
             ArrayList cache = new ArrayList();
             TokenBuffer buffer;
@@ -29,7 +29,8 @@ namespace script.parser
                 cache.Add(buffer);
             }
 
-            throw new ScriptError("Missing ) ", token.getCache().posision());
+            data.setError(new ScriptError("Missing ) ", token.getCache().posision()), db);
+            return new TokenCache(new ArrayList());
         }
     }
 }

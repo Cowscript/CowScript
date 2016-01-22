@@ -1,12 +1,11 @@
-﻿using script.stack;
-using script.variabel;
+﻿using script.variabel;
 using script.token;
 using script.plugin;
 using System.Collections;
 
 namespace script.help
 {
-    class CallScriptFunction : CallInterface
+    class CallScriptFunction
     {
         private ArrayList body;
         private PluginContainer plugin;
@@ -17,15 +16,17 @@ namespace script.help
             this.plugin = plugin;
         }
 
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        public CVar call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            Interprenter interprenter = Interprenter.parse(data.VariabelDatabase, plugin, data);
-            interprenter.parse(new TokenCache(body));
+            Interprenter.parse(new TokenCache(body), data, db);
 
-            if(interprenter.data.Return == null)
-                return new NullVariabel();
+            if(data.State == RunningState.Return)
+            {
+                //the state is return 
+                return data.getReturn();
+            }
 
-            return interprenter.data.Return;
+            return new NullVariabel();
         }
 
         public static bool compare(CVar var, string type)

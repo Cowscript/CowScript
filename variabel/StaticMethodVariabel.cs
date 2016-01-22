@@ -1,6 +1,5 @@
 ﻿using script.builder;
 using script.stack;
-using script.token;
 
 namespace script.variabel
 {
@@ -15,14 +14,24 @@ namespace script.variabel
             this.c = c;
         }
 
+        public override int agumentSize()
+        {
+            return method.Aguments.size();
+        }
+
         public override AgumentStack getStatck()
         {
             return method.Aguments;
         }
 
-        public override CVar call(CallAgumentStack call, EnegyData data)
+        public override VariabelDatabase getShadowVariabelDatabase(VariabelDatabase db)
         {
-            return method.call(c, data.VariabelDatabase, call, data);
+            return db.createShadow(c);
+        }
+
+        public override CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
+        {
+            return method.call(c, db, call, data, pos);
         }
     }
 }

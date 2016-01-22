@@ -3,17 +3,20 @@ using System;
 
 namespace script
 {
-    public class ScriptError : Exception
+    public class ScriptError
     {
         public Posision Posision { private set; get; }
-        public ScriptError(string msg, TokenPosision pos) : base(msg)
+        public string Message { get; private set; }
+        public ScriptError(string msg, TokenPosision pos)
         {
             Posision = pos.toPosision();
+            Message = msg;
         }
 
-        public ScriptError(string msg, Posision pos) : base(msg)
+        public ScriptError(string msg, Posision pos)
         {
             Posision = pos;
+            Message = msg;
         }
     }
 }

@@ -14,43 +14,33 @@ namespace script.plugin
             type.Name = "type";
             type.agument.push("controls");
             type.agument.push("string", "isType");
-            type.call = new TypeControler();
+            type.call += Type_call;
             database.pushFunction(type);
 
             Function toInt = new Function();
             toInt.Name = "toInt";
             toInt.agument.push("string", "context");
-            toInt.call = new ToInt();
+            toInt.call += ToInt_call;
             database.pushFunction(toInt);
         }
-    }
 
-    class ToInt : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        private CVar Type_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            string s = stack.pop().toString(new Posision(0, 0));
+            if (stack[0] is ObjectVariabel && stack[1].toString(pos, data, db) == ((ObjectVariabel)stack[0]).Name)
+                return new BooleanVariabel(true);
+
+            return new BooleanVariabel(stack[0].type() == stack[1].toString(pos, data, db));
+        }
+
+        private CVar ToInt_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
+        {
             double result;
-            if(!double.TryParse(s, out result))
+            if (!double.TryParse(stack[0].toString(pos, data, db), out result))
             {
-                throw new ScriptError(s + " could not be convertet to int", new Posision(0, 0));
+                throw new ScriptError(stack[0].toString(pos, data, db) + " could not be convertet to int", new Posision(0, 0));
             }
 
             return new IntVariabel(result);
-        }
-    }
-
-    class TypeControler : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
-        {
-            CVar var = stack.pop();
-            string str = stack.pop().toString(new Posision(0,0));
-
-            if (var is ObjectVariabel && str == ((ObjectVariabel)var).Name)
-                return new BooleanVariabel(true);
-
-            return new BooleanVariabel(var.type() == str);
         }
     }
 }

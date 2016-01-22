@@ -11,18 +11,23 @@ namespace script.parser
     {
         private EnegyData data;
         private Token token;
+        private VariabelDatabase db;
 
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {
             if (token.getCache().type() != TokenType.End)
-                throw new ScriptError("Missing ;. got: "+token.getCache().ToString(), token.getCache().posision());
+            {
+                data.setError(new ScriptError("Missing ;. got: " + token.getCache().ToString(), token.getCache().posision()), db);
+                return;
+            }
 
             token.next();//update token soo next dont need to use Token.next();
         }
 
-        public CVar parse(EnegyData ed, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             this.token = token;
+            this.db = db;
             data = ed;
             return getBooleanPrefix(true);
         }
@@ -99,12 +104,12 @@ namespace script.parser
             if (token.getCache().type() == TokenType.Equels) //==
             {
                 token.next();
-                return new BooleanVariabel(sum(parse).compare(var, token.getCache().posision()));
+                return new BooleanVariabel(sum(parse).compare(var, token.getCache().posision(), data, db));
             }
             else if (token.getCache().type() == TokenType.NotEquels) //!=
             {
                 token.next();
-                return new BooleanVariabel(!sum(parse).compare(var, token.getCache().posision()));
+                return new BooleanVariabel(!sum(parse).compare(var, token.getCache().posision(), data, db));
             }
             else if (token.getCache().type() == TokenType.GreaterEquels) // <=
             {
@@ -142,7 +147,7 @@ namespace script.parser
                     if (b is IntVariabel && var is IntVariabel)
                         var = new IntVariabel(var.toInt(buffer.posision()) + b.toInt(token.getPosision()));
                     else
-                        var = new StringVariabel(var.toString(buffer.posision()) + b.toString(token.getPosision()));
+                        var = new StringVariabel(var.toString(buffer.posision(), data, db) + b.toString(token.getPosision(), data, db));
                 }
                 else
                 {
@@ -231,14 +236,14 @@ namespace script.parser
                 {
                     token.next();
                     if (parse)
-                        return data.VariabelDatabase.push(buffer.ToString(), handleAfterVariabel(getBooleanPrefix(true), true));
+                        return db.push(buffer.ToString(), handleAfterVariabel(getBooleanPrefix(true), true));
                     else
                         return handleAfterVariabel(getBooleanPrefix(false), false);
                 }
                 
                 
                 //control if wee got a variabel this this name
-                if (parse && !data.VariabelDatabase.isExists(buffer.ToString()))
+                if (parse && !db.isExists(buffer.ToString()))
                     throw new ScriptError("Unknown variabel: " + buffer.ToString(), buffer.posision());
 
                 Posision p = token.getCache().posision();
@@ -249,19 +254,19 @@ namespace script.parser
                     token.next();
                     if (parse)
                     {
-                        data.VariabelDatabase.push(buffer.ToString(), varCache = new IntVariabel(data.VariabelDatabase.get(buffer.ToString()).toInt(p)+1));
+                        db.push(buffer.ToString(), varCache = new IntVariabel(db.get(buffer.ToString()).toInt(p)+1));
                     }
                 }else if(token.getCache().type() == TokenType.MinusOne)
                 {
                     token.next();
                     if (parse)
                     {
-                        data.VariabelDatabase.push(buffer.ToString(), varCache = new IntVariabel(data.VariabelDatabase.get(buffer.ToString()).toInt(p) - 1));
+                        db.push(buffer.ToString(), varCache = new IntVariabel(db.get(buffer.ToString()).toInt(p) - 1));
                     }
 
                 }
 
-                return handleAfterVariabel(parse ? varCache != null ? varCache : data.VariabelDatabase.get(buffer.ToString()) : new NullVariabel(), parse);
+                return handleAfterVariabel(parse ? varCache != null ? varCache : db.get(buffer.ToString()) : new NullVariabel(), parse);
             }
             else if (buffer.type() == TokenType.New)
             {
@@ -271,10 +276,10 @@ namespace script.parser
                 CVar c = null;
                 if (parse)
                 {
-                    if (!data.VariabelDatabase.isExists(token.getCache().ToString()))
+                    if (!db.isExists(token.getCache().ToString()))
                         throw new ScriptError("Unknown class: " + token.getCache().ToString(), token.getCache().posision());
 
-                    c = data.VariabelDatabase.get(token.getCache().ToString());
+                    c = db.get(token.getCache().ToString());
 
                     if (!(c is ClassVariabel))
                         throw new ScriptError(token.getCache().ToString() + " is not a class", token.getCache().posision());
@@ -285,8 +290,7 @@ namespace script.parser
                 if (token.next().type() != TokenType.LeftBue)
                     throw new ScriptError("Missing ( after class variabel", token.getCache().posision());
 
-                CallAgumentStack call = new CallAgumentStack();
-                VariabelDatabase vd = data.VariabelDatabase.createShadow();
+                CVar[] call = new CVar[cObject.hasConstructor() ? cObject.getConstructor().Aguments.size() : 0];
 
                 if (token.next().type() != TokenType.RightBue)
                 {
@@ -297,8 +301,7 @@ namespace script.parser
                         {
                             throw new ScriptError("A agument number 0 in constructor can not be convertet to " + cObject.getConstructor().Aguments.get(0).Type.ToString(), token.getCache().posision());
                         }
-                        call.push(v);
-                        vd.push(cObject.getConstructor().Aguments.get(0).Name, v);
+                        call[0] = v;
                     }
 
                     int i = 1;
@@ -314,8 +317,7 @@ namespace script.parser
                                 if (!CallScriptFunction.compare(v, cObject.getConstructor().Aguments.get(i).Type))
                                     throw new ScriptError("A agument number " + (i + 1) + " in  constructor can not be convertet from '"+v.type()+"' to '" + cObject.getConstructor().Aguments.get(i).Type+"'", token.getCache().posision());
                             }
-                            call.push(v);
-                            vd.push(cObject.getConstructor().Aguments.get(i).Name, v);
+                            call[i] = v;
                         }
 
                         i++;
@@ -329,8 +331,7 @@ namespace script.parser
                             if (!cObject.getConstructor().Aguments.get(i).hasValue())
                                 throw new ScriptError("Call of function  missing aguments", token.getCache().posision());
 
-                            call.push(cObject.getConstructor().Aguments.get(i).Value);
-                            vd.push(cObject.getConstructor().Aguments.get(i).Name, cObject.getConstructor().Aguments.get(i).Value);
+                            call[a] = cObject.getConstructor().Aguments.get(i).Value;
                         }
                     }
                 }
@@ -339,14 +340,14 @@ namespace script.parser
                     throw new ScriptError("Missing ) got " + token.getCache().ToString(), token.getCache().posision());
                 token.next();
 
-                return handleAfterVariabel(cObject.createNew(call, vd, new EnegyData(vd, new Interprenter(), data.Plugin, data.Error, data)), parse);
+                return handleAfterVariabel(cObject.createNew(call, db, data, token.getCache().posision()), parse);
             }
             else if (buffer.type() == TokenType.Self) {
-                if(parse && data.Interprenter.StaticVariabel == null)
+                if(parse && db.C == null)
                     throw new ScriptError("'self' can only be uses in static method", buffer.posision());
 
                 if (token.next().type() != TokenType.ObjectBind)
-                    return data.Interprenter.StaticVariabel;
+                    return db.C;
 
                 if (token.next().type() != TokenType.Variabel)
                     throw new ScriptError("After 'self->' there must be a variabel", token.getCache().posision());
@@ -356,20 +357,20 @@ namespace script.parser
                 if(token.next().type() == TokenType.Assigen)
                 {
                     token.next();
-                    return assignStaticObject(data.Interprenter.StaticVariabel, item, true, parse);
+                    return assignStaticObject(db.C, item, true, parse);
                 }
 
-                return handleStatic(data.Interprenter.StaticVariabel, item, true, parse);
+                return handleStatic(db.C, item, true, parse);
             }
             else if (buffer.type() == TokenType.This)
             {
-                if (parse && data.Interprenter.ObjectVariabel == null)
+                if (parse && db.Object == null)
                     throw new ScriptError("'this' can only be used in object method.", buffer.posision());
 
                 //okay now wee control if it return 'this' (the object) or it will get a specifik part :)
                 if (token.next().type() != TokenType.ObjectBind)
                 {
-                    return data.Interprenter.ObjectVariabel;
+                    return db.Object;
                 }
 
                 //next there must be a variabel :)
@@ -383,10 +384,10 @@ namespace script.parser
                 if (token.next().type() == TokenType.Assigen)
                 {
                     token.next();
-                    return assignObject(data.Interprenter.ObjectVariabel, item, parse, true);
+                    return assignObject(db.Object, item, parse, true);
                 }
 
-                return handleObject(data.Interprenter.ObjectVariabel, item, true, parse);
+                return handleObject(db.Object, item, true, parse);
             }else if(buffer.type() == TokenType.LeftBue)
             {
                 token.next();
@@ -541,39 +542,38 @@ namespace script.parser
         private void setArrayContext(ArrayVariabel array, bool parse)
         {
             CVar first = getBooleanPrefix(parse);
-            CVar key;
-            CVar value;
 
             //if there are : in next 
             if(token.getCache().type() == TokenType.DublePunk)
             {
                 token.next();
-                key = first;//it is the same :)
-                value = getBooleanPrefix(parse);
+                array.put(first, getBooleanPrefix(parse), token.getCache().posision(), data, db);
             }
             else
             {
-                value = first;
-                key   = new IntVariabel(array.getNextID());
+                array.put(first, token.getCache().posision(), data, db);
             }
-            array.put(key, value, token.getCache().posision());
         }
 
         private CVar handleAfterVariabel(CVar variabel, bool parse)
         {
+            Posision startPos = token.getCache().posision();
 
             //here wee control whe thinks there happend after variabel :)
             switch(token.getCache().type())
             {
                 case TokenType.LeftBue://it is a functions call :)
-                    VariabelDatabase vd = data.VariabelDatabase.createShadow();
-
                     if(parse && !(variabel is FunctionVariabel))
                     {
                         throw new ScriptError("Unknown token (", token.getCache().posision());
                     }
 
-                    CallAgumentStack call = new CallAgumentStack();
+                    if (parse && variabel == null)
+                        throw new ScriptError("FunctionVariabel is null", token.getCache().posision());
+
+                    VariabelDatabase vd = parse ? ((FunctionVariabel)variabel).getShadowVariabelDatabase(db) : new VariabelDatabase();
+
+                    CVar[] call = new CVar[parse ? ((FunctionVariabel)variabel).agumentSize() : 0];
                     AgumentStack stack = parse ? ((FunctionVariabel)variabel).getStatck() : new AgumentStack();
 
                     if(token.next().type() != TokenType.RightBue)
@@ -581,11 +581,11 @@ namespace script.parser
                         CVar v = getBooleanPrefix(parse);
                         if (parse && stack.size() > 0)
                         {
-                            if (parse && stack.get(0).hasType() && !CallScriptFunction.compare(v, stack.get(0).Type))
+                            if (stack.get(0).hasType() && !CallScriptFunction.compare(v, stack.get(0).Type))
                             {
                                 throw new ScriptError("A agument number 0 in function can not be convertet from '"+v.type()+"' to " + stack.get(0).Type.ToString(), token.getCache().posision());
                             }
-                            call.push(v);
+                            call[0] = v;
                             vd.push(stack.get(0).Name, v);
                         }
 
@@ -602,7 +602,7 @@ namespace script.parser
                                     if (!CallScriptFunction.compare(v, stack.get(i).Type))
                                         throw new ScriptError("A agument number "+(i+1)+" in function can not be convertet to "+ stack.get(i).Type.ToString(), token.getCache().posision());
                                 }
-                                call.push(v);
+                                call[i] = v;
                                 vd.push(stack.get(i).Name, v);
                             }
 
@@ -615,7 +615,7 @@ namespace script.parser
                             if(!stack.get(a).hasValue())
                                 throw new ScriptError("Call of function missing aguments", token.getCache().posision());
 
-                            call.push(stack.get(a).Value);
+                            call[a] = stack.get(a).Value;
                             vd.push(stack.get(a).Name, stack.get(a).Value);
                         }
                     }
@@ -631,7 +631,7 @@ namespace script.parser
                                     throw new ScriptError("Call of function missing aguments", token.getCache().posision());
 
                                 vd.push(stack.get(i).Name, stack.get(i).Value);
-                                call.push(stack.get(i).Value);
+                                call[i] = stack.get(i).Value;
                             }
                         }
                     }
@@ -642,7 +642,7 @@ namespace script.parser
                     if (!parse)
                         return handleAfterVariabel(new NullVariabel(), false);
 
-                    return handleAfterVariabel(((FunctionVariabel)variabel).call(call, new EnegyData(vd, new Interprenter(), data.Plugin, data.Error, data)), parse);
+                    return handleAfterVariabel(((FunctionVariabel)variabel).call(call, vd, data, token.getCache().posision()), parse);
                 case TokenType.LeftBoks:
                     //control if the context is variabel :)
                     if (!(variabel is ArrayVariabel))
@@ -668,7 +668,7 @@ namespace script.parser
 
                         if (parse)
                         {
-                            ((ArrayVariabel)variabel).put((key == null ? new IntVariabel(((ArrayVariabel)variabel).getNextID()) : key), context, token.getCache().posision());
+                            ((ArrayVariabel)variabel).put((key == null ? ((ArrayVariabel)variabel).getNextID() : key), context, token.getCache().posision(), data, db);
                         }
 
                         return context;
@@ -680,10 +680,10 @@ namespace script.parser
 
                     ArrayVariabel ar = (ArrayVariabel)variabel;
 
-                    if (parse && !ar.keyExists(key, token.getCache().posision()))
-                        throw new ScriptError("Unknown key in array: " + key.toString(token.getCache().posision()), token.getCache().posision());
+                    if (parse && !ar.keyExists(key, token.getCache().posision(), data, db))
+                        throw new ScriptError("Unknown key in array: " + key.toString(token.getCache().posision(), data, db), token.getCache().posision());
                     if(parse)
-                        return handleAfterVariabel(ar.get(key, token.getCache().posision()), parse);
+                        return handleAfterVariabel(ar.get(key, token.getCache().posision(), data, db), parse);
 
                     return handleAfterVariabel(new NullVariabel(), false);
                 case TokenType.ObjectBind:

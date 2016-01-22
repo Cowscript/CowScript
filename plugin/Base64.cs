@@ -12,34 +12,26 @@ namespace script.plugin
         {
             Class base64 = new Class("Base64");
 
-            ClassStaticMethods encode = new ClassStaticMethods(base64);
-            encode.setName("encode");
-            encode.setAccess(true);
-            AgumentStack encodeStack = new AgumentStack();
-            encodeStack.push("string", "text");
-            encode.Aguments = encodeStack;
+            ClassStaticMethods encode = new ClassStaticMethods(base64, "encode");
+            encode.Aguments.push("string", "text");
             encode.caller += Encode_caller;
             encode.create();
 
-            ClassStaticMethods decode = new ClassStaticMethods(base64);
-            decode.setName("decode");
-            decode.setAccess(true);
-            AgumentStack decodeStack = new AgumentStack();
-            decodeStack.push("string", "text");
-            decode.Aguments = decodeStack;
+            ClassStaticMethods decode = new ClassStaticMethods(base64, "decode");
+            decode.Aguments.push("string", "text");
             decode.caller += Decode_caller;
             decode.create();
         }
 
-        private CVar Decode_caller(ClassVariabel c, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar Decode_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            byte[] buffer = Convert.FromBase64String(stack.pop().toString(new Posision(0,0)));
+            byte[] buffer = Convert.FromBase64String(stack[0].toString(pos, data, db));
             return new StringVariabel(Encoding.UTF8.GetString(buffer));
         }
 
-        private CVar Encode_caller(ClassVariabel c, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar Encode_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(stack.pop().toString(new Posision(0, 0)));
+            byte[] buffer = Encoding.UTF8.GetBytes(stack[0].toString(pos, data, db));
             return new StringVariabel(Convert.ToBase64String(buffer));
         }
     }

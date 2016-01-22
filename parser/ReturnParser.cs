@@ -12,19 +12,19 @@ namespace script.parser
             
         }
 
-        public CVar parse(EnegyData ed, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             if (token.next().type() != TokenType.End)
             {
-                ed.Return = p.parse(ed, token);
+                ed.setReturn(p.parse(ed, db, token));
                 p.end();
             }
             else {
                 token.next();
-                ed.Return = new NullVariabel();
+                ed.setReturn(new NullVariabel());
             }
 
-            return ed.Return;
+            return null;
         }
     }
 }

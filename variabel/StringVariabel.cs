@@ -14,100 +14,94 @@ namespace script.variabel
             this.context = context;
 
             Class c = new Class("string");
-            ClassMethods length = (ClassMethods)c.createMethods();
-            length.setName("length");
-            length.setAccess(true);
+            ClassMethods length = new ClassMethods(c, "length");
             length.caller += Length_caller;
             length.create();
 
-            ClassMethods substr = (ClassMethods)c.createMethods();
-            substr.setName("substr");
-            substr.setAccess(true);
+            ClassMethods substr = new ClassMethods(c, "substr");
             substr.caller += Substr_caller;
-
-            //add aguments :)
-            AgumentStack substrStack = new AgumentStack();
-            substrStack.push("int", "min");
-            substrStack.push("int", "max", new NullVariabel());
-            substr.Aguments = substrStack;
-
+            substr.Aguments.push("int", "min");
+            substr.Aguments.push("int", "max", new NullVariabel());
             substr.create();
 
-            ClassMethods indexOf = (ClassMethods)c.createMethods();
-            indexOf.setName("indexOf");
-            indexOf.setAccess(true);
+            ClassMethods indexOf = new ClassMethods(c, "indexOf");
             indexOf.caller += IndexOf_caller;
-
-            AgumentStack indexOfStack = new AgumentStack();
-            indexOfStack.push("string", "serche");
-            indexOf.Aguments = indexOfStack;
-
+            indexOf.Aguments.push("string", "serche");
             indexOf.create();
 
-            ClassMethods toChars = (ClassMethods)c.createMethods();
-            toChars.setName("toChars");
-            toChars.setAccess(true);
+            ClassMethods toChars = new ClassMethods(c, "toChars");
             toChars.caller += ToChars_caller;
             toChars.create();
 
-            ClassMethods split = (ClassMethods)c.createMethods();
-            split.setName("split");
-            split.setAccess(true);
-            AgumentStack splitStack = new AgumentStack();
-            splitStack.push("string", "string");
-            split.Aguments = splitStack;
+            ClassMethods split = new ClassMethods(c, "split");
+            split.Aguments.push("string", "string");
             split.caller += Split_caller;
             split.create();
 
+            ClassMethods toLower = new ClassMethods(c, "toLower");
+            toLower.caller += ToLower_caller;
+            toLower.create();
+
+            ClassMethods toUpper = new ClassMethods(c, "toUpper");
+            toUpper.caller += ToUpper_caller;
+            toUpper.create();
+
             ClassVariabel cVar = new ClassVariabel(c);
-            items = cVar.createNew(new CallAgumentStack(), new VariabelDatabase(), new EnegyData(new VariabelDatabase(), new Interprenter(), new PluginContainer(), null, null)).items;
+            items = cVar.createNew(new CVar[0], new VariabelDatabase(), new EnegyData(), new Posision(0,0)).items;
         }
 
-        private CVar Split_caller(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar ToUpper_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return new StringVariabel(context.ToUpper());
+        }
+
+        private CVar ToLower_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return new StringVariabel(context.ToLower());
+        }
+
+        private CVar Split_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             ArrayVariabel array = new ArrayVariabel();
 
-            foreach(string i in context.Split(new string[] { stack.pop().toString(new Posision(0, 0)) }, StringSplitOptions.RemoveEmptyEntries))
+            foreach(string i in context.Split(new string[] { stack[0].toString(pos, data, db) }, StringSplitOptions.RemoveEmptyEntries))
             {
-                array.put(new IntVariabel(array.getNextID()), new StringVariabel(i), new Posision(0, 0));
+                array.put(array.getNextID(), new StringVariabel(i), pos, data, db);
             }
 
             return array;
         }
 
-        private CVar ToChars_caller(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar ToChars_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             ArrayVariabel array = new ArrayVariabel();
             foreach (char c in context.ToCharArray())
-                array.put(new IntVariabel(array.getNextID()), new StringVariabel(c.ToString()), new Posision(0,0));
+                array.put(array.getNextID(), new StringVariabel(c.ToString()), pos, data, db);
 
             return array;
         }
 
-        private CVar IndexOf_caller(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar IndexOf_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new IntVariabel(context.IndexOf(stack.pop().toString(new Posision(0, 0))));
+            return new IntVariabel(context.IndexOf(stack[0].toString(pos, data, db)));
         }
 
-        private CVar Substr_caller(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        private CVar Substr_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            double start = stack.pop().toInt(new Posision(0,0));
-            CVar end = stack.pop();
-
-            if(end is NullVariabel)
+            if (stack[1] is NullVariabel)
             {
-                return new StringVariabel(context.Substring((int)start));
+                return new StringVariabel(context.Substring((int)stack[0].toInt(pos)));
             }
 
-            return new StringVariabel(context.Substring((int)start, (int)end.toInt(new Posision(0,0))));
+            return new StringVariabel(context.Substring((int)stack[0].toInt(pos), (int)stack[1].toInt(pos)));
         }
 
-        private CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, stack.CallAgumentStack stack, EnegyData data)
+        private CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return new IntVariabel(context.Length);
         }
 
-        public override string toString(Posision pos)
+        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
         {
             return context;
         }
@@ -117,9 +111,9 @@ namespace script.variabel
             return "string";
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            return var.type() == type() && toString(pos) == var.toString(pos);
+            return var.type() == type() && toString(pos, data, db) == var.toString(pos, data, db);
         }
     }
 }

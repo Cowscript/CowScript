@@ -10,59 +10,50 @@ namespace script.plugin
     {
         public void open(VariabelDatabase database)
         {
+            //no support from V0.2
             Function count = new Function();
             count.Name = "count";
             count.agument.push("array", "array");
-            count.call = new ArrayCount();
+            count.call += Count_call;
             database.pushFunction(count);
 
             Function hasValue = new Function();
             hasValue.Name = "hasValue";
             hasValue.agument.push("array", "array");
             hasValue.agument.push("context");
-            hasValue.call = new HasValue();
+            hasValue.call += HasValue_call;
             database.pushFunction(hasValue);
 
             Function hasKey = new Function();
             hasKey.Name = "hasKey";
             hasKey.agument.push("array", "array");
             hasKey.agument.push("context");
-            hasKey.call = new HasKey();
+            hasKey.call += HasKey_call;
             database.pushFunction(hasKey);
         }
-    }
 
-    class HasKey : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        private CVar Count_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            ArrayVariabel array = (ArrayVariabel)stack.pop();
-            return new BooleanVariabel(array.keyExists(stack.pop(), new Posision(0,0)));
+            return new IntVariabel(((ArrayVariabel)stack[0]).length());
         }
-    }
 
-    class HasValue : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        private CVar HasValue_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            ArrayVariabel array = (ArrayVariabel)stack.pop();
-            CVar value = stack.pop();
+            ArrayVariabel array = (ArrayVariabel)stack[0];
 
-            foreach(string key in array.Keys())
+            foreach (string key in array.Keys())
             {
-                if (array.get(key, new Posision(0, 0)).compare(value, new Posision(0, 0)))
+                if (array.get(key, pos, data, db).compare(stack[1], pos, data, db))
                     return new BooleanVariabel(true);
             }
 
             return new BooleanVariabel(false);
         }
-    }
 
-    class ArrayCount : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        private CVar HasKey_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return new IntVariabel(((ArrayVariabel)stack.pop()).length());
+            ArrayVariabel array = (ArrayVariabel)stack[0];
+            return new BooleanVariabel(array.keyExists(stack[1], pos, data, db));
         }
     }
 }

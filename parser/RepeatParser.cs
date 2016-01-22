@@ -10,15 +10,18 @@ namespace script.parser
         public void end()
         {}
 
-        public CVar parse(EnegyData ed, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             if (token.next().type() != TokenType.LeftBue)
-                throw new ScriptError("Missing ( after repeat", token.getCache().posision());
+            {
+                ed.setError(new ScriptError("Missing ( after repeat", token.getCache().posision()), db);
+                return new NullVariabel();
+            }
 
-            TokenCache cache = ScopeParser.getScope(token);
+            TokenCache cache = ScopeParser.getScope(token, ed, db);
             token.next();
 
-            while (new VariabelParser().parse(ed, cache).toBoolean(token.getCache().posision()))
+            while (new VariabelParser().parse(ed, db, cache).toBoolean(token.getCache().posision()))
                 cache.reaset();
 
             return new NullVariabel();

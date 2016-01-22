@@ -14,12 +14,12 @@
             return context;
         }
 
-        public override string toString(Posision pos)
+        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
         {
             return context.ToString();
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             return var.type() == type() && var.toInt(pos) == toInt(pos);
         }

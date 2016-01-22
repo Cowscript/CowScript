@@ -12,36 +12,26 @@ namespace script.plugin
             Function error = new Function();
             error.Name = "error";
             error.agument.push("string", "message");//here wee say wee want a agument there is string and name string :)
-            error.call = new errorHelp();
+            error.call += Error_call;
 
             database.pushFunction(error);
 
             Function errorCallback = new Function();
             errorCallback.Name = "errorCallback";
             errorCallback.agument.push("function", "f");//here wee say wee want a agument there is function and
-            errorCallback.call = new errorCallbackHelp();
+            errorCallback.call += ErrorCallback_call; ;
             database.pushFunction(errorCallback);
         }
-    }
 
-    public class errorHelp : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
+        private CVar ErrorCallback_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            throw new ScriptError(stack.pop().toString(new Posision(0, 0)), new Posision(0, 0));
-        }
-    }
-
-    public class errorCallbackHelp : CallInterface
-    {
-        public CVar call(CallAgumentStack stack, EnegyData data)
-        {
-            if (data.Befor == null)
-                return new BooleanVariabel(false);
-
-            data.Befor.Error = (FunctionVariabel)stack.pop();
-
+            data.ErrorHandler = (FunctionVariabel)stack[0];
             return new BooleanVariabel(true);
+        }
+
+        private CVar Error_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
+        {
+            throw new ScriptError(stack[0].toString(pos, data, db), pos);
         }
     }
 }

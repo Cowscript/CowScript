@@ -1,18 +1,31 @@
 ﻿using script.builder;
 using script.plugin;
+using script.Task;
 using script.token;
+using System;
+using System.Collections;
 using System.IO;
 
 namespace script
 {
-    public class Energy
+    public class Energy : IDisposable
     {
+        private EnegyData Data {  set;  get; }
 
         public VariabelDatabase VariabelDatabase { set; get; }
         public PluginContainer plugin = new PluginContainer();
 
+        private ArrayList taskEvent = new ArrayList();
+        private ArrayList taskEnd = new ArrayList();
+        private TextReader reader;
+
         public Energy()
         {
+            Data = new EnegyData()
+            {
+                Config = new ScriptConfig()
+            };
+
             VariabelDatabase = new VariabelDatabase();
         }
 
@@ -28,7 +41,7 @@ namespace script
 
         public void parse(TextReader reader)
         {
-            Interprenter.parse(VariabelDatabase, plugin, null).parse(new Token(reader));
+            Interprenter.parse(new Token((this.reader = reader)), Data, VariabelDatabase);
         }
 
         public void push(Function func)
@@ -39,6 +52,40 @@ namespace script
         public void push(Class c)
         {
             VariabelDatabase.pushClass(c);
+        }
+
+        public void addTaskEvent(ScriptTaskEvent e)
+        {
+            taskEvent.Add(e);
+        }
+
+        public void addEndEvent(ScriptEndEvent e)
+        {
+            taskEnd.Add(e);
+        }
+
+        public void Dispose()
+        {
+            if (reader != null)
+                reader.Close();
+
+            int i = 0;
+            while (taskEvent.Count != 0)
+            {
+                if (i > taskEvent.Count)
+                    i = 0;
+
+                if (((ScriptTaskEvent)taskEvent[i]).isReady())
+                {
+                    //remove the event becuse it is ready to be removed :)
+                    taskEvent.Remove(taskEvent[i]);
+                }
+
+                i++;
+            }
+
+            foreach (ScriptEndEvent e in taskEnd)
+                e.callInEnd();
         }
     }
 }

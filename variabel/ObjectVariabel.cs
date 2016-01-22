@@ -40,7 +40,7 @@ namespace script.variabel
             items[name].Context = value;
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             throw new ScriptError("Compara to object is not suppoerted yet", pos);
         }
@@ -53,6 +53,27 @@ namespace script.variabel
         public bool containsItem(string name)
         {
             return items.ContainsKey(name);
+        }
+
+        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (!items.ContainsKey("toString"))
+            {
+                return base.toString(pos, data, db);
+            }
+
+            if (!items["toString"].isPublic)
+                return base.toString(pos, data, db);
+
+            if (!items["toString"].isMethod)
+                return base.toString(pos, data, db);
+
+            if (((MethodVariabel)items["toString"].Context).func.agument.size() < 0)
+            {
+                return base.toString(pos, data, db);
+            }
+
+            return ((MethodVariabel)items["toString"].Context).call(new CVar[0], db, data, pos).toString(pos, data, db);
         }
     }
 }

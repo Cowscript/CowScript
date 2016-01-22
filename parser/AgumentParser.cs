@@ -6,40 +6,40 @@ namespace script.stack
 {
     class AgumentParser
     {
-        public static AgumentStack parseAguments(Token token, VariabelDatabase database, Interprenter interprenter, FunctionVariabel error)
-        {
-            return parseAguments(token, new AgumentStack(), database, interprenter, error);
-        }
 
-        public static AgumentStack parseAguments(Token token, AgumentStack agument, VariabelDatabase database, Interprenter interprenter, FunctionVariabel error)
+        public static AgumentStack parseAguments(Token token, VariabelDatabase database, EnegyData data)
         {
+            AgumentStack agument = new AgumentStack();
             if(token.next().type() != TokenType.LeftBue)
             {
-                throw new ScriptError("Excpect ( got: " + token.getCache().ToString(), token.getCache().posision());
+                data.setError(new ScriptError("Excpect ( got: " + token.getCache().ToString(), token.getCache().posision()), database);
+                return agument;
             }
 
             //control if wee need to look and parse aguments :)
             if(token.next().type() != TokenType.RightBue)
             {
                 //wee need :)
-                getSingleAguments(token, agument, database, interprenter, error);
+                if (!getSingleAguments(token, agument, database, data))
+                    return new AgumentStack();
                 while(token.getCache().type() == TokenType.Comma)
                 {
                     token.next();
-                    getSingleAguments(token, agument, database, interprenter, error);
+                    if (!getSingleAguments(token, agument, database, data))
+                        return new AgumentStack();
                 }
             }
 
             //control wee got to ) 
             if(token.getCache().type() != TokenType.RightBue)
             {
-                throw new ScriptError("Missing ) after function aguments got: " + token.getCache().ToString(), token.getCache().posision());
+                data.setError(new ScriptError("Missing ) after function aguments got: " + token.getCache().ToString(), token.getCache().posision()), database);
             }
 
             return agument;
         }
 
-        private static void getSingleAguments(Token token, AgumentStack agument, VariabelDatabase database, Interprenter interprenter, FunctionVariabel error)
+        private static bool getSingleAguments(Token token, AgumentStack agument, VariabelDatabase database, EnegyData data)
         {   string type = null;
             string name = null;
             CVar value = null;
@@ -53,7 +53,8 @@ namespace script.stack
                 //okay let try to find the name 
                 if(token.next().type() != TokenType.Variabel)
                 {
-                    throw new ScriptError("After type there must be a type", token.getCache().posision());
+                    data.setError(new ScriptError("After type there must be a type", token.getCache().posision()), database);
+                    return false;
                 }
 
                 name = token.getCache().ToString();
@@ -61,7 +62,10 @@ namespace script.stack
             else
             {
                 if (token.getCache().type() != TokenType.Variabel)
-                    throw new ScriptError("Unknown agument token: " + token.getCache().ToString(), token.getCache().posision());
+                {
+                    data.setError(new ScriptError("Unknown agument token: " + token.getCache().ToString(), token.getCache().posision()), database);
+                    return false;
+                }
                 name = token.getCache().ToString();
             }
 
@@ -69,10 +73,11 @@ namespace script.stack
             {
                 token.next();
                 VariabelParser parser = new VariabelParser();
-                value = parser.parse(new EnegyData(new VariabelDatabase(), interprenter, null, error, null), token);
+                value = parser.parse(data, database, token);
             }
 
             agument.push(type, name, value);
+            return true;
         }
     }
 }

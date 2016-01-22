@@ -9,7 +9,7 @@
             this.context = context;
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             return var.type() == type() && var.toBoolean(pos) == toBoolean(pos);//here wee control if it is same as this
         }

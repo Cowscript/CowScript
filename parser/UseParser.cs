@@ -12,14 +12,17 @@ namespace script.parser
             p.end();
         }
 
-        public CVar parse(EnegyData ed, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             token.next();
-            CVar use = p.parse(ed, token);
-            if (!ed.Plugin.exists(use.toString(token.getCache().posision())))
-                throw new ScriptError("Unknown plugin: " + use.toString(token.getCache().posision()), token.getCache().posision());
+            CVar use = p.parse(ed, db, token);
+            if (!ed.Plugin.exists(use.toString(token.getCache().posision(), ed, db)))
+            {
+                ed.setError(new ScriptError("Unknown plugin: " + use.toString(token.getCache().posision(), ed, db), token.getCache().posision()), db);
+                return new NullVariabel();
+            }
 
-            ed.Plugin.open(ed.VariabelDatabase, use.toString(token.getCache().posision()));
+            ed.Plugin.open(db, use.toString(token.getCache().posision(), ed, db));
             return null;
         }
     }

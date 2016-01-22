@@ -10,16 +10,16 @@ namespace script.builder
         private Dictionary<string, ClassItems> items = new Dictionary<string, ClassItems>();
         public string Name { private set; get; }
         public ClassMethods constructor { private set; get; }
+        private EnegyData data;
+        private VariabelDatabase db;
 
-        public Class(string name) { Name = name; }
+        public Class(string name, EnegyData data, VariabelDatabase db) { Name = name; this.data = data; this.db = db; }
+        public Class(string name) { Name = name; data = new EnegyData(); }
 
         public void setStaticData(Dictionary<string, ClassStaticData> i, ClassVariabel var)
         {
             foreach(ClassItems d in items.Values)
             {
-                if (d.Name == null)
-                    throw new ScriptError("d.Name must not be null", new Posision(0, 0));
-
                 if (d.IsMethod && d.Method.isStatic)
                     i.Add(d.Name, new ClassStaticData()
                     {
@@ -36,22 +36,10 @@ namespace script.builder
             }
         }
 
-        public ClassItemsMethod createMethods()
-        {
-            return createMethods(false);
-        }
-
-        public ClassItemsMethod createMethods(bool isStatic)
-        {
-            if (isStatic)
-                return new ClassStaticMethods(this);
-
-            return new ClassMethods(this);
-        }
-
         public void addVariabel(string name, CVar context, bool isStatic, bool isPublic)
         {
-            controlItems(name);
+            if (!controlItems(name))
+                return;
 
             items.Add(name, new ClassItems()
             {
@@ -70,7 +58,8 @@ namespace script.builder
 
         public void addMethod(ClassItemsMethod m)
         {
-            controlItems(m.Name);
+            if (!controlItems(m.Name))
+                return;
 
             items.Add(m.Name, new ClassItems()
             {
@@ -83,7 +72,10 @@ namespace script.builder
         public void addConstructor(ClassMethods m)
         {
             if (constructor != null)
-                throw new ScriptError("A class can only have one constructor", new Posision(0, 0));
+            {
+                data.setError(new ScriptError("A class can only have one constructor", new Posision(0, 0)), db);
+                return;
+            }
 
             constructor = m;
         }
@@ -121,10 +113,14 @@ namespace script.builder
             return obj;
         }
 
-        private void controlItems(string name)
+        private bool controlItems(string name)
         {
-            if (items.ContainsKey(name))
-                throw new ScriptError("A class items i alredy exists: " + name, new Posision(0, 0));
+            if (items.ContainsKey(name)) {
+                data.setError(new ScriptError("A class items i alredy exists: " + name, new Posision(0, 0)), db);
+                return false;
+            }
+
+            return true;
         }
     }
 
@@ -133,45 +129,58 @@ namespace script.builder
         public string Name { protected set; get; }
         public bool isPublic { protected set; get; }
         public bool isStatic { protected set; get; }
-        public AgumentStack Aguments { set; get; }
+        public AgumentStack Aguments {set; get; }
         protected Class c;
 
-        public void setAccess(bool isPublic)
-        {
-            this.isPublic = isPublic;
-        }
-
-        public void setName(string name)
+        public ClassItemsMethod(Class c, string name)
         {
             Name = name;
+            isPublic = true;
+            isStatic = false;
+            Aguments = new AgumentStack();
+            this.c = c;
+        }
+
+        public ClassItemsMethod(Class c, string name, bool isPublic)
+        {
+            Name = name;
+            this.isPublic = isPublic;
+            isStatic = false;
+            Aguments = new AgumentStack();
+            this.c = c;
+        }
+
+        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic)
+        {
+            Name = name;
+            this.isPublic = isPublic;
+            this.isStatic = isStatic;
+            Aguments = new AgumentStack();
+            this.c = c;
         }
 
         public void create()
         {
-            if (Name == null)
-                throw new ScriptError("You can`t create a method whitout a name", new Posision(0, 0));
-
-            if (Aguments == null)
-                Aguments = new AgumentStack();
-
             c.addMethod(this);
         }
     }
 
     public class ClassStaticMethods : ClassItemsMethod
     {
-        public delegate CVar Method(ClassVariabel c, VariabelDatabase db, CallAgumentStack stack, EnegyData data);
+        public delegate CVar Method(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassStaticMethods(Class c)
+        public ClassStaticMethods(Class c, string name) : base(c, name, true, true)
         {
-            this.c = c;
-            isStatic = true;
         }
 
-        public CVar call(ClassVariabel c, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        public ClassStaticMethods(Class c, string name, bool isPublic) : base(c, name, isPublic, true)
         {
-            CVar cc = caller(c, db, stack, data);
+        }
+
+        public CVar call(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            CVar cc = caller(c, db, stack, data, pos);
 
             if (cc == null)
                 return new NullVariabel();
@@ -182,13 +191,15 @@ namespace script.builder
 
     public class ClassMethods : ClassItemsMethod
     {
-        public delegate CVar Method(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data);
+        public delegate CVar Method(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassMethods(Class c)
+        public ClassMethods(Class c, string name) : base(c, name)
         {
-            this.c = c;
-            isStatic = false;
+        }
+
+        public ClassMethods(Class c, string name, bool isPublic) : base(c, name, isPublic)
+        {
         }
 
         public void createConstructor()
@@ -199,9 +210,9 @@ namespace script.builder
             c.addConstructor(this);
         }
 
-        public CVar call(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        public CVar call(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            CVar c = caller(obj, db, stack, data);
+            CVar c = caller(obj, db, stack, data, pos);
 
             if (c == null)
                 return new NullVariabel();

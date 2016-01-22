@@ -1,6 +1,5 @@
 ﻿using script.builder;
 using script.help;
-using script.stack;
 using System.Collections.Generic;
 
 namespace script.variabel
@@ -38,15 +37,15 @@ namespace script.variabel
             return Container.constructor;
         }
 
-        public virtual void callConstructor(CallAgumentStack c, VariabelDatabase db, EnegyData d, ObjectVariabel obj)
+        public virtual void callConstructor(CVar[] c, VariabelDatabase db, EnegyData d, ObjectVariabel obj, Posision pos)
         {
             if (!hasConstructor())
                 return;
 
-            new MethodVariabel(Container.constructor, obj).call(c, d);
+            new MethodVariabel(Container.constructor, obj).call(c, db, d, pos);
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             return false;
         }
@@ -56,12 +55,38 @@ namespace script.variabel
             return "class";
         }
 
-        public ObjectVariabel createNew(CallAgumentStack cas, VariabelDatabase vd, EnegyData data)
+        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (!containsStaticItem("toString"))
+                return base.toString(pos, data, db);
+
+            ClassStaticData d = getItem("toString");
+
+            if (!d.isPublic)
+                return base.toString(pos, data, db);
+
+            if (!d.isMethod)
+                return base.toString(pos, data, db);
+
+            if (((StaticMethodVariabel)d.Context).agumentSize() == 0)
+                return base.toString(pos, data, db);
+
+            return ((MethodVariabel)d.Context).call(new CVar[0], db, data, pos).toString(pos, data, db);
+        }
+
+        public ObjectVariabel createNew(CVar[] cas, VariabelDatabase db, EnegyData data, Posision pos)
         {
             ObjectVariabel obj = Container.createObject();
 
             if (hasConstructor())
-                callConstructor(cas, vd, data, obj);
+            {
+                VariabelDatabase vd = db.createShadow(obj);
+                //wee quikly push variabel in a shadow of our database :)
+                for (int i = 0; i < getConstructor().Aguments.size(); i++)
+                    vd.push(getConstructor().Aguments.get(i).Name, cas[i]);
+
+                callConstructor(cas, vd, data, obj, pos);
+            }
 
             return obj;    
         }

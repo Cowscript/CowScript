@@ -14,20 +14,30 @@ namespace script.variabel
             this.obj = obj;
         }
 
+        public override int agumentSize()
+        {
+            return method.Aguments.size();
+        }
+
         public override AgumentStack getStatck()
         {
             return method.Aguments;
         }
 
-        public override CVar call(CallAgumentStack call, EnegyData data)
+        public override VariabelDatabase getShadowVariabelDatabase(VariabelDatabase db)
         {
-            return method.call(obj, data.VariabelDatabase, call, data);
+            return db.createShadow(obj);
         }
 
-        public override CVar call(EnegyData data, params object[] parameters)
+        public override CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            CallAgumentStack stack = new CallAgumentStack();
-            VariabelDatabase vd = data.VariabelDatabase.createShadow();
+            return method.call(obj, db, call, data, pos);
+        }
+
+        public override CVar call(EnegyData data, VariabelDatabase db, params object[] parameters)
+        {
+            CVar[] stack = new CVar[method.Aguments.size()];
+            VariabelDatabase vd = getShadowVariabelDatabase(db);
 
             for (int i = 0; i < parameters.Length && i <= method.Aguments.size(); i++)
             {
@@ -36,24 +46,24 @@ namespace script.variabel
                     throw new ScriptError("Cant convert " + context.type() + " to " + method.Aguments.get(i).Type.ToString(), new Posision(0, 0));
 
                 //okay let cache the parameters :)
-                stack.push(context);
-                vd.push(method.Aguments.get(i).Name, context);
+                stack[0] = context;
+                vd.push(method.Aguments.get(i).Name, stack[0]);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
-            for (int i = stack.size(); i < method.Aguments.size(); i++)
+            for (int i = stack.Length; i < method.Aguments.size(); i++)
             {
                 if (!method.Aguments.get(i).hasValue())
                     throw new ScriptError("Missing agument to " + method.Name, new Posision(0, 0));
 
-                stack.push(method.Aguments.get(i).Value);
+                stack[i] = method.Aguments.get(i).Value;
                 vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value);
             }
 
-            return call(stack, new EnegyData(vd, new Interprenter(), data.Plugin, data.Error, data));
+            return call(stack, db, data, new Posision(0,0));
         }
 
-        public override bool compare(CVar var, Posision pos)
+        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
             return false;
         }

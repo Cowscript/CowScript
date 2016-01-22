@@ -5,30 +5,49 @@ namespace script
 {
     public class EnegyData
     {
-        public bool Run { set; get; }
-        public CVar Return { set; get; }
-        public VariabelDatabase VariabelDatabase { set; get; }
-        public Interprenter Interprenter { set; get; }
-        public PluginContainer Plugin { set; get; }
-        public FunctionVariabel Error { set; get; }
-        public EnegyData Befor { set; get; }
+       public FunctionVariabel ErrorHandler { get; set; }
+       public ScriptConfig Config { get; set; }  
+       public RunningState State { get; private set; }
+       public PluginContainer Plugin { get; set; }
 
-        public EnegyData(VariabelDatabase databse, Interprenter interprenter, PluginContainer plugin, FunctionVariabel error, EnegyData befor)
+       public ScriptError ErrorData { get; private set; }
+       private CVar ReturnContext { get; set; }
+
+        public EnegyData()
         {
-            Run = true;
-            Return = null;
-            Interprenter = interprenter;
-            VariabelDatabase = databse;
-            Plugin = plugin;
-            Error = error;
-            Befor = befor;
+            Plugin = new PluginContainer();
         }
 
-        public void removeError()
+        public CVar getReturn()
         {
-            Error = null;
-            if (Befor != null)
-                Befor.removeError();
+            if (State != RunningState.Return)
+                return new NullVariabel();
+
+            State = RunningState.Normal;
+            return ReturnContext;
         }
+
+        public void setReturn(CVar r)
+        {
+            State = RunningState.Return;
+            ReturnContext = r;
+        }
+
+        public void setError(ScriptError er, VariabelDatabase db)
+        {
+            State = RunningState.Error;
+            ErrorData = er;
+            if(ErrorHandler != null)
+            {
+                ErrorHandler.call(this, db, er.Message, er.Posision.Line, er.Posision.Row);
+            }
+        }
+    }
+
+    public enum RunningState
+    {
+        Normal, 
+        Return,
+        Error
     }
 }

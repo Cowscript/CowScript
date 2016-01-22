@@ -8,15 +8,17 @@ namespace script.parser
     {
         private Token token;
         private EnegyData ed;
+        private VariabelDatabase db;
 
         public void end()
         {
         }
 
-        public CVar parse(EnegyData ed, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             this.token = token;
             this.ed = ed;
+            this.db = db;
             begin(false);
             return null;
         }
@@ -25,31 +27,34 @@ namespace script.parser
             //if token ( now ?
             if(token.next().type() != TokenType.LeftBue)
             {
-                throw new ScriptError("Missing ( after if", token.getCache().posision());
+                ed.setError(new ScriptError("Missing ( after if", token.getCache().posision()), db);
+                return;
             }
 
             if(token.next().type() == TokenType.RightBue)
             {
                 //it is a empty scope :)
-                throw new ScriptError("You can not use a if whit empty scope", token.getCache().posision());
+                ed.setError(new ScriptError("You can not use a if whit empty scope", token.getCache().posision()), db);
+                return;
             }
 
             //get context :)
-            CVar scope = new VariabelParser().parse(ed, token);
+            CVar scope = new VariabelParser().parse(ed, db, token);
 
             //control if wee got a ) 
             if(token.getCache().type() != TokenType.RightBue)
             {
                 //wee missing ) 
-                throw new ScriptError("Missing ) got: " + token.getCache().ToString(), token.getCache().posision());
+                ed.setError(new ScriptError("Missing ) got: " + token.getCache().ToString(), token.getCache().posision()), db);
+                return;
             }
 
-            ArrayList body = BodyParser.parse(token);
+            ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
 
             if(!befor && scope.toBoolean(token.getCache().posision()))
             {
-                ed.Interprenter.parse(new TokenCache(body));
+                Interprenter.parse(new TokenCache(body), ed, db);
                 befor = true;
             }
 
@@ -65,10 +70,10 @@ namespace script.parser
 
         private void doElse(bool befor)
         {
-            ArrayList body = BodyParser.parse(token);
+            ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
             if (!befor)
-                ed.Interprenter.parse(new TokenCache(body));
+                Interprenter.parse(new TokenCache(body), ed, db);
         }
     }
 }

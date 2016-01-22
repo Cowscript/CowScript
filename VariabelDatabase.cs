@@ -8,9 +8,14 @@ namespace script
 {
     public class VariabelDatabase
     {
+        //velcommen to the new VariabelDatabase :)
+
         private ArrayList types = new ArrayList();
-        private Dictionary<string, VariabelDatabaseData> container = new Dictionary<string, VariabelDatabaseData>();
-        private VariabelDatabase befor = null;
+        private Dictionary<string, CVar> container = new Dictionary<string, CVar>();
+        private Dictionary<string, CVar> global = new Dictionary<string, CVar>();
+
+        public ObjectVariabel Object { private set; get; }
+        public ClassVariabel C { private set; get; }
 
         public VariabelDatabase()
         {
@@ -22,10 +27,24 @@ namespace script
             types.Add("class");
         }
 
-        public VariabelDatabase(VariabelDatabase befor, ArrayList type)
+        public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types)
         {
-            this.befor = befor;
-            types = type;
+            this.global = new Dictionary<string, CVar>(global);
+            this.types = new ArrayList(types);
+        }
+
+        public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types, ObjectVariabel obj)
+        {
+            this.global = new Dictionary<string, CVar>(global);
+            this.types = new ArrayList(types);
+            Object = obj;
+        }
+
+        public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types, ClassVariabel c)
+        {
+            this.global = new Dictionary<string, CVar>(global);
+            this.types = new ArrayList(types);
+            C = c;
         }
 
         public bool isType(string name)
@@ -38,138 +57,61 @@ namespace script
         {
             controleOveride(name);
             if (container.ContainsKey(name)) container.Remove(name);
-            container.Add(name, new VariabelDatabaseData()
-            {
-                IsFunction = false,
-                isClass = false,
-                Context = variabel
-            });
+            container.Add(name, variabel);
             return variabel;
         }
 
         public CVar get(string name)
         {
-            return get(name, false);
-        }
+            if (global.ContainsKey(name))
+                return global[name];
 
-        public CVar get(string name, bool befor)
-        {
-            if (!befor)
-            {
-                //wee control in this scope 
-                if (container.ContainsKey(name))
-                    return container[name].Context;
-                else if(this.befor != null)
-                {
-                    return this.befor.get(name, true);
-                }
-                else
-                {
-                    throw new ScriptError("Unknown variabel: " + name, new Posision(0, 0));
-                }
-            }
-            else
-            {
-                if (container.ContainsKey(name))
-                {
-                    if (container[name].IsFunction || container[name].isClass)
-                        return container[name].Context;
-                    else throw new ScriptError("Unknown variabel: " + name, new Posision(0, 0));
-                }else if(this.befor != null)
-                {
-                    return this.befor.get(name, true);
-                }
-                else
-                {
-                    throw new ScriptError("3Unknown variabel: " + name, new Posision(0, 0));
-                }
-            }
+            if (container.ContainsKey(name))
+                return container[name];
+
+            throw new ScriptError("Unknown variabel: " + name, new Posision(0, 0));
         }
 
         public bool isExists(string name)
         {
-            return isExists(name, false);
-        }
-
-        public bool isExists(string name, bool befor)
-        {
-            if (!befor)
-            {
-                if (container.ContainsKey(name))
-                {
-                    return true;
-                }
-                else if(this.befor != null)
-                {
-                    return this.befor.isExists(name, true);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if(container.ContainsKey(name) && (container[name].IsFunction || container[name].isClass))
-                {
-                    return true;
-                }else if(this.befor != null)
-                {
-                    return this.befor.isExists(name, true);
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return global.ContainsKey(name) || container.ContainsKey(name);
         }
 
         public void pushFunction(Function function)
         {
             controleOveride(function.Name);
-            if (container.ContainsKey(function.Name)) container.Remove(function.Name);
-            container.Add(function.Name, new VariabelDatabaseData()
-            {
-                Context = new FunctionVariabel(function),
-                IsFunction = true,
-                isClass = false
-            });
+            global.Add(function.Name, new FunctionVariabel(function));
         }
 
         public void pushClass(Class c)
         {
-            types.Add(c.Name);//now is this class a types :)
             controleOveride(c.Name);
-            if (container.ContainsKey(c.Name)) container.Remove(c.Name);
-
-            container.Add(c.Name, new VariabelDatabaseData()
-            {
-                Context = new ClassVariabel(c),
-                IsFunction = false,
-                isClass = true
-            });
+            types.Add(c.Name);//now is this class a types :)
+            global.Add(c.Name, new ClassVariabel(c));
         }
 
         public VariabelDatabase createShadow()
         {
-            return new VariabelDatabase(this, types);
+            return new VariabelDatabase(global, types);
+        }
+
+        public VariabelDatabase createShadow(ObjectVariabel obj)
+        {
+            return new VariabelDatabase(global, types, obj);
+        }
+
+        public VariabelDatabase createShadow(ClassVariabel obj)
+        {
+            return new VariabelDatabase(global, types, obj);
         }
 
         public void controleOveride(string name)
         {
-            if (container.ContainsKey(name))
-            {
-                if (container[name].IsFunction)
-                {
-                    throw new ScriptError("Cant overide " + name + " becuse it is a function", new Posision(0, 0));
-                }else if (container[name].isClass)
-                {
-                    throw new ScriptError("Cant overide " + name + " becuse it is a class", new Posision(0, 0));
-                }
-            }
+            if (!global.ContainsKey(name))
+                return;
 
-            if (befor != null)
-                befor.controleOveride(name);
+            CVar var = global[name];
+            throw new ScriptError("You can´t convert " + name + " becuse it is " + var.type(), new Posision(0, 0));
         }
     }
 }

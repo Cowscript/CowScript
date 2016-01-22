@@ -16,22 +16,19 @@ namespace script.help
             Agument = agument;
         }
 
-        public CVar call(ObjectVariabel obj, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        public CVar call(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            Interprenter interprenter = Interprenter.parse(db, data.Plugin, data);
-            interprenter.setObject(obj);
-            interprenter.parse(new TokenCache(Body));
+            //interprenter.setObject(obj);
+            Interprenter.parse(new TokenCache(Body), data, db);
 
-            return interprenter.data.Return;
+            return data.getReturn();
         }
 
-        public CVar call(ClassVariabel c, VariabelDatabase db, CallAgumentStack stack, EnegyData data)
+        public CVar call(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            Interprenter interprenter = Interprenter.parse(db, data.Plugin, data);
-            interprenter.setStatic(c);
-            interprenter.parse(new TokenCache(Body));
+            Interprenter.parse(new TokenCache(Body), data, db);
 
-            return interprenter.data.Return;
+            return data.getReturn();
         }
     }
 }
