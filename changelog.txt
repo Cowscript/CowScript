@@ -11,7 +11,9 @@ V0.3
  Append a new plugin random with a static class where method next and hash. 
  Append lock, isLock and unlock method to array. When call lock the array will raise error when the array is attempt to change and so on.
  Append throw catch so you can throw errors.
- Append String->format(string skapalon, array data); String->format("Hey %s i are %n old", ["jugolo", 24]); -> Hey jugolo i are 24 old 
+ Append string->format(string skapalon, array data); there work as sprintf in PHP
+ Append hasKey and hasValue method to array and start last support cyclus for Array plugin. 
+ Append return type for function and method. look like this function toString() : string{}. when do this the callable is lock to return the specific type. 
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
