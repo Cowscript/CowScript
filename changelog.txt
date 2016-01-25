@@ -8,6 +8,7 @@ V0.3
  Create class as name = class{}, test(class(){});, test = new class{} or test(new class{});
  Append new tokens break and continue. Break stop current task and continue break the running task and jump to next if there are any
  Append a new parser unset. When do this "i=0;unset i;" you remove i. You cant never remove function and class.
+ Append a new plugin random with a static class where method next and hash. 
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
