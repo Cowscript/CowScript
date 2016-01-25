@@ -23,3 +23,24 @@ A array key will always try to be convertet to string. There for can "0" and 0 w
 */
 
 asset(items[0] == "Hallo" && items[1] == " " && items[2] == "world", "the array is not working well");
+
+class MyName{
+
+   private static sName;
+
+   public static function sSetName(string name){
+       self->sName = name;
+   }
+
+   static function sGetName(){return self->sName;}
+
+   private name;
+
+   public function setName(string name){
+      this->name = name;
+   }
+
+   function getName(){
+      return this->name;
+   }
+}
