@@ -1,0 +1,25 @@
+use "error";
+
+//a function to detect if a given statment is okay or not
+function asset(bool isTrue, string msg){
+   if(!isTrue){
+      error(msg);
+   }
+}
+
+asset(true, "true is not true......");/// a simpel way to control it :) 
+
+function myName(string name){
+   return name;
+}
+
+asset(myName("jugolo") == "jugolo", "jugolo is not jugolo");
+
+//a language should have a array
+items = ["Hallo", " ", "world"];
+
+/*
+A array key will always try to be convertet to string. There for can "0" and 0 work to get Hallo
+*/
+
+asset(items[0] == "Hallo" && items[1] == " " && items[2] == "world", "the array is not working well");
