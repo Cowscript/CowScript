@@ -15,6 +15,9 @@ V0.3
  Append hasKey and hasValue method to array and start last support cyclus for Array plugin. 
  Append return type for function and method. look like this function string toString(){}. when do this the callable is lock to return the specific type. 
  Append plugin "parser" there create a function "version" there tell the version of parser.
+ Append 'is' control if object is from the specifc class
+ Append 'instanceof' control of the object is from the class
+ Append extends. Extrens anthor class.
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
