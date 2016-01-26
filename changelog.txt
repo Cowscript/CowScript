@@ -18,6 +18,9 @@ V0.3
  Append 'is' control if object is from the specifc class
  Append 'instanceof' control of the object is from the class
  Append extends. Extrens anthor class.
+ Throw a error when a non defult agument is after a defult value "A agument there has not a defult value can not be after a agument there has a defult value" in methods and function.
+ Create a new token "func" as short cut for "function".
+ Optimize how ArrayVariabel works and standardized how it work so wee in V0.4 can create object in the script there can work as array.
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
