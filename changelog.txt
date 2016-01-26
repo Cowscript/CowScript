@@ -14,6 +14,7 @@ V0.3
  Append string->format(string skapalon, array data); there work as sprintf in PHP
  Append hasKey and hasValue method to array and start last support cyclus for Array plugin. 
  Append return type for function and method. look like this function string toString(){}. when do this the callable is lock to return the specific type. 
+ Append plugin "parser" there create a function "version" there tell the version of parser.
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
