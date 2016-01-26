@@ -1,5 +1,5 @@
 ----------------- change log -----------------
-V0.3
+V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
  Change ParserInterface so end is removed.
  Change so parseres not is interlize every time.
  Allow _ invariabels name.
