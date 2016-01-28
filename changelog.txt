@@ -24,6 +24,8 @@ V0.3 [No further items is append to V0.3 the next new thing will be append in Ve
 
 V0.2 
  Create a file system where the script can parse other file and get class and function.
+ When using anthoter file you beed to append public befor tokens "class" and "function" to indicate this class or/and function may be uses in anthoer file.
+ Create token lock, lock is used when a file only be uses in anthor file. If caller is not a file it should only be "lock '';" if it only may be uses in one file "lock 'file path';" or multi "lock [paths];"
  Optimie Interprenter
  Append Posision to function and method call
  If the object or class has a method call toString() the name can be use as string variabel.
