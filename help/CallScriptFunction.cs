@@ -18,7 +18,7 @@ namespace script.help
 
         public CVar call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            Interprenter.parse(new TokenCache(body), data, db);
+            Interprenter.parse(new TokenCache(body, data, db), data, db);
 
             if(data.State == RunningState.Return)
             {

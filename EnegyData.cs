@@ -39,7 +39,14 @@ namespace script
             ErrorData = er;
             if(ErrorHandler != null)
             {
-                ErrorHandler.call(this, db, er.Message, er.Posision.Line, er.Posision.Row);
+                //okay here may not be a error handler and state must be set to normal
+                FunctionVariabel eh = ErrorHandler;
+                ErrorHandler = null;
+                if (Config.get("error.handler.enable", "1") == "1")
+                {
+                    State = RunningState.Normal;
+                    eh.call(this, db, er.Message, er.Posision.Line, er.Posision.Row);
+                }
             }
         }
     }

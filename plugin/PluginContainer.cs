@@ -22,9 +22,9 @@ namespace script.plugin
             return container.ContainsKey(name);
         }
 
-        public void open(VariabelDatabase database, string name)
+        public void open(VariabelDatabase database, string name, EnegyData data)
         {
-            container[name].open(database);
+            container[name].open(database, data);
         }
     }
 }

@@ -204,9 +204,6 @@ namespace script.builder
 
         public void createConstructor()
         {
-            if (Aguments == null)
-                Aguments = new AgumentStack();
-
             c.addConstructor(this);
         }
 

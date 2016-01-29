@@ -51,23 +51,29 @@ namespace script.variabel
             int i = 0;
             for(; i < parameters.Length && i <= func.agument.size(); i++)
             {
-                CVar context = ScriptConverter.convert(parameters[i]);
+                CVar context = ScriptConverter.convert(parameters[i], data, db);
                 if (func.agument.get(i).hasType() && !CallScriptFunction.compare(context, func.agument.get(i).Type))
-                    throw new ScriptError("Cant convert " + context.type() + " to " + func.agument.get(i).Type.ToString(), new Posision(0, 0));
+                {
+                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + func.agument.get(i).Type.ToString(), new Posision(0, 0)), db);
+                    return new NullVariabel();
+                }
 
                 //okay let cache the parameters :)
                 stack[i] = context;
-                vd.push(func.agument.get(i).Name, context);
+                vd.push(func.agument.get(i).Name, context, data);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
             for(; i < func.agument.size(); i++)
             {
                 if (!func.agument.get(i).hasValue())
-                    throw new ScriptError("Missing agument to " + func.Name, new Posision(0, 0));
+                {
+                    data.setError(new ScriptError("Missing agument to " + func.Name, new Posision(0, 0)), db);
+                    return new NullVariabel();
+                }
 
                 stack[i] = func.agument.get(i).Value;
-                vd.push(func.agument.get(i).Name, stack[i]);
+                vd.push(func.agument.get(i).Name, stack[i], data);
             }
 
             return call(stack, db, data, new Posision(0,0));

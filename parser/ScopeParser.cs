@@ -18,7 +18,7 @@ namespace script.parser
                 {
                     happens--;
                     if (happens == 0)
-                        return new TokenCache(cache);
+                        return new TokenCache(cache, data, db);
 
                     cache.Add(buffer);
                     continue;
@@ -30,7 +30,7 @@ namespace script.parser
             }
 
             data.setError(new ScriptError("Missing ) ", token.getCache().posision()), db);
-            return new TokenCache(new ArrayList());
+            return new TokenCache(new ArrayList(), data, db);
         }
     }
 }

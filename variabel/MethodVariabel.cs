@@ -41,23 +41,28 @@ namespace script.variabel
 
             for (int i = 0; i < parameters.Length && i <= method.Aguments.size(); i++)
             {
-                CVar context = ScriptConverter.convert(parameters[i]);
+                CVar context = ScriptConverter.convert(parameters[i], data, db);
                 if (method.Aguments.get(i).hasType() && !CallScriptFunction.compare(context, method.Aguments.get(i).Type))
-                    throw new ScriptError("Cant convert " + context.type() + " to " + method.Aguments.get(i).Type.ToString(), new Posision(0, 0));
+                {
+                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + method.Aguments.get(i).Type.ToString(), new Posision(0, 0)), db);
+                }
 
                 //okay let cache the parameters :)
                 stack[0] = context;
-                vd.push(method.Aguments.get(i).Name, stack[0]);
+                vd.push(method.Aguments.get(i).Name, stack[0], data);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
             for (int i = stack.Length; i < method.Aguments.size(); i++)
             {
                 if (!method.Aguments.get(i).hasValue())
-                    throw new ScriptError("Missing agument to " + method.Name, new Posision(0, 0));
+                {
+                    data.setError(new ScriptError("Missing agument to " + method.Name, new Posision(0, 0)), db);
+                    return new NullVariabel();
+                }
 
                 stack[i] = method.Aguments.get(i).Value;
-                vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value);
+                vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value, data);
             }
 
             return call(stack, db, data, new Posision(0,0));

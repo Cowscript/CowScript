@@ -8,7 +8,7 @@ namespace script.plugin
 {
     class Time : PluginInterface
     {
-        public void open(VariabelDatabase database)
+        public void open(VariabelDatabase database, EnegyData data)
         {
             Class time = new Class("Time");
 
@@ -61,7 +61,7 @@ namespace script.plugin
             millisecond.caller += Millisecond_caller;
             millisecond.create();
 
-            database.pushClass(time);
+            database.pushClass(time, data);
         }
 
         private CVar Millisecond_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
@@ -126,49 +126,49 @@ namespace script.plugin
 
             if(stack[0] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[0].toInt(pos)) - dt.Year;
+                append = Convert.ToInt32(stack[0].toInt(pos, data, db)) - dt.Year;
                 if(append != 0)
                     dt = dt.AddYears(append);
             }
 
             if (stack[1] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[1].toInt(pos)) - dt.Month;
+                append = Convert.ToInt32(stack[1].toInt(pos, data, db)) - dt.Month;
                 if (append != 0)
                     dt = dt.AddMonths(append);
             }
 
             if (stack[2] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[2].toInt(pos)) - dt.Day;
+                append = Convert.ToInt32(stack[2].toInt(pos, data, db)) - dt.Day;
                 if (append != 0)
                     dt = dt.AddDays(append);
             }
 
             if (stack[3] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[3].toInt(pos)) - dt.Hour;
+                append = Convert.ToInt32(stack[3].toInt(pos, data, db)) - dt.Hour;
                 if(append != 0)
                     dt = dt.AddHours(append);
             }
 
             if (stack[4] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[4].toInt(pos)) - dt.Minute;
+                append = Convert.ToInt32(stack[4].toInt(pos, data, db)) - dt.Minute;
                 if(append != 0)
                     dt = dt.AddMinutes(append);
             }
 
             if (stack[5] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[5].toInt(pos)) - dt.Second;
+                append = Convert.ToInt32(stack[5].toInt(pos, data, db)) - dt.Second;
                 if(append != 0)
                     dt = dt.AddSeconds(append);
             }
 
             if (stack[6] is IntVariabel)
             {
-                append = Convert.ToInt32(stack[6].toInt(pos)) - dt.Millisecond;
+                append = Convert.ToInt32(stack[6].toInt(pos, data, db)) - dt.Millisecond;
                 if(append != 0)
                     dt = dt.AddMilliseconds(append);
             }

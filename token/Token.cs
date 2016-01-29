@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using System.Text;
 
@@ -12,6 +13,9 @@ namespace script.token
         private TokenBuffer cache = null;
         private ArrayList reservedVariabelName = new ArrayList();
         private Posision bp;
+
+        protected EnegyData data;
+        protected VariabelDatabase database;
 
         public Posision getPosision()
         {
@@ -31,16 +35,22 @@ namespace script.token
             return c >= '0' && c <= '9';
         }
 
-        public Token() { }
+        public Token(EnegyData data, VariabelDatabase db) {
+            this.data = data;
+            database = db;
+        }
 
-        public Token(TextReader reader)
+        public Token(TextReader reader, EnegyData data, VariabelDatabase db)
         {
-            this.reader = reader;
+            this.reader   = reader;
+            this.data     = data;
+            database      = db;
+
         }
 
         public virtual TokenBuffer next()
         {
-            return cache = this.getNextToken();
+            return cache = getNextToken();
         }
 
         public virtual TokenBuffer getCache()
@@ -49,17 +59,6 @@ namespace script.token
                 return next();
 
             return cache;
-        }
-
-        public void except(TokenType type)
-        {
-            if(next().type() == TokenType.EOF)
-            {
-                throw new ScriptError("Except " + type.ToString() + " got end of file", this.getCache().posision());
-            }
-
-            if (getCache().type() != type)
-                throw new ScriptError("Except " + type.ToString() + " got " + getCache().type(), getCache().posision());
         }
 
         private TokenBuffer getNextToken()
@@ -184,8 +183,9 @@ namespace script.token
                             cache = pop(false);
                         }
 
-                        if (cache == -1)
-                            throw new ScriptError("Missing */ got end of line", bp);
+                        if (cache == -1) {
+                            return error("Missing */ got end of line", bp);
+                        }
                         return getNextToken();
                     }
 
@@ -203,7 +203,7 @@ namespace script.token
 
             }
 
-            throw new ScriptError("Unknown char: " + (char)c, this.pos);
+            return error("Unknown char: " + (char)c, bp);
         }
 
         private TokenBuffer getVariabel(int prefix)
@@ -219,20 +219,20 @@ namespace script.token
             string name = builder.ToString();
 
             if (reservedVariabelName.Contains(name))
-                throw new ScriptError(name + " is resevd and there for you are not allow to use it", this.pos);
+                return error(name + " is resevd and there for you are not allow to use it", pos.toPosision());
 
             if (name == "if") {
-                return new TokenBuffer("if", TokenType.If, this.pos.toPosision());
+                return new TokenBuffer("if", TokenType.If, pos.toPosision());
             } else if (name == "elseif") {
-                return new TokenBuffer("elseif", TokenType.Elseif, this.pos.toPosision());
+                return new TokenBuffer("elseif", TokenType.Elseif, pos.toPosision());
             } else if(name == "else") {
-                return new TokenBuffer("else", TokenType.Else, this.pos.toPosision());
+                return new TokenBuffer("else", TokenType.Else, pos.toPosision());
             }else if(name == "true" || name == "false")
             {
-                return new TokenBuffer(name, TokenType.Bool, this.pos.toPosision());
+                return new TokenBuffer(name, TokenType.Bool, pos.toPosision());
             }else if(name == "null")
             {
-                return new TokenBuffer(name, TokenType.Null, this.pos.toPosision());
+                return new TokenBuffer(name, TokenType.Null, pos.toPosision());
             }else if(name == "class")
             {
                 return new TokenBuffer(name, TokenType.Class, pos.toPosision());
@@ -318,10 +318,9 @@ namespace script.token
             if(peek() == '.')
             {
                 //it is a comma :)
-                context.Append(pop());
+                context.Append((char)pop());
                 getInts(context);//wee got number after , 
             }
-
             return context.ToString();
         }
 
@@ -361,7 +360,7 @@ namespace script.token
                                 builder.Append("\"");
                                 break;
                             default:
-                                throw new ScriptError("Unknown char after \\ (" + (char)peek() + ")", pos);
+                                return error("Unknown char after \\ (" + (char)peek() + ")", pos.toPosision());
                         }
 
                         pop(false);
@@ -392,10 +391,16 @@ namespace script.token
 
             if(buffer == -1)
             {
-                throw new ScriptError("Missing (" + (char)start + ") got end of file", pos);
+                return error("Missing (" + (char)start + ") got end of file", pos.toPosision());
             }
             pop();
             return new TokenBuffer(builder.ToString(), TokenType.String, pos.toPosision());
+        }
+
+        protected TokenBuffer error(string msg, Posision posision)
+        {
+            data.setError(new ScriptError(msg, posision), database);
+            return new TokenBuffer("End of file", TokenType.EOF, posision);
         }
     }
 }

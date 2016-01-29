@@ -10,7 +10,7 @@ namespace script.parser
         private EnegyData ed;
         private VariabelDatabase db;
 
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {
         }
 
@@ -52,9 +52,9 @@ namespace script.parser
             ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
 
-            if(!befor && scope.toBoolean(token.getCache().posision()))
+            if(!befor && scope.toBoolean(token.getCache().posision(), ed, db))
             {
-                Interprenter.parse(new TokenCache(body), ed, db);
+                Interprenter.parse(new TokenCache(body, ed, db), ed, db);
                 befor = true;
             }
 
@@ -73,7 +73,7 @@ namespace script.parser
             ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
             if (!befor)
-                Interprenter.parse(new TokenCache(body), ed, db);
+                Interprenter.parse(new TokenCache(body, ed, db), ed, db);
         }
     }
 }

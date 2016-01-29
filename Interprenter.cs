@@ -27,7 +27,7 @@ namespace script
             {
                 ParserInterface pi = getParser(token);
                 pi.parse(data, db, token);
-                pi.end();//in some parser it will have this to detext if end is okay (like variabel parseren)
+                pi.end(data, db);//in some parser it will have this to detext if end is okay (like variabel parseren)
             }
         }
 

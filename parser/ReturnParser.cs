@@ -7,7 +7,7 @@ namespace script.parser
     {
         private VariabelParser p = new VariabelParser();
 
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {
             
         }
@@ -17,7 +17,7 @@ namespace script.parser
             if (token.next().type() != TokenType.End)
             {
                 ed.setReturn(p.parse(ed, db, token));
-                p.end();
+                p.end(ed, db);
             }
             else {
                 token.next();

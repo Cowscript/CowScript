@@ -10,7 +10,7 @@ namespace script.parser
     {
         private Function function = new Function();
 
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {
             
         }
@@ -33,7 +33,7 @@ namespace script.parser
 
             token.next();
             
-            db.pushFunction(function);
+            db.pushFunction(function, ed);
             return null;
         }
     }

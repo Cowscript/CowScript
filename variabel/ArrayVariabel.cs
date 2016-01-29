@@ -65,14 +65,17 @@ namespace script.variabel
         public CVar get(CVar key, Posision pos, EnegyData data, VariabelDatabase db)
         {
             if (!keyExists(key, pos, data, db))
-                throw new ScriptError("Unknown key in array: " + key.toString(pos, data, db), pos);
+            {
+                data.setError(new ScriptError("Unknown key in array: " + key.toString(pos, data, db), pos), db);
+                return new NullVariabel();
+            }
 
             return container[key.toString(pos, data, db)];
         }
 
         public CVar get(string key, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            return get(new StringVariabel(key), pos, data, db);
+            return get(StringVariabel.CreateString(data, db, pos, key), pos, data, db);
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
@@ -96,11 +99,11 @@ namespace script.variabel
 
             if(key is IntVariabel)
             {
-                k = key.toInt(pos);
+                k = key.toInt(pos, data, db);
             }else if(key is NullVariabel)
             {
                 k = 0;
-            }else if(key is StringVariabel && System.Text.RegularExpressions.Regex.IsMatch(key.toString(pos, data, db), "^[0-9]*?$"))
+            }else if(StringVariabel.isString(key) && System.Text.RegularExpressions.Regex.IsMatch(key.toString(pos, data, db), "^[0-9]*?$"))
             {
                 k = Convert.ToDouble(key.toString(pos, data, db));
             }

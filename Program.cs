@@ -8,10 +8,9 @@ namespace script
         {
             Console.WriteLine("Write you code");
             Energy e = new Energy();
-            try {
-                e.parse(Console.ReadLine());
-            }catch(ScriptError se)
-            {
+            e.parse(Console.ReadLine());
+            if(e.getRunningStatus() == RunningState.Error){
+                ScriptError se = e.getError();
                 Console.WriteLine("#Error");
                 Console.WriteLine(se.Message);
                 Console.WriteLine("On line [" + se.Posision.Line + "] Row [" + se.Posision.Row + "]");

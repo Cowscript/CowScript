@@ -6,7 +6,7 @@ namespace script.parser
 {
     class ForeachParser : ParserInterface
     {
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {}
 
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
@@ -72,10 +72,10 @@ namespace script.parser
                 if (ed.State != RunningState.Normal)
                     break;
 
-                db.push(firstVariabel, (secondVariabel != null ? new StringVariabel(key) : array.get(key, token.getCache().posision(), ed, db)));
+                db.push(firstVariabel, (secondVariabel != null ? StringVariabel.CreateString(ed, db, token.getCache().posision(), key) : array.get(key, token.getCache().posision(), ed, db)), ed);
                 if (secondVariabel != null)
-                    db.push(secondVariabel, array.get(key, token.getCache().posision(), ed, db));
-                Interprenter.parse(new TokenCache(body), ed, db);
+                    db.push(secondVariabel, array.get(key, token.getCache().posision(), ed, db), ed);
+                Interprenter.parse(new TokenCache(body, ed, db), ed, db);
             }
 
             token.next();

@@ -5,11 +5,11 @@ namespace script
 {
     class ScriptConverter
     {
-        public static CVar convert(object c)
+        public static CVar convert(object c, EnegyData data, VariabelDatabase db)
         {
             if (c is string)
             {
-                return new StringVariabel((string)c);
+                return StringVariabel.CreateString(data, db, new Posision(0,0), (string)c);
             }
             else if (c is bool)
             {
@@ -34,7 +34,8 @@ namespace script
                 return (ClassVariabel)c;
             }
 
-            throw new ScriptError("Unkown type: " + c.GetType().Name, new Posision(0, 0));
+            data.setError(new ScriptError("Unkown type: " + c.GetType().Name, new Posision(0, 0)), db);
+            return new NullVariabel();
         }
     }
 }

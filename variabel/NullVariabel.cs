@@ -2,7 +2,7 @@
 {
     public class NullVariabel : CVar
     {
-        public override bool toBoolean(Posision pos)
+        public override bool toBoolean(Posision pos, EnegyData data, VariabelDatabase db)
         {
             return false;
         }
@@ -12,7 +12,7 @@
             return "";
         }
 
-        public override double toInt(Posision pos)
+        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
         {
             return 0;
         }

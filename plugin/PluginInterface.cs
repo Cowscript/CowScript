@@ -2,6 +2,6 @@
 {
     interface PluginInterface
     {
-        void open(VariabelDatabase database);
+        void open(VariabelDatabase database, EnegyData data);
     }
 }

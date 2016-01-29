@@ -19,14 +19,14 @@ namespace script.help
         public CVar call(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             //interprenter.setObject(obj);
-            Interprenter.parse(new TokenCache(Body), data, db);
+            Interprenter.parse(new TokenCache(Body, data, db), data, db);
 
             return data.getReturn();
         }
 
         public CVar call(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            Interprenter.parse(new TokenCache(Body), data, db);
+            Interprenter.parse(new TokenCache(Body, data, db), data, db);
 
             return data.getReturn();
         }

@@ -7,7 +7,7 @@ namespace script.token
         private ArrayList cache = new ArrayList();
         private int id = -1;
 
-        public TokenCache(ArrayList c)
+        public TokenCache(ArrayList c, EnegyData data, VariabelDatabase vd) : base(data, vd)
         {
             cache = c;
         }

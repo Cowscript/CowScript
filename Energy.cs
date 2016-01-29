@@ -1,4 +1,5 @@
 ﻿using script.builder;
+using script.help;
 using script.plugin;
 using script.Task;
 using script.token;
@@ -27,6 +28,17 @@ namespace script
             };
 
             VariabelDatabase = new VariabelDatabase();
+            StartItems.CreateStartItems(Data, VariabelDatabase);
+        }
+
+        public void setConfig(string name, string value)
+        {
+            setConfig(name, value, true);
+        }
+
+        public void setConfig(string name, string value, bool overide)
+        {
+            Data.Config.append(name, value, overide);
         }
 
         public void parse(string script)
@@ -41,17 +53,17 @@ namespace script
 
         public void parse(TextReader reader)
         {
-            Interprenter.parse(new Token((this.reader = reader)), Data, VariabelDatabase);
+            Interprenter.parse(new Token((this.reader = reader), Data, VariabelDatabase), Data, VariabelDatabase);
         }
 
         public void push(Function func)
         {
-            VariabelDatabase.pushFunction(func);
+            VariabelDatabase.pushFunction(func, Data);
         }
 
         public void push(Class c)
         {
-            VariabelDatabase.pushClass(c);
+            VariabelDatabase.pushClass(c, Data);
         }
 
         public void addTaskEvent(ScriptTaskEvent e)
@@ -86,6 +98,21 @@ namespace script
 
             foreach (ScriptEndEvent e in taskEnd)
                 e.callInEnd();
+        }
+
+        public RunningState getRunningStatus()
+        {
+            return Data.State;
+        }
+
+        public ScriptError getError()
+        {
+            if(Data.State != RunningState.Error)
+            {
+                return null;
+            }
+
+            return Data.ErrorData;
         }
     }
 }

@@ -53,15 +53,15 @@ namespace script
         }
         
 
-        public CVar push(string name, CVar variabel)
+        public CVar push(string name, CVar variabel, EnegyData data)
         {
-            controleOveride(name);
+            controleOveride(name, data);
             if (container.ContainsKey(name)) container.Remove(name);
             container.Add(name, variabel);
             return variabel;
         }
 
-        public CVar get(string name)
+        public CVar get(string name, EnegyData data)
         {
             if (global.ContainsKey(name))
                 return global[name];
@@ -69,7 +69,8 @@ namespace script
             if (container.ContainsKey(name))
                 return container[name];
 
-            throw new ScriptError("Unknown variabel: " + name, new Posision(0, 0));
+            data.setError(new ScriptError("Unknown variabel: " + name, new Posision(0, 0)), this);
+            return new NullVariabel();
         }
 
         public bool isExists(string name)
@@ -77,15 +78,15 @@ namespace script
             return global.ContainsKey(name) || container.ContainsKey(name);
         }
 
-        public void pushFunction(Function function)
+        public void pushFunction(Function function, EnegyData data)
         {
-            controleOveride(function.Name);
+            controleOveride(function.Name, data);
             global.Add(function.Name, new FunctionVariabel(function));
         }
 
-        public void pushClass(Class c)
+        public void pushClass(Class c, EnegyData data)
         {
-            controleOveride(c.Name);
+            controleOveride(c.Name, data);
             types.Add(c.Name);//now is this class a types :)
             global.Add(c.Name, new ClassVariabel(c));
         }
@@ -105,13 +106,13 @@ namespace script
             return new VariabelDatabase(global, types, obj);
         }
 
-        public void controleOveride(string name)
+        public void controleOveride(string name, EnegyData data)
         {
             if (!global.ContainsKey(name))
                 return;
 
             CVar var = global[name];
-            throw new ScriptError("You can´t convert " + name + " becuse it is " + var.type(), new Posision(0, 0));
+            data.setError(new ScriptError("You can´t convert " + name + " becuse it is " + var.type(), new Posision(0, 0)), this);
         }
     }
 }

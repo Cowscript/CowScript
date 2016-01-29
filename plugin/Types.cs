@@ -8,20 +8,20 @@ namespace script.plugin
 {
     class Types : PluginInterface
     {
-        public void open(VariabelDatabase database)
+        public void open(VariabelDatabase database, EnegyData data)
         {
             Function type = new Function();
             type.Name = "type";
             type.agument.push("controls");
             type.agument.push("string", "isType");
             type.call += Type_call;
-            database.pushFunction(type);
+            database.pushFunction(type, data);
 
             Function toInt = new Function();
             toInt.Name = "toInt";
             toInt.agument.push("string", "context");
             toInt.call += ToInt_call;
-            database.pushFunction(toInt);
+            database.pushFunction(toInt, data);
         }
 
         private CVar Type_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
@@ -37,7 +37,8 @@ namespace script.plugin
             double result;
             if (!double.TryParse(stack[0].toString(pos, data, db), out result))
             {
-                throw new ScriptError(stack[0].toString(pos, data, db) + " could not be convertet to int", new Posision(0, 0));
+                data.setError(new ScriptError(stack[0].toString(pos, data, db) + " could not be convertet to int", new Posision(0, 0)), db);
+                return new NullVariabel();
             }
 
             return new IntVariabel(result);

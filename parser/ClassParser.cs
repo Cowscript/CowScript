@@ -11,7 +11,7 @@ namespace script.parser
         private Class builder;
         private VariabelDatabase db;
 
-        public void end()
+        public void end(EnegyData data, VariabelDatabase db)
         {}
 
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
@@ -44,7 +44,7 @@ namespace script.parser
             }
 
             token.next();
-            db.pushClass(builder);
+            db.pushClass(builder, ed);
             return new NullVariabel();
         }
 
@@ -111,7 +111,7 @@ namespace script.parser
                 token.next();
                 VariabelParser p = new VariabelParser();
                 value = p.parse(data, db, token);
-                p.end();
+                p.end(data, db);
             }else if(token.getCache().type() == TokenType.End)
             {
                 token.next();

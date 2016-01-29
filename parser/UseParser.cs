@@ -1,5 +1,6 @@
 ﻿using script.token;
 using script.variabel;
+using System.Text.RegularExpressions;
 
 namespace script.parser
 {
@@ -7,23 +8,39 @@ namespace script.parser
     {
         private VariabelParser p = new VariabelParser();
 
-        public void end()
+        public void end(EnegyData ed, VariabelDatabase db)
         {
-            p.end();
+            p.end(ed, db);
         }
 
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             token.next();
-            CVar use = p.parse(ed, db, token);
-            if (!ed.Plugin.exists(use.toString(token.getCache().posision(), ed, db)))
+            string plugin = p.parse(ed, db, token).toString(token.getCache().posision(), ed, db);
+            
+            //control if the plugin exists in the system
+            if(ed.Plugin.exists(plugin))
             {
-                ed.setError(new ScriptError("Unknown plugin: " + use.toString(token.getCache().posision(), ed, db), token.getCache().posision()), db);
-                return new NullVariabel();
+                //wee has the plugin and load it :)
+                ed.Plugin.open(db, plugin, ed);
+            }
+            else
+            {
+                if(ed.Config.get("file.base", "0") == "0")
+                {
+                    ed.setError(new ScriptError("It is not allow to use file in use. 'file.base' is not set.", token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
+
+                parseFile(ed, db, token.getCache().posision());
             }
 
-            ed.Plugin.open(db, use.toString(token.getCache().posision(), ed, db));
-            return null;
+            return new NullVariabel();
+        }
+
+        private void parseFile(EnegyData ed, VariabelDatabase db, Posision pos)
+        {
+
         }
     }
 }

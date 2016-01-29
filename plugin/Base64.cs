@@ -8,7 +8,7 @@ namespace script.plugin
 {
     class Base64 : PluginInterface
     {
-        public void open(VariabelDatabase database)
+        public void open(VariabelDatabase database, EnegyData data)
         {
             Class base64 = new Class("Base64");
 
@@ -21,18 +21,20 @@ namespace script.plugin
             decode.Aguments.push("string", "text");
             decode.caller += Decode_caller;
             decode.create();
+
+            database.pushClass(base64, data);
         }
 
         private CVar Decode_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             byte[] buffer = Convert.FromBase64String(stack[0].toString(pos, data, db));
-            return new StringVariabel(Encoding.UTF8.GetString(buffer));
+            return StringVariabel.CreateString(data, db, pos, Encoding.UTF8.GetString(buffer));
         }
 
         private CVar Encode_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             byte[] buffer = Encoding.UTF8.GetBytes(stack[0].toString(pos, data, db));
-            return new StringVariabel(Convert.ToBase64String(buffer));
+            return StringVariabel.CreateString(data, db, pos, Convert.ToBase64String(buffer));
         }
     }
 }

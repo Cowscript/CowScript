@@ -42,7 +42,13 @@ namespace script.variabel
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            throw new ScriptError("Compara to object is not suppoerted yet", pos);
+            if (StringVariabel.isString(this))
+            {
+                return StringVariabel.compare(this, var, pos, data, db);
+            }
+
+            data.setError(new ScriptError("Compara to object is not suppoerted yet", pos), db);
+            return false;
         }
 
         public override string type()
@@ -57,6 +63,12 @@ namespace script.variabel
 
         public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
         {
+            if (StringVariabel.isString(this))
+            {
+                //this is string variabel :)
+                return (string)systemItems["str"];
+            }
+
             if (!items.ContainsKey("toString"))
             {
                 return base.toString(pos, data, db);
@@ -68,7 +80,7 @@ namespace script.variabel
             if (!items["toString"].isMethod)
                 return base.toString(pos, data, db);
 
-            if (((MethodVariabel)items["toString"].Context).func.agument.size() < 0)
+            if (((MethodVariabel)items["toString"].Context).agumentSize() < 0)
             {
                 return base.toString(pos, data, db);
             }

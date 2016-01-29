@@ -1,4 +1,6 @@
-﻿namespace script.variabel
+﻿using System.Globalization;
+
+namespace script.variabel
 {
     public class IntVariabel : CVar
     {
@@ -9,19 +11,19 @@
             context = d;
         }
 
-        public override double toInt(Posision pos)
+        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
         {
             return context;
         }
 
         public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
         {
-            return context.ToString();
+            return context.ToString(CultureInfo.GetCultureInfo("en-US"));
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            return var.type() == type() && var.toInt(pos) == toInt(pos);
+            return var.type() == type() && var.toInt(pos, data, db) == toInt(pos, data, db);
         }
 
         public override string type()

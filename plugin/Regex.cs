@@ -6,7 +6,7 @@ namespace script.plugin
 {
     class Regex : PluginInterface
     {
-        public void open(VariabelDatabase database)
+        public void open(VariabelDatabase database, EnegyData data)
         {
             Class regex = new Class("Regex");
 
@@ -28,7 +28,7 @@ namespace script.plugin
             exec.Aguments.push("string", "str");
             exec.create();
 
-            database.pushClass(regex);
+            database.pushClass(regex, data);
         }
 
         private CVar Exec_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
@@ -50,7 +50,7 @@ namespace script.plugin
                     System.Text.RegularExpressions.Group group = match.Groups[i];
 
                     if (group.Success)
-                        subArray.put(new StringVariabel(group.Value), pos, data, db);
+                        subArray.put(StringVariabel.CreateString(data, db, pos, group.Value), pos, data, db);
                 }
 
                 array.put(array.getNextID(), subArray, pos, data, db);
