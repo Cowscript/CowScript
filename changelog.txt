@@ -50,6 +50,7 @@ V0.2
  ---bugfix for V0.2---
  base64 plugin never push class to variabel databse
  Token dont convert comma (.) currect but just save the char code. 
+ The int converter dont convert . Probely. It can convert it to , (the danish comma).
  
  --V0.1 is testet to time: 60547,4869ms in test case
  
