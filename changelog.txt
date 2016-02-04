@@ -22,19 +22,15 @@ V0.3 [No further items is append to V0.3 the next new thing will be append in Ve
  Create a new token "func" as short cut for "function".
  Optimize how ArrayVariabel works and standardized how it work so wee in V0.4 can create object in the script there can work as array.
 
-V0.2 - Takes 19525,3693ms old test [approved to release]
+V0.2 - Takes 19525,3693ms old test [approved to release]. new 30195,7674ms
  Create a file system where the script can parse other file and get class and function.
  When using anthoter file you beed to append public befor tokens "class" and "function" to indicate this class or/and function may be uses in anthoer file.
- Create token lock, lock is used when a file only be uses in anthor file. If caller is not a file it should only be "lock '';" if it only may be uses in one file "lock 'file path';" or multi "lock [paths];"
  Optimie Interprenter
  Append Posision to function and method call
  If the object or class has a method call toString() the name can be use as string variabel.
  optimizes the class parser
  Remove StringVariabel and write a static method there create a object of the class String. 
  Remove CallAgumentStack and use CVar[].
- Move the work of put variabels in function call to the event there is call when a function us called. 
- Create a Static method to parse a call of method, function or init a new object.
- Create a ScriptStartEvent there collect all object there want to be call before a master script is called.
  Create a ScriptEndEvent there collect all object there want to be call after hole script is called.
  Create a ScriptTaskEvent there collect all object there can tell the Energy if the task is done. If not the Energy object will wait to call ScriptEndEvent.
  Change Class methods builder soo you can use Agugment with out first append AgumentStack object.
@@ -45,7 +41,6 @@ V0.2 - Takes 19525,3693ms old test [approved to release]
  Create ForParser so you can use for(int=0;i<10;i++)
  Array will be change to object so you can use []->length();
  Append a ScriptConfig so you can use config. Script can change config, but you can disable it or disbale change on single config.
- Append new plugin to get details of functions and method.
  Append method 'toLower()' and 'toUpper()' to string. toLower() will change HEY to hey and toUpper will change hey to HEY.
  ---bugfix for V0.2---
  base64 plugin never push class to variabel databse
