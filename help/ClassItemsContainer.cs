@@ -11,5 +11,6 @@ namespace script.help
         public CVar Context { get; set; }
         public bool IsStatic { get; set; }
         public bool IsPublic { get; set; }
+        public VariabelDatabase extraVariabelDatabase { get; set; }
     }
 }

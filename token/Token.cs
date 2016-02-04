@@ -17,6 +17,14 @@ namespace script.token
         protected EnegyData data;
         protected VariabelDatabase database;
 
+        public Token()
+        {
+            reservedVariabelName.Add("extends");
+            reservedVariabelName.Add("instanceof");
+            reservedVariabelName.Add("is");
+            reservedVariabelName.Add("func");
+        }
+
         public Posision getPosision()
         {
             return bp;
@@ -275,6 +283,9 @@ namespace script.token
             }else if(name == "repeat")
             {
                 return new TokenBuffer(name, TokenType.Repeat, pos.toPosision());
+            }else if(name == "for")
+            {
+                return new TokenBuffer(name, TokenType.For, pos.toPosision());
             }
 
             return new TokenBuffer(name, TokenType.Variabel, this.pos.toPosision());

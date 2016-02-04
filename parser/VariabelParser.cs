@@ -16,7 +16,7 @@ namespace script.parser
 
         public void end(EnegyData data, VariabelDatabase db)
         {
-            if (token.getCache().type() != TokenType.End)
+            if (token.getCache().type() != TokenType.End && data.State == RunningState.Normal)
             {
                 data.setError(new ScriptError("Missing ;. got: " + token.getCache().ToString(), token.getCache().posision()), db);
                 return;

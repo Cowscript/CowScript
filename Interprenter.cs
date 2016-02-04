@@ -2,6 +2,7 @@
 using script.plugin;
 using script.token;
 using script.variabel;
+using System;
 
 namespace script
 {
@@ -21,17 +22,22 @@ namespace script
         }
 
         public static void parse(Token token, EnegyData data, VariabelDatabase db) {
+            parse(token, data, db, false);
+        }
+
+        public static void parse(Token token, EnegyData data, VariabelDatabase db, bool isFile)
+        {
             token.next();
+            ParserInterface pi;
             //run thrue the script (if Run is true and return is null)
-            while (data.State == RunningState.Normal && token.getCache().type() != TokenType.EOF)
+            while (data.State == RunningState.Normal && token.getCache().type() != TokenType.EOF && (pi = getParser(token, isFile, data, db)) != null)
             {
-                ParserInterface pi = getParser(token);
                 pi.parse(data, db, token);
                 pi.end(data, db);//in some parser it will have this to detext if end is okay (like variabel parseren)
             }
         }
 
-        private static ParserInterface getParser(Token token)
+        private static ParserInterface getParser(Token token, bool isFile, EnegyData data, VariabelDatabase database)
         {
             switch (token.getCache().type())
             {
@@ -51,6 +57,16 @@ namespace script
                     return new WhileParser();
                 case TokenType.Repeat:
                     return new RepeatParser();
+                case TokenType.For:
+                    return new ForParser();
+                case TokenType.Public:
+                    if (!isFile)
+                    {
+                        data.setError(new ScriptError("public [function/class] can only be uses when you parse file from use 'path'", token.getCache().posision()), database);
+                        return null;
+                    }
+
+                    return new PublicParser();
                 default:
                     return new VariabelParser();
             }

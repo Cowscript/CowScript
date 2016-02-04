@@ -12,6 +12,7 @@ namespace script.builder
         public ClassMethods constructor { private set; get; }
         private EnegyData data;
         private VariabelDatabase db;
+        public VariabelDatabase extraVariabelDatabase { get; set; }
 
         public Class(string name, EnegyData data, VariabelDatabase db) { Name = name; this.data = data; this.db = db; }
         public Class(string name) { Name = name; data = new EnegyData(); }
@@ -24,14 +25,16 @@ namespace script.builder
                     i.Add(d.Name, new ClassStaticData()
                     {
                         isMethod = true,
-                        Context = new StaticMethodVariabel((ClassStaticMethods)d.Method, var),
-                        isPublic = d.Method.isPublic
+                        Context = new StaticMethodVariabel((ClassStaticMethods)d.Method, var, extraVariabelDatabase),
+                        isPublic = d.Method.isPublic,
+                        extraVariabelDatabase = extraVariabelDatabase,
                     });
                 else if (!d.IsMethod && d.IsStatic)
                     i.Add(d.Name, new ClassStaticData() {
                         isMethod = false,
-                        Context  = d.Context,
-                        isPublic = d.IsPublic
+                        Context = d.Context,
+                        isPublic = d.IsPublic,
+                        extraVariabelDatabase = extraVariabelDatabase,
                     });
             }
         }
@@ -47,7 +50,8 @@ namespace script.builder
                 Name = name,
                 Context = context,
                 IsStatic = isStatic,
-                IsPublic = isPublic
+                IsPublic = isPublic,
+                extraVariabelDatabase = extraVariabelDatabase,
             });
         }
 
@@ -59,13 +63,17 @@ namespace script.builder
         public void addMethod(ClassItemsMethod m)
         {
             if (!controlItems(m.Name))
+            {
+                data.setError(new ScriptError("You can only add one method: " + m.Name, new Posision(0, 0)), db);
                 return;
+            }
 
             items.Add(m.Name, new ClassItems()
             {
                 IsMethod = true,
-                Method   = m,
+                Method = m,
                 Name = m.Name,
+                extraVariabelDatabase = extraVariabelDatabase,
             });
         }
 
@@ -94,7 +102,7 @@ namespace script.builder
                     {
                         isMethod = true,
                         Name = item.Method.Name,
-                        Context = new MethodVariabel((ClassMethods)item.Method, obj),
+                        Context = new MethodVariabel((ClassMethods)item.Method, obj, extraVariabelDatabase),
                         isPublic = item.Method.isPublic,
                         isStatic = item.Method.isStatic
                     });
@@ -106,7 +114,8 @@ namespace script.builder
                         Name = item.Name,
                         Context = item.Context,
                         isPublic = item.IsPublic,
-                        isStatic = item.IsStatic
+                        isStatic = item.IsStatic,
+                        extraVariabelDatabase = extraVariabelDatabase,
                     });
             }
 

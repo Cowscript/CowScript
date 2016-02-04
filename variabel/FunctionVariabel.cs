@@ -36,6 +36,12 @@ namespace script.variabel
 
         public virtual CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
         {
+            if(func.extraVariabelDatabase != null)
+            {
+                db = func.extraVariabelDatabase.createShadow();
+                for (int i = 0; i < func.agument.size(); i++)
+                    db.push(func.agument.get(i).Name, call[i], data);
+            }
             CVar r = func.callFunction(call, db, data, pos);
 
             if (r == null)

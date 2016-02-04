@@ -20,7 +20,7 @@ namespace script.help
             ClassMethods constructor = new ClassMethods(s, "constructor");
             constructor.Aguments.push("string", "s", new NullVariabel());
             constructor.caller += Constructor_caller;
-            constructor.create();
+            constructor.createConstructor();
 
             ClassMethods length = new ClassMethods(s, "length");
             length.caller += Length_caller;

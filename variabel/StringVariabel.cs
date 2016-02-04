@@ -7,7 +7,7 @@ namespace script.variabel
         public static CVar CreateString(EnegyData data, VariabelDatabase db, Posision posision, string context)
         {
             ObjectVariabel obj = ((ClassVariabel)db.get("string", data)).createNew(db, data, posision);
-            obj.systemItems.Add("str", context);
+            obj.systemItems["str"] = context;
             return obj;
         }
 

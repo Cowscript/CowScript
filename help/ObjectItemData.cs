@@ -9,5 +9,6 @@ namespace script.help
         public CVar Context { set; get; }
         public bool isMethod { set; get; }
         public bool isStatic { set; get; }
+        public VariabelDatabase extraVariabelDatabase { set; get; }
     }
 }

@@ -7,11 +7,13 @@ namespace script.variabel
     {
         private ClassMethods method;
         private ObjectVariabel obj;
+        private VariabelDatabase extraVariabelDatabase;
 
-        public MethodVariabel(ClassMethods method, ObjectVariabel obj) : base(null)
+        public MethodVariabel(ClassMethods method, ObjectVariabel obj, VariabelDatabase extra) : base(null)
         {
             this.method = method;
             this.obj = obj;
+            extraVariabelDatabase = extra;
         }
 
         public override int agumentSize()
@@ -31,6 +33,12 @@ namespace script.variabel
 
         public override CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
         {
+            if(extraVariabelDatabase != null)
+            {
+                db = getShadowVariabelDatabase(extraVariabelDatabase);
+                for (int i = 0; i < method.Aguments.size(); i++)
+                    db.push(method.Aguments.get(i).Name, call[i], data);
+            }
             return method.call(obj, db, call, data, pos);
         }
 

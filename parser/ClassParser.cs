@@ -1,8 +1,10 @@
 ﻿using script.builder;
 using script.help;
+using script.plugin.File;
 using script.stack;
 using script.token;
 using script.variabel;
+using System;
 
 namespace script.parser
 {
@@ -10,6 +12,12 @@ namespace script.parser
     {
         private Class builder;
         private VariabelDatabase db;
+        private bool isFile;
+
+        public ClassParser(bool isFile = false)
+        {
+            this.isFile = isFile;
+        }
 
         public void end(EnegyData data, VariabelDatabase db)
         {}
@@ -45,6 +53,11 @@ namespace script.parser
 
             token.next();
             db.pushClass(builder, ed);
+            if (isFile)
+            {
+                builder.extraVariabelDatabase = db;
+                ((FileVariabelDatabase)db).VariabelDatabase.pushClass(builder, ed);
+            }
             return new NullVariabel();
         }
 

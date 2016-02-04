@@ -10,6 +10,7 @@ namespace script.builder
         public string Name { get; set; }
         public AgumentStack agument = new AgumentStack();
         public event CallFunctionEvent call;
+        public VariabelDatabase extraVariabelDatabase { get; set; }
 
         public CVar callFunction(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {

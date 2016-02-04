@@ -21,8 +21,7 @@ namespace script.parser
             TokenCache cache = ScopeParser.getScope(token, ed, db);
             token.next();
 
-            while (new VariabelParser().parse(ed, db, cache).toBoolean(token.getCache().posision(), ed, db))
-                cache.reaset();
+            while (new VariabelParser().parse(ed, db, cache).toBoolean(token.getCache().posision(), ed, db)) ;
 
             return new NullVariabel();
         }

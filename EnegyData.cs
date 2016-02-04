@@ -7,7 +7,7 @@ namespace script
     {
        public FunctionVariabel ErrorHandler { get; set; }
        public ScriptConfig Config { get; set; }  
-       public RunningState State { get; private set; }
+       public virtual RunningState State { get; private set; }
        public PluginContainer Plugin { get; set; }
 
        public ScriptError ErrorData { get; private set; }
@@ -33,11 +33,14 @@ namespace script
             ReturnContext = r;
         }
 
-        public void setError(ScriptError er, VariabelDatabase db)
+        public virtual void setError(ScriptError er, VariabelDatabase db)
         {
+            if (State == RunningState.Error)
+                return;
             State = RunningState.Error;
             ErrorData = er;
-            if(ErrorHandler != null)
+
+            if (ErrorHandler != null)
             {
                 //okay here may not be a error handler and state must be set to normal
                 FunctionVariabel eh = ErrorHandler;

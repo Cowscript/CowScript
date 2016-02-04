@@ -3,12 +3,19 @@ using script.variabel;
 using script.builder;
 using script.help;
 using script.stack;
+using script.plugin.File;
 
 namespace script.parser
 {
     class functionParser : ParserInterface
     {
         private Function function = new Function();
+        private bool inFile;
+
+        public functionParser(bool inFile = false)
+        {
+            this.inFile = inFile;
+        }
 
         public void end(EnegyData data, VariabelDatabase db)
         {
@@ -34,6 +41,11 @@ namespace script.parser
             token.next();
             
             db.pushFunction(function, ed);
+            if (inFile)
+            {
+                function.extraVariabelDatabase = db;
+                ((FileVariabelDatabase)db).VariabelDatabase.pushFunction(function, ed);
+            }
             return null;
         }
     }

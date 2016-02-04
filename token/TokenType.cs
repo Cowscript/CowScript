@@ -53,5 +53,6 @@
         Self,
         While,
         Repeat,
+        For,
     }
 }

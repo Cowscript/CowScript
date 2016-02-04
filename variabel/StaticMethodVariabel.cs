@@ -7,11 +7,13 @@ namespace script.variabel
     {
         private ClassStaticMethods method;
         private ClassVariabel c;
+        private VariabelDatabase extra;
 
-        public StaticMethodVariabel(ClassStaticMethods m, ClassVariabel c) : base(null, null)
+        public StaticMethodVariabel(ClassStaticMethods m, ClassVariabel c, VariabelDatabase extra) : base(null, null, extra)
         {
             method = m;
             this.c = c;
+            this.extra = extra;
         }
 
         public override int agumentSize()
@@ -26,6 +28,9 @@ namespace script.variabel
 
         public override VariabelDatabase getShadowVariabelDatabase(VariabelDatabase db)
         {
+            if (extra != null)
+                return extra.createShadow(c);
+
             return db.createShadow(c);
         }
 

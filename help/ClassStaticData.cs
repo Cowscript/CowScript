@@ -7,5 +7,6 @@ namespace script.help
         public bool isMethod { set; get; }
         public CVar Context { set; get; }
         public bool isPublic { set; get; }
+        public VariabelDatabase extraVariabelDatabase { set; get; }
     }
 }

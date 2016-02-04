@@ -12,8 +12,6 @@ namespace script.token
             cache = c;
         }
 
-        public void reaset() { id = -1; }
-
         public override TokenBuffer getCache()
         {
             if (id == -1)

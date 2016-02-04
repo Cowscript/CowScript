@@ -9,12 +9,14 @@ namespace script.variabel
     {
         private Class Container;
         protected Dictionary<string, ClassStaticData> staticItems = new Dictionary<string, ClassStaticData>();
+        private VariabelDatabase extra = null;
 
         public virtual string Name { get { return Container.Name; } }
 
         public ClassVariabel(Class c)
         {
             Container = c;
+            extra = c.extraVariabelDatabase;
             c.setStaticData(staticItems, this);
         }
 
@@ -43,7 +45,7 @@ namespace script.variabel
             if (!hasConstructor())
                 return;
 
-            new MethodVariabel(Container.constructor, obj).call(c, db, d, pos);
+            new MethodVariabel(Container.constructor, obj, extra).call(c, db, d, pos);
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
@@ -69,7 +71,7 @@ namespace script.variabel
             if (!d.isMethod)
                 return base.toString(pos, data, db);
 
-            if (((StaticMethodVariabel)d.Context).agumentSize() == 0)
+            if (((StaticMethodVariabel)d.Context).agumentSize() != 0)
                 return base.toString(pos, data, db);
 
             return ((MethodVariabel)d.Context).call(new CVar[0], db, data, pos).toString(pos, data, db);

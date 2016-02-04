@@ -1,5 +1,4 @@
-﻿using System;
-using script.token;
+﻿using script.token;
 using script.variabel;
 using System.Collections;
 
@@ -23,7 +22,6 @@ namespace script.parser
             //run the code until a boolean false i hit :)
             while (ed.State == RunningState.Normal && new VariabelParser().parse(ed, db, scope).toBoolean(new Posision(0, 0), ed, db))
             {
-                scope.reaset();
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
             }
 

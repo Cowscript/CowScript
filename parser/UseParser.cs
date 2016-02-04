@@ -1,6 +1,7 @@
-﻿using script.token;
+﻿using script.plugin.File;
+using script.token;
 using script.variabel;
-using System.Text.RegularExpressions;
+using System.IO;
 
 namespace script.parser
 {
@@ -26,21 +27,27 @@ namespace script.parser
             }
             else
             {
-                if(ed.Config.get("file.base", "0") == "0")
+                if(ed.Config.get("file.enabled", "false") == "false")
                 {
-                    ed.setError(new ScriptError("It is not allow to use file in use. 'file.base' is not set.", token.getCache().posision()), db);
+                    ed.setError(new ScriptError("It is not allow to use file in use. 'file.enabled' is not set.", token.getCache().posision()), db);
                     return new NullVariabel();
                 }
 
-                parseFile(ed, db, token.getCache().posision());
+                parseFile(ed, db, token.getCache().posision(), plugin);
             }
 
             return new NullVariabel();
         }
 
-        private void parseFile(EnegyData ed, VariabelDatabase db, Posision pos)
+        private void parseFile(EnegyData ed, VariabelDatabase db, Posision pos, string plugin)
         {
+            if (!File.Exists(plugin))
+            {
+                ed.setError(new ScriptError("Unknown file: " + plugin, pos), db);
+                return;
+            }
 
+            FileEnergy.parse(new FileEnergyData(ed), new FileVariabelDatabase(db), plugin);
         }
     }
 }
