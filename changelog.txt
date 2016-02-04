@@ -22,7 +22,7 @@ V0.3 [No further items is append to V0.3 the next new thing will be append in Ve
  Create a new token "func" as short cut for "function".
  Optimize how ArrayVariabel works and standardized how it work so wee in V0.4 can create object in the script there can work as array.
 
-V0.2 
+V0.2 - Takes 19525,3693ms old test [approved to release]
  Create a file system where the script can parse other file and get class and function.
  When using anthoter file you beed to append public befor tokens "class" and "function" to indicate this class or/and function may be uses in anthoer file.
  Create token lock, lock is used when a file only be uses in anthor file. If caller is not a file it should only be "lock '';" if it only may be uses in one file "lock 'file path';" or multi "lock [paths];"
