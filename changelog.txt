@@ -11,6 +11,8 @@ V0.4
  Append option to save error in a special files. 
  Append a database drivers so you can connect to different databases like MySQl.
  Append plugin "math" and pus cos tang and sin function to it.
+Change function/method call aguments so it interlize in specific length. When the length is trying to be overridden it will result in a error "Max aguments count is overriding.";
+ Append plugin "config" with class "Config" with static method "get(string)" and "set(string, string)" "isLocked(string)". If the config is set by system it will only allow override if the config is not lock. When use set it is not lock and can be change allways
 
 V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
  Change ParserInterface so end is removed.
