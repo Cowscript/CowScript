@@ -8,6 +8,7 @@ V0.4
  Set toInt in type plugin as not supportet.
  Only accept function and class in extern files.
  Append ? If the node befor ? Is true it will take the first node, else it will take after : it will look like this "bool ? node : node;"
+Append option to save error in a special files. 
 
 V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
  Change ParserInterface so end is removed.
