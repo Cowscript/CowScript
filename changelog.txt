@@ -6,6 +6,7 @@ V0.4
  Append a static method to int class "convert(data)" there can convert a given type to int, the defult return is 0.
  Append a class when be uses the object can be uses as array
  Set toInt in type plugin as not supportet.
+ Only accept function and class in extern files.
 
 V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
  Change ParserInterface so end is removed.
