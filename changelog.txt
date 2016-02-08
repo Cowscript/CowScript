@@ -9,7 +9,6 @@ V0.3 [No further items is append to V0.3 the next new thing will be append in Ve
  Append new tokens break and continue. Break stop current task and continue break the running task and jump to next if there are any
  Append a new parser unset. When do this "i=0;unset i;" you remove i. You cant never remove function and class.
  Append a new plugin random with a static class where method next and hash. 
- Append lock, isLock and unlock method to array. When call lock the array will raise error when the array is attempt to change and so on.
  Append throw catch so you can throw errors.
  Append string->format(string skapalon, array data); there work as sprintf in PHP
  Append hasKey and hasValue method to array and start last support cyclus for Array plugin. 
