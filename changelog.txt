@@ -19,6 +19,7 @@ If config "tcp.enable" set to true there will be tcp plugin available.
  Append isScriptLock to config class so you can control if the script is allowed to change the config class,
  If config has a value "file.system.enable" it open a plugin to allow the script to touch the compourters file system.
  Set timeouts controls to the config. The parser control if the parser is taking to long time and set error when it take to long time
+ Remove create in ClassMethod and ClassStaticMethod. It should create self and not when use create.
 
 V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
  Change ParserInterface so end is removed.
