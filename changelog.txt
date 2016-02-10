@@ -1,4 +1,7 @@
 ----------------- change log -----------------
+V0.5
+Rewriting the class handler.
+
 V0.4
  If the object has a method "toInt()" the variabel can be uses as int.
  If the class has a static method "toInt()" the class name can be uses as int.
