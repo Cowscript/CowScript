@@ -16,6 +16,12 @@ namespace script.help
         {
             Class s = new Class("string", data, db);
 
+            ClassStaticMethods format = new ClassStaticMethods(s, "format");
+            format.Aguments.push("string", "query");
+            format.Aguments.push("array", "parameters");
+            format.caller += Format_caller;
+            format.create();
+
             //constructor :)
             ClassMethods constructor = new ClassMethods(s, "constructor");
             constructor.Aguments.push("string", "s", new NullVariabel());
@@ -59,6 +65,31 @@ namespace script.help
             toString.create();
 
             db.pushClass(s, data);
+        }
+
+        private static CVar Format_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            StringFormater format = new StringFormater();
+            ArrayVariabel array = (ArrayVariabel)stack[1];
+
+            foreach(string key in array.Keys())
+            {
+                CVar context = array.get(key, pos, data, db);
+
+                if (StringVariabel.isString(context))
+                {
+                    format.appendParam(context.toString(pos, data, db));
+                }else if(context is IntVariabel)
+                {
+                    format.appendParam(Convert.ToInt32(context.toInt(pos, data, db)));
+                }
+                else
+                {
+                    data.setError(new ScriptError("Cant convert '" + context.type() + "' to string", pos), db);
+                }
+            }
+
+            return StringVariabel.CreateString(data, db, pos, format.format(stack[0].toString(pos, data, db)));
         }
 
         private static CVar ToString_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

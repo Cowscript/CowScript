@@ -1,26 +1,27 @@
 ﻿using script.token;
 using script.variabel;
-using System;
 
 namespace script.parser
 {
     class PublicParser : ParserInterface
     {
-        public void end(EnegyData data, VariabelDatabase db)
-        {}
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
+            if (!isFile)
+            {
+                ed.setError(new ScriptError("public [function/class] can only be uses when you parse file from use 'path'", token.getCache().posision()), db);
+                return null;
+            }
+
             if(token.next().type() == TokenType.Function)
             {
-                functionParser p = new functionParser(true);
-                p.parse(ed, db, token);
-                p.end(ed, db);
+                functionParser p = new functionParser();
+                p.parseFunction(ed, db, token, true, true, true);
             }else if(token.getCache().type() == TokenType.Class)
             {
-                ClassParser p = new ClassParser(true);
-                p.parse(ed, db, token);
-                p.end(ed, db);
+                ClassParser p = new ClassParser();
+                p.parse(ed, db, token, true);
             }
             else
             {

@@ -1,6 +1,7 @@
 ﻿using script.builder;
 using script.help;
 using script.stack;
+using System;
 
 namespace script.variabel
 {
@@ -42,7 +43,21 @@ namespace script.variabel
                 for (int i = 0; i < func.agument.size(); i++)
                     db.push(func.agument.get(i).Name, call[i], data);
             }
+
             CVar r = func.callFunction(call, db, data, pos);
+
+            if(func.ReturnType != null)
+            {
+                //this function is lock to a type :)
+                if (r == null)
+                    r = new NullVariabel();
+
+                if(!CallScriptFunction.compare(r, func.ReturnType))
+                {
+                    data.setError(new ScriptError("a function '"+func.Name+"' returns can not be convertet to '" + func.ReturnType + "'", pos), db);
+                    return new NullVariabel();
+                }
+            }
 
             if (r == null)
                 return new NullVariabel();

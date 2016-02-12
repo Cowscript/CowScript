@@ -27,6 +27,16 @@ namespace script
             types.Add("class");
         }
 
+        public Dictionary<string, CVar>.KeyCollection ContainerKeys()
+        {
+            return container.Keys;
+        }
+
+        public Dictionary<string, CVar>.KeyCollection GlobalsKey()
+        {
+            return global.Keys;
+        }
+
         public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types)
         {
             this.global = new Dictionary<string, CVar>(global);
@@ -113,6 +123,16 @@ namespace script
 
             CVar var = global[name];
             data.setError(new ScriptError("You can´t convert " + name + " becuse it is " + var.type(), new Posision(0, 0)), this);
+        }
+
+        public bool allowedOveride(string name)
+        {
+            return !global.ContainsKey(name);
+        }
+
+        public void removeVariabel(string name)
+        {
+            container.Remove(name);
         }
     }
 }

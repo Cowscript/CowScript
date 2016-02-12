@@ -7,8 +7,8 @@
 
         public Posision(int line, int row)
         {
-            this.Line = line;
-            this.Row = row;
+            Line = line;
+            Row = row;
         }
     }
 }

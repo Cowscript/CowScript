@@ -39,6 +39,15 @@ namespace script.variabel
                 for (int i = 0; i < method.Aguments.size(); i++)
                     db.push(method.Aguments.get(i).Name, call[i], data);
             }
+            if(method.ReturnType != null)
+            {
+                CVar cache = method.call(obj, db, call, data, pos);
+                if(!CallScriptFunction.compare(cache, method.ReturnType))
+                {
+                    data.setError(new ScriptError("a method '" + obj.Name + "->"+method.Name+"' returns can not be convertet to '" + method.ReturnType + "'", pos), db);
+                    return new NullVariabel();
+                }
+            }
             return method.call(obj, db, call, data, pos);
         }
 

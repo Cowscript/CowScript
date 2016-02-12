@@ -1,8 +1,6 @@
 ﻿using script.builder;
-using script.plugin;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace script.variabel
 {
@@ -19,8 +17,33 @@ namespace script.variabel
             length.caller += Length_caller;
             length.create();
 
-            ClassVariabel cv = new ClassVariabel(c);
-            items = cv.createNew(new CVar[0], new VariabelDatabase(), new EnegyData(), new Posision(0, 0)).items;
+            ClassMethods hasValue = new ClassMethods(c, "hasValue");
+            hasValue.Aguments.push("context");
+            hasValue.caller += HasValue_caller;
+            hasValue.create();
+
+            ClassMethods hasKey = new ClassMethods(c, "hasKey");
+            hasKey.Aguments.push("context");
+            hasKey.caller += HasKey_caller;
+            hasKey.create();
+
+            items = new ClassVariabel(c).createNew(new CVar[0], new VariabelDatabase(), new EnegyData(), new Posision(0,0)).items;
+        }
+
+        private CVar HasKey_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return new BooleanVariabel(keyExists(stack[0], pos, data, db));
+        }
+
+        private CVar HasValue_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            foreach(string key in Keys())
+            {
+                if (get(key, pos, data, db).compare(stack[0], pos, data, db))
+                    return new BooleanVariabel(true);
+            }
+
+            return new BooleanVariabel(false);
         }
 
         private CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

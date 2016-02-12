@@ -5,19 +5,12 @@ namespace script.parser
 {
     class ReturnParser : ParserInterface
     {
-        private VariabelParser p = new VariabelParser();
 
-        public void end(EnegyData data, VariabelDatabase db)
-        {
-            
-        }
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
             if (token.next().type() != TokenType.End)
             {
-                ed.setReturn(p.parse(ed, db, token));
-                p.end(ed, db);
+                ed.setReturn(new VariabelParser().parse(ed, db, token, isFile));
             }
             else {
                 token.next();

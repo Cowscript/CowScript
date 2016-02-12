@@ -1,4 +1,5 @@
 ﻿using script.builder;
+using script.help;
 using script.stack;
 
 namespace script.variabel
@@ -36,6 +37,19 @@ namespace script.variabel
 
         public override CVar call(CVar[] call, VariabelDatabase db, EnegyData data, Posision pos)
         {
+            if(method.ReturnType != null)
+            {
+                CVar cache = method.call(c, db, call, data, pos);
+
+                if(!CallScriptFunction.compare(cache, method.ReturnType))
+                {
+                    data.setError(new ScriptError("a static method '" + c.Name + "->" + method.Name + "' returns can not be convertet to '" + method.ReturnType + "'", pos), db);
+                    return new NullVariabel();
+                }
+
+                return cache;
+            }
+
             return method.call(c, db, call, data, pos);
         }
     }

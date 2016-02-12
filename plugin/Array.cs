@@ -8,6 +8,7 @@ namespace script.plugin
 {
     class Array : PluginInterface
     {
+        //no support from V0.3
         public void open(VariabelDatabase database, EnegyData data)
         {
             //no support from V0.2

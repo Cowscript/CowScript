@@ -7,17 +7,10 @@ namespace script.parser
 {
     class UseParser : ParserInterface
     {
-        private VariabelParser p = new VariabelParser();
-
-        public void end(EnegyData ed, VariabelDatabase db)
-        {
-            p.end(ed, db);
-        }
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
             token.next();
-            string plugin = p.parse(ed, db, token).toString(token.getCache().posision(), ed, db);
+            string plugin = new VariabelParser().parse(ed, db, token, isFile).toString(token.getCache().posision(), ed, db);
             
             //control if the plugin exists in the system
             if(ed.Plugin.exists(plugin))
@@ -47,7 +40,7 @@ namespace script.parser
                 return;
             }
 
-            FileEnergy.parse(new FileEnergyData(ed), new FileVariabelDatabase(db), plugin);
+            FileEnergy.parse(ed, new FileVariabelDatabase(db), plugin);
         }
     }
 }

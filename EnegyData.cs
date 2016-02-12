@@ -52,12 +52,29 @@ namespace script
                 }
             }
         }
+
+        public virtual void setBreak()
+        {
+            State = RunningState.Break;
+        }
+
+        public virtual void setContinue()
+        {
+            State = RunningState.Continue;
+        }
+
+        public virtual void setNormal()
+        {
+            State = RunningState.Normal;
+        }
     }
 
     public enum RunningState
     {
         Normal, 
         Return,
-        Error
+        Error,
+        Break, 
+        Continue,
     }
 }

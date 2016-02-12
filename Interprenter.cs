@@ -1,8 +1,7 @@
 ﻿using script.parser;
-using script.plugin;
 using script.token;
 using script.variabel;
-using System;
+using System.Collections.Generic;
 
 namespace script
 {
@@ -10,6 +9,8 @@ namespace script
     {
         public ObjectVariabel ObjectVariabel { private set; get; }
         public ClassVariabel StaticVariabel { private set; get; }
+
+        private static Dictionary<TokenType, ParserInterface> parsers = null;
 
         public void setObject(ObjectVariabel objectVariabel)
         {
@@ -27,49 +28,42 @@ namespace script
 
         public static void parse(Token token, EnegyData data, VariabelDatabase db, bool isFile)
         {
-            token.next();
-            ParserInterface pi;
-            //run thrue the script (if Run is true and return is null)
-            while (data.State == RunningState.Normal && token.getCache().type() != TokenType.EOF && (pi = getParser(token, isFile, data, db)) != null)
+            if(parsers == null)
             {
-                pi.parse(data, db, token);
-                pi.end(data, db);//in some parser it will have this to detext if end is okay (like variabel parseren)
+                setParser();
+            }
+
+            token.next();
+            //run thrue the script (if Run is true and return is null)
+            while (data.State == RunningState.Normal && token.getCache().type() != TokenType.EOF)
+            {
+                if (parsers.ContainsKey(token.getCache().type()))
+                {
+                    parsers[token.getCache().type()].parse(data, db, token, isFile);
+                }
+                else
+                {
+                    new VariabelParser().parse(data, db, token, isFile);
+                }
             }
         }
 
-        private static ParserInterface getParser(Token token, bool isFile, EnegyData data, VariabelDatabase database)
+        private static void setParser()
         {
-            switch (token.getCache().type())
-            {
-                case TokenType.If:
-                    return new IfParser();
-                case TokenType.Function:
-                    return new functionParser();
-                case TokenType.Return:
-                    return new ReturnParser();
-                case TokenType.Use:
-                    return new UseParser();
-                case TokenType.Foreach:
-                    return new ForeachParser();
-                case TokenType.Class:
-                    return new ClassParser();
-                case TokenType.While:
-                    return new WhileParser();
-                case TokenType.Repeat:
-                    return new RepeatParser();
-                case TokenType.For:
-                    return new ForParser();
-                case TokenType.Public:
-                    if (!isFile)
-                    {
-                        data.setError(new ScriptError("public [function/class] can only be uses when you parse file from use 'path'", token.getCache().posision()), database);
-                        return null;
-                    }
-
-                    return new PublicParser();
-                default:
-                    return new VariabelParser();
-            }
+            parsers = new Dictionary<TokenType, ParserInterface>();
+            parsers.Add(TokenType.If, new IfParser());
+            parsers.Add(TokenType.Function, new functionParser());
+            parsers.Add(TokenType.Return, new ReturnParser());
+            parsers.Add(TokenType.Use, new UseParser());
+            parsers.Add(TokenType.Foreach, new ForeachParser());
+            parsers.Add(TokenType.Class, new ClassParser());
+            parsers.Add(TokenType.While, new WhileParser());
+            parsers.Add(TokenType.Repeat, new RepeatParser());
+            parsers.Add(TokenType.For, new ForParser());
+            parsers.Add(TokenType.Public, new PublicParser());
+            parsers.Add(TokenType.Break, new BreakParser());
+            parsers.Add(TokenType.Continue, new ContinueParser());
+            parsers.Add(TokenType.Unset, new UnsetParser());
         }
     }
 }

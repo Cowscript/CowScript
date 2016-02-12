@@ -10,11 +10,7 @@ namespace script.parser
         private EnegyData ed;
         private VariabelDatabase db;
 
-        public void end(EnegyData data, VariabelDatabase db)
-        {
-        }
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
             this.token = token;
             this.ed = ed;
@@ -39,7 +35,7 @@ namespace script.parser
             }
 
             //get context :)
-            CVar scope = new VariabelParser().parse(ed, db, token);
+            CVar scope = new VariabelParser().parseNoEnd(ed, db, token);
 
             //control if wee got a ) 
             if(token.getCache().type() != TokenType.RightBue)
@@ -52,17 +48,17 @@ namespace script.parser
             ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
 
-            if(!befor && scope.toBoolean(token.getCache().posision(), ed, db))
+            if(!befor && scope.toBoolean(token.getCache().posision(), ed, db) && ed.State == RunningState.Normal)
             {
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
                 befor = true;
             }
 
             //control if next is elseif :)
-            if(token.getCache().type() == TokenType.Elseif)
+            if(token.getCache().type() == TokenType.Elseif && ed.State == RunningState.Normal)
             {
                 begin(befor);
-            }else if(token.getCache().type() == TokenType.Else)
+            }else if(token.getCache().type() == TokenType.Else && ed.State == RunningState.Normal)
             {
                 doElse(befor);
             }
@@ -72,7 +68,7 @@ namespace script.parser
         {
             ArrayList body = BodyParser.parse(token, ed, db);
             token.next();
-            if (!befor)
+            if (!befor && ed.State == RunningState.Normal)
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
         }
     }

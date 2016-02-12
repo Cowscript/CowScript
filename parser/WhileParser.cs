@@ -6,11 +6,7 @@ namespace script.parser
 {
     class WhileParser : ParserInterface
     {
-        public void end(EnegyData data, VariabelDatabase db)
-        {
-        }
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
             if (token.next().type() != TokenType.LeftBue)
                 ed.setError(new ScriptError("Missing ( after while", token.getCache().posision()), db);
@@ -20,9 +16,17 @@ namespace script.parser
             token.next();
 
             //run the code until a boolean false i hit :)
-            while (ed.State == RunningState.Normal && new VariabelParser().parse(ed, db, scope).toBoolean(new Posision(0, 0), ed, db))
+            while (ed.State == RunningState.Normal && new VariabelParser().parseNoEnd(ed, db, scope).toBoolean(new Posision(0, 0), ed, db))
             {
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
+                if(ed.State == RunningState.Continue)
+                {
+                    ed.setNormal();
+                }else if(ed.State == RunningState.Break)
+                {
+                    ed.setNormal();
+                    break;
+                }
             }
 
             return new NullVariabel();

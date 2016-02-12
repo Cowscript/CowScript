@@ -14,26 +14,30 @@ namespace script.parser
         private Token token;
         private VariabelDatabase db;
 
-        public void end(EnegyData data, VariabelDatabase db)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
-            if (token.getCache().type() != TokenType.End && data.State == RunningState.Normal)
+            CVar result = parseNoEnd(ed, db, token);
+
+            if (token.getCache().type() != TokenType.End && ed.State == RunningState.Normal)
             {
-                data.setError(new ScriptError("Missing ;. got: " + token.getCache().ToString(), token.getCache().posision()), db);
-                return;
+                ed.setError(new ScriptError("Missing ;. got: " + token.getCache().ToString(), token.getCache().posision()), db);
+                return new NullVariabel();
             }
 
-            token.next();//update token soo next dont need to use Token.next();
+            token.next();
+            return result;
         }
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parseNoEnd(EnegyData ed, VariabelDatabase db, Token token)
         {
             this.token = token;
             this.db = db;
             data = ed;
+
             return getBooleanPrefix(true);
         }
 
-        private CVar getBooleanPrefix(bool parse)
+        public CVar getBooleanPrefix(bool parse)
         {
             if(token.getCache().type() == TokenType.Not)
             {
@@ -121,14 +125,37 @@ namespace script.parser
             { //<
                 token.next();
                 return new BooleanVariabel(sum(parse).toInt(token.getCache().posision(), data, db) > var.toInt(token.getCache().posision(), data, db));
-            }else if(token.getCache().type() == TokenType.LessEquels)
+            }
+            else if (token.getCache().type() == TokenType.LessEquels)
             {
                 token.next();
                 return new BooleanVariabel(sum(parse).toInt(token.getCache().posision(), data, db) <= var.toInt(token.getCache().posision(), data, db));
-            }else if(token.getCache().type() == TokenType.Less)
+            }
+            else if (token.getCache().type() == TokenType.Less)
             {
                 token.next();
                 return new BooleanVariabel(sum(parse).toInt(token.getCache().posision(), data, db) < var.toInt(token.getCache().posision(), data, db));
+            }
+            else if (token.getCache().type() == TokenType.Is)
+            {
+                token.next();
+                CVar next = sum(parse);
+
+                if (parse && !(var is ClassVariabel || next is ClassVariabel))
+                {
+                    data.setError(new ScriptError("The node befor is or after must be class identify", token.getCache().posision()), db);
+                    return new BooleanVariabel(false);
+                }
+
+                if (parse)
+                {
+                    ClassVariabel c = (var is ClassVariabel ? (ClassVariabel)var : (ClassVariabel)next);
+                    ObjectVariabel o = (var is ClassVariabel ? (ObjectVariabel)next : (ObjectVariabel)var);
+
+                    return new BooleanVariabel(c.Name == o.Name);
+                }
+
+                return new BooleanVariabel(false);
             }
 
             return var;
@@ -161,7 +188,7 @@ namespace script.parser
 
         private CVar gange(bool parse)
         {
-            CVar var = negetave(parse);
+            CVar var = power(parse);
 
             TokenBuffer buffer;
             while((buffer = token.getCache()).type() == TokenType.Gange || buffer.type() == TokenType.Divider)
@@ -169,12 +196,29 @@ namespace script.parser
                 token.next();
                 if(buffer.type() == TokenType.Gange)
                 {
-                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) * gange(parse).toInt(token.getPosision(), data, db));
+                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) * power(parse).toInt(token.getPosision(), data, db));
                 }
                 else
                 {
-                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) / gange(parse).toInt(token.getPosision(), data, db));
+                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) / power(parse).toInt(token.getPosision(), data, db));
                 }
+            }
+
+            return var;
+        }
+
+        private CVar power(bool parse)
+        {
+            CVar var = negetave(parse);
+            if(token.getCache().type() == TokenType.Power)
+            {
+                token.next();
+                if (parse)
+                {
+                    var = new IntVariabel(Math.Pow(var.toInt(token.getCache().posision(), data, db), power(parse).toInt(token.getCache().posision(), data, db)));
+                }
+                else
+                    negetave(parse);
             }
 
             return var;
@@ -274,99 +318,50 @@ namespace script.parser
             }
             else if (buffer.type() == TokenType.New)
             {
-                //wee try to create a new object :)
-                if (token.next().type() != TokenType.Variabel)
+                ClassVariabel cObject = null;
+                if (token.next().type() == TokenType.Class)
                 {
-                    data.setError(new ScriptError("After 'new' there must be a variabel", token.getCache().posision()), db);
-                    return new NullVariabel();
-                }
-                CVar c = null;
-                if (parse)
+                    cObject = new ClassParser().parseNoName(data, db, token);
+                }else if(token.getCache().type() == TokenType.Variabel)
                 {
                     if (!db.isExists(token.getCache().ToString()))
                     {
-                        data.setError(new ScriptError("Unknown class: " + token.getCache().ToString(), token.getCache().posision()), db);
+                        data.setError(new ScriptError("Unknown class '" + token.getCache().ToString(), token.getCache().posision()), db);
                         return new NullVariabel();
                     }
 
-                    c = db.get(token.getCache().ToString(), data);
+                    //control it is a class variabel :)
+                    CVar cache = db.get(token.getCache().ToString(), data);
 
-                    if (!(c is ClassVariabel))
+                    if(!(cache is ClassVariabel))
                     {
-                        data.setError(new ScriptError(token.getCache().ToString() + " is not a class", token.getCache().posision()), db);
+                        data.setError(new ScriptError("Unknown class '" + token.getCache().ToString(), token.getCache().posision()), db);
                         return new NullVariabel();
                     }
+
+                    cObject = (ClassVariabel)cache;
+
+                    token.next();
                 }
-
-                ClassVariabel cObject = (c != null ? (ClassVariabel)c : null);
-
-                if (token.next().type() != TokenType.LeftBue)
+                else
                 {
-                    data.setError(new ScriptError("Missing ( after class variabel", token.getCache().posision()), db);
+                    data.setError(new ScriptError("Unknown token after 'new': " + token.getCache().ToString(), token.getCache().posision()), db);
                     return new NullVariabel();
                 }
 
-                CVar[] call = new CVar[cObject.hasConstructor() ? cObject.getConstructor().Aguments.size() : 0];
-
-                if (token.next().type() != TokenType.RightBue)
+                if (token.getCache().type() != TokenType.LeftBue)
                 {
-                    CVar v = getBoolean(parse);
-                    if (parse && cObject.hasConstructor() && cObject.getConstructor().Aguments.size() > 0)
-                    {
-                        if (cObject.getConstructor().Aguments.get(0).hasType() && !CallScriptFunction.compare(v, cObject.getConstructor().Aguments.get(0).Type))
-                        {
-                            data.setError(new ScriptError("A agument number 0 in constructor can not be convertet to " + cObject.getConstructor().Aguments.get(0).Type.ToString(), token.getCache().posision()), db);
-                            return new NullVariabel();
-                        }
-                        call[0] = v;
-                    }
-
-                    int i = 1;
-                    while (token.getCache().type() == TokenType.Comma)
-                    {
-                        token.next();
-                        v = getBoolean(parse);
-                        if (parse && cObject.hasConstructor() && cObject.getConstructor().Aguments.size() >= i)
-                        {
-                            if (cObject.getConstructor().Aguments.get(i).hasType())
-                            {
-                                //compare types 
-                                if (!CallScriptFunction.compare(v, cObject.getConstructor().Aguments.get(i).Type))
-                                {
-                                    data.setError(new ScriptError("A agument number " + (i + 1) + " in  constructor can not be convertet from '" + v.type() + "' to '" + cObject.getConstructor().Aguments.get(i).Type + "'", token.getCache().posision()), db);
-                                    return new NullVariabel();
-                                }
-                            }
-                            call[i] = v;
-                        }
-
-                        i++;
-                    }
-
-                    if (cObject.hasConstructor())
-                    {
-                        //control if wee missing aguments :)
-                        for (int a = i; a < cObject.getConstructor().Aguments.size(); a++)
-                        {
-                            if (!cObject.getConstructor().Aguments.get(i).hasValue())
-                            {
-                                data.setError(new ScriptError("Call of function  missing aguments", token.getCache().posision()), db);
-                                return new NullVariabel();
-                            }
-
-                            call[a] = cObject.getConstructor().Aguments.get(i).Value;
-                        }
-                    }
-                }
-
-                if (token.getCache().type() != TokenType.RightBue)
-                {
-                    data.setError(new ScriptError("Missing ) got " + token.getCache().ToString(), token.getCache().posision()), db);
+                    data.setError(new ScriptError("Missing ( after class variabel. got: "+token.getCache().ToString(), token.getCache().posision()), db);
                     return new NullVariabel();
                 }
-                token.next();
+                ParseFunctionCallResult pfcr;
 
-                return handleAfterVariabel(cObject.createNew(call, db, data, token.getCache().posision()), parse);
+                if (parse && cObject.hasConstructor())
+                    pfcr = CallScriptFunction.parseCall(parse, cObject.getConstructor().Aguments, new VariabelDatabase(), token, this, data);
+                else
+                    pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data);
+
+                return handleAfterVariabel(cObject.createNew(pfcr.Call, db, data, token.getCache().posision()), parse);
             }
             else if (buffer.type() == TokenType.Self) {
                 if (parse && db.C == null)
@@ -438,6 +433,12 @@ namespace script.parser
             }else if(buffer.type() == TokenType.EOF)
             {
                 return new NullVariabel();
+            }else if(buffer.type() == TokenType.Function)
+            {
+                return new functionParser().parseNoName(data, db, token);
+            }else if(buffer.type() == TokenType.Class)
+            {
+                return new ClassParser().parseNoName(data, db, token);
             }
             else
             {
@@ -559,7 +560,7 @@ namespace script.parser
             }
 
             //this is only for pointer :)
-            if (obj.isPointer(item))
+            if (parse && obj.isPointer(item))
             {
                 if (token.getCache().type() == TokenType.PlusOne)
                 {
@@ -606,7 +607,7 @@ namespace script.parser
 
             token.next();
 
-            return array;
+            return handleAfterVariabel(array, parse);
         }
 
         private void setArrayContext(ArrayVariabel array, bool parse)
@@ -633,104 +634,33 @@ namespace script.parser
             switch(token.getCache().type())
             {
                 case TokenType.LeftBue://it is a functions call :)
-                    if(parse && !(variabel is FunctionVariabel))
+                    ParseFunctionCallResult pfcr;
+                    if (parse)
                     {
-                        data.setError(new ScriptError("Unknown token (", token.getCache().posision()), db);
-                        return new NullVariabel();
-                    }
-
-                    if (parse && variabel == null)
-                    {
-                        data.setError(new ScriptError("FunctionVariabel is null", token.getCache().posision()), db);
-                        return new NullVariabel();
-                    }
-
-                    VariabelDatabase vd = parse ? ((FunctionVariabel)variabel).getShadowVariabelDatabase(db) : new VariabelDatabase();
-
-                    CVar[] call = new CVar[parse ? ((FunctionVariabel)variabel).agumentSize() : 0];
-                    AgumentStack stack = parse ? ((FunctionVariabel)variabel).getStatck() : new AgumentStack();
-
-                    if(token.next().type() != TokenType.RightBue)
-                    {
-                        CVar v = getBooleanPrefix(parse);
-                        if (parse && stack.size() > 0)
+                        if(!(variabel is FunctionVariabel))
                         {
-                            if (stack.get(0).hasType() && !CallScriptFunction.compare(v, stack.get(0).Type))
-                            {
-                                data.setError(new ScriptError("A agument number 0 in function can not be convertet from '"+v.type()+"' to " + stack.get(0).Type.ToString(), token.getCache().posision()), db);
-                                return new NullVariabel();
-                            }
-                            call[0] = v;
-                            vd.push(stack.get(0).Name, v, data);
+                            data.setError(new ScriptError("Variabel befor ( must be a function, method or class identify", token.getCache().posision()), db);
+                            return new NullVariabel();
                         }
 
-                        int i = 1;
-                        while(token.getCache().type() == TokenType.Comma)
-                        {
-                            token.next();
-                            v = getBooleanPrefix(parse);
-                            if (parse && stack.size() >= i)
-                            {
-                                if (stack.get(i).hasType())
-                                {
-                                    //compare types 
-                                    if (!CallScriptFunction.compare(v, stack.get(i).Type))
-                                    {
-                                        data.setError(new ScriptError("A agument number " + (i + 1) + " in function can not be convertet to " + stack.get(i).Type.ToString(), token.getCache().posision()), db);
-                                        return new NullVariabel();
-                                    }
-                                }
-                                call[i] = v;
-                                vd.push(stack.get(i).Name, v, data);
-                            }
-
-                            i++;
-                        }
-
-                        //control if wee missing aguments :)
-                        for (int a = i; a < stack.size(); a++)
-                        {
-                            if (!stack.get(a).hasValue())
-                            {
-                                data.setError(new ScriptError("Call of function missing aguments", token.getCache().posision()), db);
-                                return new NullVariabel();
-                            }
-
-                            call[a] = stack.get(a).Value;
-                            vd.push(stack.get(a).Name, stack.get(a).Value, data);
-                        }
+                        pfcr = CallScriptFunction.parseCall(parse, ((FunctionVariabel)variabel).getStatck(), ((FunctionVariabel)variabel).getShadowVariabelDatabase(db), token, this, data);
                     }
                     else
                     {
-                        //okay wee need to control if it taks 0 aguments :)
-                        if(stack.size() != 0)
-                        {
-                            //it taks aguments :) let see if one ore more requerie aguments :)
-                            for(int i = 0; i < stack.size(); i++)
-                            {
-                                if (!stack.get(i).hasValue())
-                                {
-                                    data.setError(new ScriptError("Call of function missing aguments", token.getCache().posision()), db);
-                                    return new NullVariabel();
-                                }
-
-                                vd.push(stack.get(i).Name, stack.get(i).Value, data);
-                                call[i] = stack.get(i).Value;
-                            }
-                        }
+                        pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data);
                     }
 
-                    if (token.getCache().type() != TokenType.RightBue)
+                    if(pfcr == null || !parse)
                     {
-                        data.setError(new ScriptError("Missing ) got " + token.getCache().ToString(), token.getCache().posision()), db);
-                        return new NullVariabel();
+                        return handleAfterVariabel(new NullVariabel(), false);
                     }
 
-                    token.next();
-                    if (!parse)
-                        return handleAfterVariabel(new NullVariabel(), false);
+                    CVar r = ((FunctionVariabel)variabel).call(pfcr.Call, pfcr.VariabelDatabase, data, token.getCache().posision());
 
-                    return handleAfterVariabel(((FunctionVariabel)variabel).call(call, vd, data, token.getCache().posision()), parse);
+                    if (data.State != RunningState.Normal)
+                        return new NullVariabel();
+
+                    return handleAfterVariabel(r, parse);
                 case TokenType.LeftBoks:
                     //control if the context is variabel :)
                     if (!(variabel is ArrayVariabel))

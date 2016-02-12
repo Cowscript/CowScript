@@ -11,6 +11,7 @@ namespace script
 {
     public class Energy : IDisposable
     {
+        public const string VERSION = "V0.3";
         private EnegyData Data {  set;  get; }
 
         public VariabelDatabase VariabelDatabase { set; get; }

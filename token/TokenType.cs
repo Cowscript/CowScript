@@ -54,5 +54,10 @@
         While,
         Repeat,
         For,
+        Unset,
+        Power,
+        Break,
+        Continue,
+        Is,
     }
 }

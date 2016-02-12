@@ -6,12 +6,9 @@ namespace script.parser
 {
     class ForeachParser : ParserInterface
     {
-        public void end(EnegyData data, VariabelDatabase db)
-        {}
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
-            VariabelParser parser = new VariabelParser();
 
             if (token.next().type() != TokenType.LeftBue)
             {
@@ -21,7 +18,7 @@ namespace script.parser
 
             token.next();
 
-            CVar agument = parser.parse(ed, db, token);
+            CVar agument = new VariabelParser().parseNoEnd(ed, db, token);
 
             if (!(agument is ArrayVariabel))
             {
@@ -76,6 +73,15 @@ namespace script.parser
                 if (secondVariabel != null)
                     db.push(secondVariabel, array.get(key, token.getCache().posision(), ed, db), ed);
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
+
+                if (ed.State == RunningState.Break)
+                {
+                    //a token in this foreach is 'break' so wee stop this and continue outside the body of this foreach
+                    ed.setNormal();
+                    break;
+                }
+                else if (ed.State == RunningState.Continue)
+                    ed.setNormal();
             }
 
             token.next();

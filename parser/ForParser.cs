@@ -6,11 +6,7 @@ namespace script.parser
 {
     class ForParser : ParserInterface
     {
-        public void end(EnegyData data, VariabelDatabase db)
-        {
-        }
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
             if(token.next().type() != TokenType.LeftBue)
             {
@@ -48,13 +44,13 @@ namespace script.parser
             }
 
             //init the data :)
-            new VariabelParser().parse(ed, db, new TokenCache(init, ed, db));
+            new VariabelParser().parseNoEnd(ed, db, new TokenCache(init, ed, db));
 
-            while(ed.State == RunningState.Normal && new VariabelParser().parse(ed, db, new TokenCache(status, ed, db)).toBoolean(token.getCache().posision(), ed, db))
+            while(ed.State == RunningState.Normal && new VariabelParser().parseNoEnd(ed, db, new TokenCache(status, ed, db)).toBoolean(token.getCache().posision(), ed, db))
             {
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
                 if (ed.State == RunningState.Normal)
-                    new VariabelParser().parse(ed, db, new TokenCache(handler, ed, db));
+                    new VariabelParser().parseNoEnd(ed, db, new TokenCache(handler, ed, db));
             }
             token.next();
             return null;

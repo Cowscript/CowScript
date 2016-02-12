@@ -4,7 +4,6 @@ using script.plugin.File;
 using script.stack;
 using script.token;
 using script.variabel;
-using System;
 
 namespace script.parser
 {
@@ -14,26 +13,36 @@ namespace script.parser
         private VariabelDatabase db;
         private bool isFile;
 
-        public ClassParser(bool isFile = false)
+        public ClassVariabel parseNoName(EnegyData data, VariabelDatabase db, Token token)
         {
-            this.isFile = isFile;
+            return (ClassVariabel)p(data, db, token, false, false);
         }
 
-        public void end(EnegyData data, VariabelDatabase db)
-        {}
-
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
         {
+            return p(ed, db, token, isFile, true);
+        }
+
+        private CVar p(EnegyData ed, VariabelDatabase db, Token token, bool isFile, bool name) { 
+            this.isFile = isFile;
             this.db = db;
-            if(token.next().type() != TokenType.Variabel)
+
+            if (name)
             {
-                ed.setError(new ScriptError("Missing class name after 'class'", token.getCache().posision()), db);
-                return new NullVariabel();
+                if (token.next().type() != TokenType.Variabel)
+                {
+                    ed.setError(new ScriptError("Missing class name after 'class'", token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
+
+                builder = new Class(token.getCache().ToString());
+            }
+            else
+            {
+                builder = new Class();
             }
 
-            builder = new Class(token.getCache().ToString());
 
-            //control if wee got { after class name
             if(token.next().type() != TokenType.LeftTuborg)
             {
                 ed.setError(new ScriptError("Missing { after class name", token.getCache().posision()), db);
@@ -52,13 +61,20 @@ namespace script.parser
             }
 
             token.next();
-            db.pushClass(builder, ed);
-            if (isFile)
+            if (name)
             {
-                builder.extraVariabelDatabase = db;
-                ((FileVariabelDatabase)db).VariabelDatabase.pushClass(builder, ed);
+                db.pushClass(builder, ed);
+                if (isFile)
+                {
+                    builder.extraVariabelDatabase = db;
+                    ((FileVariabelDatabase)db).VariabelDatabase.pushClass(builder, ed);
+                }
+                return null;
             }
-            return new NullVariabel();
+            else
+            {
+                return new ClassVariabel(builder);
+            }
         }
 
         private bool run(TokenType type)
@@ -123,8 +139,7 @@ namespace script.parser
             {
                 token.next();
                 VariabelParser p = new VariabelParser();
-                value = p.parse(data, db, token);
-                p.end(data, db);
+                value = p.parse(data, db, token, isFile);
             }else if(token.getCache().type() == TokenType.End)
             {
                 token.next();
@@ -148,25 +163,40 @@ namespace script.parser
                 return false;
             }
 
+            string type = null;
+
+            //okay the name can be a type so wee control it here :)
+            if (db.isType(token.getCache().ToString()))
+            {
+                type = token.getCache().ToString();
+
+                if(token.next().type() != TokenType.Variabel)
+                {
+                    data.setError(new ScriptError("A method should have a name", token.getCache().posision()), db);
+                    return false;
+                }
+            }
 
             if (isStatic)
-                buildStaticMethod(isPublic, token, data);
+                buildStaticMethod(isPublic, token, data, type);
             else
-                buildNonStaticMethod(isPublic, token, data);
+                buildNonStaticMethod(isPublic, token, data, type);
             return true;
         }
 
-        public void buildStaticMethod(bool isPublic, Token token, EnegyData data)
+        public void buildStaticMethod(bool isPublic, Token token, EnegyData data, string type)
         {
-            ClassStaticMethods m = new ClassStaticMethods(builder, token.getCache().ToString(), isPublic);
+            ClassStaticMethods m = new ClassStaticMethods(builder, token.getCache().ToString(), isPublic, type);
+            token.next();
             m.Aguments = AgumentParser.parseAguments(token, db, data);
             m.caller += new CallScriptMethod(m.Aguments, BodyParser.parse(token, data, db)).call;
             m.create();
             token.next();
         }
 
-        public void buildNonStaticMethod(bool isPublic, Token token, EnegyData data) {
-            ClassMethods m = new ClassMethods(builder, token.getCache().ToString(), isPublic);
+        public void buildNonStaticMethod(bool isPublic, Token token, EnegyData data, string type) {
+            ClassMethods m = new ClassMethods(builder, token.getCache().ToString(), isPublic, type);
+            token.next();
             m.Aguments = AgumentParser.parseAguments(token, db, data);
             m.caller += new CallScriptMethod(m.Aguments, BodyParser.parse(token, data, db)).call;
             m.create();
@@ -175,7 +205,8 @@ namespace script.parser
 
         private bool buildConstructor(Token token, EnegyData data)
         {
-            ClassMethods cm = new ClassMethods(builder, null, true);
+            ClassMethods cm = new ClassMethods(builder, null, true, null);
+            token.next();
             cm.Aguments = AgumentParser.parseAguments(token, db, data);
             cm.caller += new CallScriptMethod(cm.Aguments, BodyParser.parse(token, data, db)).call;
             cm.createConstructor();

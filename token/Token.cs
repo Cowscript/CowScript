@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using System.Text;
 
@@ -19,10 +18,6 @@ namespace script.token
 
         public Token()
         {
-            reservedVariabelName.Add("extends");
-            reservedVariabelName.Add("instanceof");
-            reservedVariabelName.Add("is");
-            reservedVariabelName.Add("func");
         }
 
         public Posision getPosision()
@@ -76,11 +71,13 @@ namespace script.token
             if(c == -1)
             {
                 //end of file :)
-                return new TokenBuffer("End of file", TokenType.EOF, this.bp);
+                return new TokenBuffer("End of file", TokenType.EOF, bp);
             }
 
             switch (c)
             {
+                case '^':
+                    return new TokenBuffer("^", TokenType.Power, bp);
                 case '{':
                     return new TokenBuffer("{", TokenType.LeftTuborg, bp);
                 case '}':
@@ -221,8 +218,8 @@ namespace script.token
 
             int c;
 
-            while (isVariabelChar((c = this.peek())) || isInt(c))
-                builder.Append((char)this.pop());
+            while (isVariabelChar((c = peek())) || isInt(c) || c == '_')
+                builder.Append((char)pop());
 
             string name = builder.ToString();
 
@@ -233,59 +230,71 @@ namespace script.token
                 return new TokenBuffer("if", TokenType.If, pos.toPosision());
             } else if (name == "elseif") {
                 return new TokenBuffer("elseif", TokenType.Elseif, pos.toPosision());
-            } else if(name == "else") {
+            } else if (name == "else") {
                 return new TokenBuffer("else", TokenType.Else, pos.toPosision());
-            }else if(name == "true" || name == "false")
+            } else if (name == "true" || name == "false")
             {
                 return new TokenBuffer(name, TokenType.Bool, pos.toPosision());
-            }else if(name == "null")
+            } else if (name == "null")
             {
                 return new TokenBuffer(name, TokenType.Null, pos.toPosision());
-            }else if(name == "class")
+            } else if (name == "class")
             {
                 return new TokenBuffer(name, TokenType.Class, pos.toPosision());
-            }else if(name == "public")
+            } else if (name == "public")
             {
                 return new TokenBuffer(name, TokenType.Public, pos.toPosision());
-            }else if(name == "private")
+            } else if (name == "private")
             {
                 return new TokenBuffer(name, TokenType.Private, pos.toPosision());
-            }else if(name == "static")
+            } else if (name == "static")
             {
                 return new TokenBuffer(name, TokenType.Static, pos.toPosision());
-            }else if(name == "function")
+            } else if (name == "function" || name == "func")
             {
                 return new TokenBuffer(name, TokenType.Function, pos.toPosision());
-            }else if(name == "return")
+            } else if (name == "return")
             {
                 return new TokenBuffer(name, TokenType.Return, pos.toPosision());
-            }else if(name == "use")
+            } else if (name == "use")
             {
                 return new TokenBuffer(name, TokenType.Use, pos.toPosision());
-            }else if(name == "foreach")
+            } else if (name == "foreach")
             {
                 return new TokenBuffer(name, TokenType.Foreach, pos.toPosision());
-            }else if(name == "as")
+            } else if (name == "as")
             {
                 return new TokenBuffer(name, TokenType.As, pos.toPosision());
-            }else if(name == "new")
+            } else if (name == "new")
             {
                 return new TokenBuffer(name, TokenType.New, pos.toPosision());
-            }else if(name == "this")
+            } else if (name == "this")
             {
                 return new TokenBuffer(name, TokenType.This, pos.toPosision());
-            }else if(name == "self")
+            } else if (name == "self")
             {
                 return new TokenBuffer(name, TokenType.Self, pos.toPosision());
-            }else if(name == "while")
+            } else if (name == "while")
             {
                 return new TokenBuffer(name, TokenType.While, pos.toPosision());
-            }else if(name == "repeat")
+            } else if (name == "repeat")
             {
                 return new TokenBuffer(name, TokenType.Repeat, pos.toPosision());
-            }else if(name == "for")
+            } else if (name == "for")
             {
                 return new TokenBuffer(name, TokenType.For, pos.toPosision());
+            } else if (name == "unset")
+            {
+                return new TokenBuffer(name, TokenType.Unset, pos.toPosision());
+            } else if (name == "break")
+            {
+                return new TokenBuffer(name, TokenType.Break, pos.toPosision());
+            } else if (name == "continue")
+            {
+                return new TokenBuffer(name, TokenType.Continue, pos.toPosision());
+            }else if(name == "is")
+            {
+                return new TokenBuffer(name, TokenType.Is, pos.toPosision());
             }
 
             return new TokenBuffer(name, TokenType.Variabel, this.pos.toPosision());

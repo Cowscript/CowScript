@@ -15,6 +15,8 @@ namespace script.plugin
             container.Add("regex", new Regex());
             container.Add("base64", new Base64());
             container.Add("time", new Time());
+            container.Add("random", new Random());
+            container.Add("parser", new Parser());
         }
 
         public bool exists(string name)

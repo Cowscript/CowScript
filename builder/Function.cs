@@ -11,11 +11,14 @@ namespace script.builder
         public AgumentStack agument = new AgumentStack();
         public event CallFunctionEvent call;
         public VariabelDatabase extraVariabelDatabase { get; set; }
+        public string ReturnType { get; set; }
 
         public CVar callFunction(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
             if (call == null)
+            {
                 return new NullVariabel();
+            }
 
             return call(stack, db, data, pos);
         }

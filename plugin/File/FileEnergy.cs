@@ -9,11 +9,14 @@ namespace script.plugin.File
         public static void parse(EnegyData data, VariabelDatabase database, string file)
         {
             StartItems.CreateStartItems(data, database);
-            using (FileStream reader = System.IO.File.OpenRead(file))
+            if (data.State == RunningState.Normal)
             {
-                using(StreamReader r = new StreamReader(reader))
+                using (FileStream reader = System.IO.File.OpenRead(file))
                 {
-                    Interprenter.parse(new Token(r, data, database), data, database, true);
+                    using (StreamReader r = new StreamReader(reader))
+                    {
+                        Interprenter.parse(new Token(r, data, database), data, database, true);
+                    }
                 }
             }
         }

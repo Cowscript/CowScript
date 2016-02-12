@@ -6,14 +6,16 @@ namespace script.stack
 {
     class AgumentParser
     {
+        private static bool hasDefault = false;
 
         public static AgumentStack parseAguments(Token token, VariabelDatabase database, EnegyData data)
         {
+            hasDefault = false;//be sure :)
             AgumentStack agument = new AgumentStack();
-            if(token.next().type() != TokenType.LeftBue)
+            if(token.getCache().type() != TokenType.LeftBue)
             {
                 data.setError(new ScriptError("Excpect ( got: " + token.getCache().ToString(), token.getCache().posision()), database);
-                return agument;
+                return null;
             }
 
             //control if wee need to look and parse aguments :)
@@ -72,8 +74,16 @@ namespace script.stack
             if (token.next().type() == TokenType.Assigen)
             {
                 token.next();
-                VariabelParser parser = new VariabelParser();
-                value = parser.parse(data, database, token);
+                value = new VariabelParser().parseNoEnd(data, database, token);
+                hasDefault = true;
+            }
+            else
+            {
+                if (hasDefault)
+                {
+                    data.setError(new ScriptError("You can not put non default after a defualt variabel!", token.getCache().posision()), database);
+                    return false;
+                }
             }
 
             agument.push(type, name, value);

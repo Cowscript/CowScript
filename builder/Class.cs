@@ -1,6 +1,7 @@
 ﻿using script.help;
 using script.stack;
 using script.variabel;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace script.builder
@@ -16,6 +17,7 @@ namespace script.builder
 
         public Class(string name, EnegyData data, VariabelDatabase db) { Name = name; this.data = data; this.db = db; }
         public Class(string name) { Name = name; data = new EnegyData(); }
+        public Class() {data = new EnegyData(); }
 
         public void setStaticData(Dictionary<string, ClassStaticData> i, ClassVariabel var)
         {
@@ -139,32 +141,36 @@ namespace script.builder
         public bool isPublic { protected set; get; }
         public bool isStatic { protected set; get; }
         public AgumentStack Aguments {set; get; }
+        public string ReturnType { protected set; get; }
         protected Class c;
 
-        public ClassItemsMethod(Class c, string name)
+        public ClassItemsMethod(Class c, string name, string type)
         {
             Name = name;
             isPublic = true;
             isStatic = false;
             Aguments = new AgumentStack();
+            ReturnType = type;
             this.c = c;
         }
 
-        public ClassItemsMethod(Class c, string name, bool isPublic)
+        public ClassItemsMethod(Class c, string name, bool isPublic, string type)
         {
             Name = name;
             this.isPublic = isPublic;
             isStatic = false;
             Aguments = new AgumentStack();
+            ReturnType = type;
             this.c = c;
         }
 
-        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic)
+        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic, string type)
         {
             Name = name;
             this.isPublic = isPublic;
             this.isStatic = isStatic;
             Aguments = new AgumentStack();
+            ReturnType = type;
             this.c = c;
         }
 
@@ -179,11 +185,11 @@ namespace script.builder
         public delegate CVar Method(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassStaticMethods(Class c, string name) : base(c, name, true, true)
+        public ClassStaticMethods(Class c, string name) : base(c, name, true, true, null)
         {
         }
 
-        public ClassStaticMethods(Class c, string name, bool isPublic) : base(c, name, isPublic, true)
+        public ClassStaticMethods(Class c, string name, bool isPublic, string type) : base(c, name, isPublic, true, type)
         {
         }
 
@@ -203,11 +209,11 @@ namespace script.builder
         public delegate CVar Method(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassMethods(Class c, string name) : base(c, name)
+        public ClassMethods(Class c, string name) : base(c, name, null)
         {
         }
 
-        public ClassMethods(Class c, string name, bool isPublic) : base(c, name, isPublic)
+        public ClassMethods(Class c, string name, bool isPublic, string type) : base(c, name, isPublic, type)
         {
         }
 
