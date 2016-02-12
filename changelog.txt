@@ -26,27 +26,26 @@ If config "tcp.enable" set to true there will be tcp plugin available.
  Append switch.
  Append error lang file. Here you can tell where the language files is and use it to show error in yous language.
 
-V0.3 [No further items is append to V0.3 the next new thing will be append in Version 0.4]
+V0.3 - Takes 18513,9272ms old test [approved to release]. new 22973,7051ms
  Change ParserInterface so end is removed.
  Change so parseres not is interlize every time.
  Allow _ invariabels name.
  Add ^ to math section 2^3 = 8 
  Create function as name = function(){}; or test(function(){});
- Create class as name = class{};, test(class(){});, test = new class{}; or test(new class{});
+ Create class as name = class{}, test(class(){});, test = new class{} or test(new class{});
  Append new tokens break and continue. Break stop current task and continue break the running task and jump to next if there are any
  Append a new parser unset. When do this "i=0;unset i;" you remove i. You cant never remove function and class.
- Append a new plugin random with a static class where method next and hash. 
- Append throw catch so you can throw errors.
+ Append a new plugin random with a class where method next and seed. 
  Append string->format(string skapalon, array data); there work as sprintf in PHP
  Append hasKey and hasValue method to array and start last support cyclus for Array plugin. 
  Append return type for function and method. look like this function string toString(){}. when do this the callable is lock to return the specific type. 
  Append plugin "parser" there create a function "version" there tell the version of parser.
  Append 'is' control if object is from the specifc class
- Append 'instanceof' control of the object is from the class
- Append extends. Extrens anthor class.
  Throw a error when a non defult agument is after a defult value "A agument there has not a defult value can not be after a agument there has a defult value" in methods and function.
  Create a new token "func" as short cut for "function".
- Optimize how ArrayVariabel works and standardized how it work so wee in V0.4 can create object in the script there can work as array.
+ ---Bugfix--
+ when use object in if it can lead to error. 
+ Files handler is broken. put functions without public indicator. 
 
 V0.2 - Takes 19525,3693ms old test [approved to release]. new 30195,7674ms
  Create a file system where the script can parse other file and get class and function.
