@@ -25,6 +25,8 @@ If config "tcp.enable" set to true there will be tcp plugin available.
  Remove create in ClassMethod and ClassStaticMethod. It should create self and not when use create.
  Append switch.
  Append error lang file. Here you can tell where the language files is and use it to show error in yous language.
+----Bugfix----
+If the system plugins has a item widt a global name it raise error. It shold never use the agument name becuse it never is used.
 
 V0.3 - Takes 18513,9272ms old test [approved to release]. new 22973,7051ms
  Change ParserInterface so end is removed.
