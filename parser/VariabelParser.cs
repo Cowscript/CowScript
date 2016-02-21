@@ -14,7 +14,7 @@ namespace script.parser
         private Token token;
         private VariabelDatabase db;
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             CVar result = parseNoEnd(ed, db, token);
 
@@ -34,10 +34,49 @@ namespace script.parser
             this.db = db;
             data = ed;
 
-            return getBooleanPrefix(true);
+            return getAsk(true);
         }
 
-        public CVar getBooleanPrefix(bool parse)
+        public CVar getAsk(bool parse)
+        {
+            CVar var = getBooleanPrefix(parse);
+
+            if(token.getCache().type() == TokenType.Ask)
+            {
+                bool befor = false;
+                token.next();
+                if(parse && var.toBoolean(token.getCache().posision(), data, db))
+                {
+                    befor = true;
+                    var = parseNoEnd(data, db, token);
+                }
+                else
+                {
+                    getAsk(false);
+                }
+
+                if(parse && token.getCache().type() != TokenType.DublePunk)
+                {
+                    data.setError(new ScriptError("Missing : in ? node", token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
+
+                token.next();
+
+                if(parse && !befor)
+                {
+                    var = parseNoEnd(data, db, token);
+                }
+                else
+                {
+                    getAsk(false);
+                }
+            }
+
+            return var;
+        }
+
+        private CVar getBooleanPrefix(bool parse)
         {
             if(token.getCache().type() == TokenType.Not)
             {
@@ -60,10 +99,10 @@ namespace script.parser
                 if (!var.toBoolean(token.getCache().posision(), data, db))
                 {
                     //this is not true soo wee use this :)
-                    return new BooleanVariabel(getBooleanPrefix(parse).toBoolean(token.getCache().posision(), data, db));
+                    return new BooleanVariabel(getAsk(parse).toBoolean(token.getCache().posision(), data, db));
                 }
 
-                getBooleanPrefix(false);//no need this becuse it is true :)
+                getAsk(false);//no need this becuse it is true :)
                 return new BooleanVariabel(true);
             }
 
@@ -172,14 +211,14 @@ namespace script.parser
                 if(buffer.type() == TokenType.Plus)
                 {
                     CVar b = gange(parse);
-                    if (b is IntVariabel && var is IntVariabel)
-                        var = new IntVariabel(var.toInt(buffer.posision(), data, db) + b.toInt(token.getPosision(), data, db));
+                    if (IntVariabel.isInt(b) && IntVariabel.isInt(var))
+                        var = IntVariabel.createInt(data, db, buffer.posision(), var.toInt(buffer.posision(), data, db) + b.toInt(token.getCache().posision(), data, db));
                     else
-                        var = StringVariabel.CreateString(data, db, token.getCache().posision(), var.toString(buffer.posision(), data, db) + b.toString(token.getPosision(), data, db));
+                        var = StringVariabel.CreateString(data, db, token.getCache().posision(), var.toString(buffer.posision(), data, db) + b.toString(token.getCache().posision(), data, db));
                 }
                 else
                 {
-                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) - gange(parse).toInt(token.getPosision(), data, db));
+                    var = IntVariabel.createInt(data, db, buffer.posision(), var.toInt(buffer.posision(), data, db) - gange(parse).toInt(token.getCache().posision(), data, db));
                 }
             }
 
@@ -196,11 +235,11 @@ namespace script.parser
                 token.next();
                 if(buffer.type() == TokenType.Gange)
                 {
-                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) * power(parse).toInt(token.getPosision(), data, db));
+                    var = IntVariabel.createInt(data, db, token.getCache().posision(), var.toInt(buffer.posision(), data, db) * power(parse).toInt(token.getCache().posision(), data, db));
                 }
                 else
                 {
-                    var = new IntVariabel(var.toInt(buffer.posision(), data, db) / power(parse).toInt(token.getPosision(), data, db));
+                    var = IntVariabel.createInt(data, db, token.getCache().posision(), var.toInt(buffer.posision(), data, db) / power(parse).toInt(token.getCache().posision(), data, db));
                 }
             }
 
@@ -215,7 +254,7 @@ namespace script.parser
                 token.next();
                 if (parse)
                 {
-                    var = new IntVariabel(Math.Pow(var.toInt(token.getCache().posision(), data, db), power(parse).toInt(token.getCache().posision(), data, db)));
+                    var = IntVariabel.createInt(data, db, token.getCache().posision(), Math.Pow(var.toInt(token.getCache().posision(), data, db), power(parse).toInt(token.getCache().posision(), data, db)));
                 }
                 else
                     negetave(parse);
@@ -231,13 +270,13 @@ namespace script.parser
             {
                 token.next();
                 if (parse)
-                    return new IntVariabel(-atom(parse).toInt(token.getCache().posision(), data, db));
+                    return IntVariabel.createInt(data, db, token.getCache().posision(), -atom(parse).toInt(token.getCache().posision(), data, db));
                 return atom(parse);
             }else if(token.getCache().type() == TokenType.Plus)
             {
                 token.next();
                 if (parse)
-                    return new IntVariabel(+atom(parse).toInt(token.getCache().posision(), data, db));
+                    return IntVariabel.createInt(data, db, token.getCache().posision(), +atom(parse).toInt(token.getCache().posision(), data, db));
                 return atom(parse);
             }
 
@@ -256,7 +295,7 @@ namespace script.parser
             else if (buffer.type() == TokenType.Int)
             {
                 token.next();
-                return new IntVariabel(double.Parse(buffer.ToString(), NumberStyles.Currency, CultureInfo.GetCultureInfo("en-US")));
+                return IntVariabel.createInt(data, db, buffer.posision(), double.Parse(buffer.ToString(), NumberStyles.Currency, CultureInfo.GetCultureInfo("en-US")));
             }
             else if (buffer.type() == TokenType.Bool)
             {
@@ -302,14 +341,14 @@ namespace script.parser
                     token.next();
                     if (parse)
                     {
-                        db.push(buffer.ToString(), varCache = new IntVariabel(db.get(buffer.ToString(), data).toInt(p, data, db)+1), data);
+                        db.push(buffer.ToString(), varCache = IntVariabel.createInt(data, db, token.getCache().posision(), db.get(buffer.ToString(), data).toInt(p, data, db) + 1), data);
                     }
                 }else if(token.getCache().type() == TokenType.MinusOne)
                 {
                     token.next();
                     if (parse)
                     {
-                        db.push(buffer.ToString(), varCache = new IntVariabel(db.get(buffer.ToString(), data).toInt(p, data, db) - 1), data);
+                        db.push(buffer.ToString(), varCache = IntVariabel.createInt(data, db, token.getCache().posision(), db.get(buffer.ToString(), data).toInt(p, data, db) - 1), data);
                     }
 
                 }
@@ -357,9 +396,9 @@ namespace script.parser
                 ParseFunctionCallResult pfcr;
 
                 if (parse && cObject.hasConstructor())
-                    pfcr = CallScriptFunction.parseCall(parse, cObject.getConstructor().Aguments, new VariabelDatabase(), token, this, data);
+                    pfcr = CallScriptFunction.parseCall(parse, cObject.getConstructor().Aguments, new VariabelDatabase(), token, this, data, cObject.getConstructor().setVariabel);
                 else
-                    pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data);
+                    pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data, false);
 
                 return handleAfterVariabel(cObject.createNew(pfcr.Call, db, data, token.getCache().posision()), parse);
             }
@@ -464,7 +503,7 @@ namespace script.parser
 
             if (parse && !isSelf && !c.getItem(item).isPublic)
             {
-                data.setError(new ScriptError("You can`t use a private static variabel", token.getPosision()), db);
+                data.setError(new ScriptError("You can`t use a private static variabel", token.getCache().posision()), db);
                 return new NullVariabel();
 
             }
@@ -529,7 +568,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        c.getItem(item).Context = new IntVariabel(c.getItem(item).Context.toInt(token.getCache().posision(), data, db) + 1);
+                        c.getItem(item).Context = IntVariabel.createInt(data, db, token.getCache().posision(), c.getItem(item).Context.toInt(token.getCache().posision(), data, db) + 1);
                     }
                 }else if(token.getCache().type() == TokenType.MinusOne)
                 {
@@ -537,7 +576,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        c.getItem(item).Context = new IntVariabel(c.getItem(item).Context.toInt(token.getCache().posision(), data, db) - 1);
+                        c.getItem(item).Context = IntVariabel.createInt(data, db, token.getCache().posision(), c.getItem(item).Context.toInt(token.getCache().posision(), data, db) - 1);
                     }
                 }
             }
@@ -568,7 +607,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        obj.appendToPointer(item, new IntVariabel(obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
+                        obj.appendToPointer(item, IntVariabel.createInt(data, db, token.getCache().posision(), obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
                     }
                 }
                 else if (token.getCache().type() == TokenType.MinusOne)
@@ -577,7 +616,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        obj.appendToPointer(item, new IntVariabel(obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
+                        obj.appendToPointer(item, IntVariabel.createInt(data, db, token.getCache().posision(), obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
                     }
                 }
             }
@@ -643,11 +682,11 @@ namespace script.parser
                             return new NullVariabel();
                         }
 
-                        pfcr = CallScriptFunction.parseCall(parse, ((FunctionVariabel)variabel).getStatck(), ((FunctionVariabel)variabel).getShadowVariabelDatabase(db), token, this, data);
+                        pfcr = CallScriptFunction.parseCall(parse, ((FunctionVariabel)variabel).getStatck(), ((FunctionVariabel)variabel).getShadowVariabelDatabase(db), token, this, data, ((FunctionVariabel)variabel).SetVariabel);
                     }
                     else
                     {
-                        pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data);
+                        pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data, false);
                     }
 
                     if(pfcr == null || !parse)
@@ -692,7 +731,7 @@ namespace script.parser
 
                         if (parse)
                         {
-                            ((ArrayVariabel)variabel).put((key == null ? ((ArrayVariabel)variabel).getNextID() : key), context, token.getCache().posision(), data, db);
+                            ((ArrayVariabel)variabel).put((key == null ? ((ArrayVariabel)variabel).getNextID(data, db, token.getCache().posision()) : key), context, token.getCache().posision(), data, db);
                         }
 
                         return context;

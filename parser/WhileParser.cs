@@ -6,7 +6,7 @@ namespace script.parser
 {
     class WhileParser : ParserInterface
     {
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             if (token.next().type() != TokenType.LeftBue)
                 ed.setError(new ScriptError("Missing ( after while", token.getCache().posision()), db);

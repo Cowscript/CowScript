@@ -5,6 +5,7 @@ using System.Collections;
 using script.stack;
 using script.parser;
 using System;
+using script.Type;
 
 namespace script.help
 {
@@ -28,54 +29,53 @@ namespace script.help
 
             return new NullVariabel();
         }
-
-        public static bool compare(CVar var, string type)
+        
+        public static ParseFunctionCallResult parseCall(bool parse, AgumentStack stack, VariabelDatabase vd, Token token, VariabelParser parser, EnegyData data, bool setVariabel)
         {
-            if (type == "function" && var.type() == "method")
-                return true;//method can also be a function :)
-
-            if (type == "string" && var.type() == "int")
-                return true;//int can be convertet to string :)
-
-            return var.type().Equals(type) || var is ObjectVariabel && type == ((ObjectVariabel)var).Name;
-        }
-
-        public static ParseFunctionCallResult parseCall(bool parse, AgumentStack stack, VariabelDatabase vd, Token token, VariabelParser parser, EnegyData data)
-        {
-            CVar[] call = new CVar[stack.size()];
+            CVar[] call = new CVar[EnegyData.getAgumentSize(data)];
 
             if (token.next().type() != TokenType.RightBue)
             {
-                CVar v = parser.getBooleanPrefix(parse);
+                CVar v = parser.getAsk(parse);
                 if (stack.size() > 0)
                 {
-                    if (stack.get(0).hasType() && !compare(v, stack.get(0).Type))
+                    if (stack.get(0).hasType())
                     {
-                        data.setError(new ScriptError("A agument number 0 in function can not be convertet from '" + v.type() + "' to " + stack.get(0).Type.ToString(), token.getCache().posision()), vd);
-                        return null;
+                        if (!TypeHandler.controlType(v, stack.get(0).Type))
+                        {
+                            data.setError(new ScriptError("A agument number 0 in function can not be convertet from '" + v.type() + "' to " + stack.get(0).Type.ToString(), token.getCache().posision()), vd);
+                            return null;
+                        }
+
+                        v = getTrueType(v, stack.get(0).Type, data, vd, token.getCache().posision());
                     }
+
                     call[0] = v;
-                    vd.push(stack.get(0).Name, v, data);
+                    if(setVariabel)
+                        vd.push(stack.get(0).Name, v, data);
                 }
 
                 int i = 1;
                 while (token.getCache().type() == TokenType.Comma)
                 {
                     token.next();
-                    v = parser.getBooleanPrefix(parse);
+                    v = parser.getAsk(parse);
                     if (stack.size() >= i)
                     {
                         if (stack.get(i).hasType())
                         {
-                            //compare types 
-                            if (!compare(v, stack.get(i).Type))
+                            if (!TypeHandler.controlType(v, stack.get(i).Type))
                             {
                                 data.setError(new ScriptError("A agument number " + (i + 1) + " in function can not be convertet to " + stack.get(i).Type.ToString(), token.getCache().posision()), vd);
                                 return null;
                             }
+
+                            v = getTrueType(v, stack.get(i).Type, data, vd, token.getCache().posision());
                         }
+                        
                         call[i] = v;
-                        vd.push(stack.get(i).Name, v, data);
+                        if(setVariabel)
+                            vd.push(stack.get(i).Name, v, data);
                     }
 
                     i++;
@@ -91,7 +91,8 @@ namespace script.help
                     }
 
                     call[a] = stack.get(a).Value;
-                    vd.push(stack.get(a).Name, stack.get(a).Value, data);
+                    if(setVariabel)
+                        vd.push(stack.get(a).Name, stack.get(a).Value, data);
                 }
             }
             else
@@ -108,7 +109,9 @@ namespace script.help
                             return null;
                         }
 
-                        vd.push(stack.get(i).Name, stack.get(i).Value, data);
+                        if(setVariabel)
+                            vd.push(stack.get(i).Name, stack.get(i).Value, data);
+
                         call[i] = stack.get(i).Value;
                     }
                 }
@@ -128,6 +131,25 @@ namespace script.help
                 Call = call
             };
             
+        }
+
+        private static CVar getTrueType(CVar var, string type, EnegyData data, VariabelDatabase db, Posision pos)
+        {
+            //this is for int and string if it not this two proces 
+            switch (type)
+            {
+                case "string":
+                    if (StringVariabel.isString(var))
+                        return var;
+
+                    return StringVariabel.CreateString(data, db, pos, var.toString(pos, data, db));
+                case "int":
+                    if (IntVariabel.isInt(var))
+                        return var;
+                    return IntVariabel.createInt(data, db, pos, var.toInt(pos, data, db));
+                default:
+                    return var;
+            }
         }
     }
 

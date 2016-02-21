@@ -2,33 +2,25 @@
 
 namespace script.variabel
 {
-    public class IntVariabel : CVar
+    public class IntVariabel
     {
-        private double context;
-
-        public IntVariabel(double d)
+        public static ObjectVariabel createInt(EnegyData data, VariabelDatabase db, Posision posision, double context)
         {
-            context = d;
+            ObjectVariabel obj = ((ClassVariabel)db.get("int", data)).createNew(db, data, posision);
+            obj.systemItems["int"] = context;
+            return obj;
         }
 
-        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
+        public static bool isInt(CVar item)
         {
-            return context;
+            return item.type() == "object" && ((ObjectVariabel)item).Name == "int";
         }
 
-        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
+        public static bool compare(CVar one, CVar two, EnegyData data, VariabelDatabase db, Posision pos)
         {
-            return context.ToString(CultureInfo.GetCultureInfo("en-US"));
-        }
-
-        public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
-        {
-            return var.type() == type() && var.toInt(pos, data, db) == toInt(pos, data, db);
-        }
-
-        public override string type()
-        {
-            return "int";
+            return isInt(one) &&
+                   isInt(two) &&
+                   ((ObjectVariabel)one).toInt(pos, data, db) == ((ObjectVariabel)two).toInt(pos, data, db);
         }
     }
 }

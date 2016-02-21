@@ -1,6 +1,8 @@
 ﻿using script.builder;
 using script.help;
 using script.stack;
+using script.Type;
+
 namespace script.variabel
 {
     class MethodVariabel : FunctionVariabel
@@ -14,6 +16,14 @@ namespace script.variabel
             this.method = method;
             this.obj = obj;
             extraVariabelDatabase = extra;
+        }
+
+        public override bool SetVariabel
+        {
+            get
+            {
+                return method.setVariabel;
+            }
         }
 
         public override int agumentSize()
@@ -36,13 +46,16 @@ namespace script.variabel
             if(extraVariabelDatabase != null)
             {
                 db = getShadowVariabelDatabase(extraVariabelDatabase);
-                for (int i = 0; i < method.Aguments.size(); i++)
-                    db.push(method.Aguments.get(i).Name, call[i], data);
+                if (SetVariabel)
+                {
+                    for (int i = 0; i < method.Aguments.size(); i++)
+                        db.push(method.Aguments.get(i).Name, call[i], data);
+                }
             }
             if(method.ReturnType != null)
             {
                 CVar cache = method.call(obj, db, call, data, pos);
-                if(!CallScriptFunction.compare(cache, method.ReturnType))
+                if(!TypeHandler.controlType(cache, method.ReturnType))
                 {
                     data.setError(new ScriptError("a method '" + obj.Name + "->"+method.Name+"' returns can not be convertet to '" + method.ReturnType + "'", pos), db);
                     return new NullVariabel();
@@ -59,14 +72,15 @@ namespace script.variabel
             for (int i = 0; i < parameters.Length && i <= method.Aguments.size(); i++)
             {
                 CVar context = ScriptConverter.convert(parameters[i], data, db);
-                if (method.Aguments.get(i).hasType() && !CallScriptFunction.compare(context, method.Aguments.get(i).Type))
+                if (method.Aguments.get(i).hasType() && !TypeHandler.controlType(context, method.Aguments.get(i).Type))
                 {
                     data.setError(new ScriptError("Cant convert " + context.type() + " to " + method.Aguments.get(i).Type.ToString(), new Posision(0, 0)), db);
                 }
 
                 //okay let cache the parameters :)
                 stack[0] = context;
-                vd.push(method.Aguments.get(i).Name, stack[0], data);
+                if(SetVariabel)
+                    vd.push(method.Aguments.get(i).Name, stack[0], data);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
@@ -79,7 +93,8 @@ namespace script.variabel
                 }
 
                 stack[i] = method.Aguments.get(i).Value;
-                vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value, data);
+                if(SetVariabel)
+                    vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value, data);
             }
 
             return call(stack, db, data, new Posision(0,0));

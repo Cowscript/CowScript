@@ -53,7 +53,7 @@ namespace script.plugin
                         subArray.put(StringVariabel.CreateString(data, db, pos, group.Value), pos, data, db);
                 }
 
-                array.put(array.getNextID(), subArray, pos, data, db);
+                array.put(array.getNextID(data, db, pos), subArray, pos, data, db);
             }
 
             return array;

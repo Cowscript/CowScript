@@ -6,7 +6,7 @@ namespace script.parser
 {
     class UnsetParser : ParserInterface
     {
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             if(token.next().type() != TokenType.Variabel)
             {

@@ -5,6 +5,6 @@ namespace script.parser
 {
     interface ParserInterface
     {
-        CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile);
+        CVar parse(EnegyData ed, VariabelDatabase db, Token token);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using script.builder;
 using script.help;
 using script.stack;
+using script.Type;
 using System.Collections.Generic;
 
 namespace script.variabel
@@ -58,6 +59,25 @@ namespace script.variabel
             return "class";
         }
 
+        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (!containsStaticItem("toInt"))
+                return base.toInt(pos, data, db);
+
+            ClassStaticData d = getItem("toString");
+
+            if (!d.isPublic)
+                return base.toInt(pos, data, db);
+
+            if (!d.isMethod)
+                return base.toInt(pos, data, db);
+
+            if (((StaticMethodVariabel)d.Context).agumentSize() != 0)
+                return base.toInt(pos, data, db);
+
+            return ((MethodVariabel)d.Context).call(new CVar[0], db, data, pos).toInt(pos, data, db);
+        }
+
         public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
         {
             if (!containsStaticItem("toString"))
@@ -87,7 +107,7 @@ namespace script.variabel
             for (; i < length && i < inputs.Length; i++)
             {
                 CVar context = ScriptConverter.convert(inputs[i], data, db);
-                if (a.get(i).hasType() && !CallScriptFunction.compare(context, a.get(i).Type))
+                if (a.get(i).hasType() && !TypeHandler.controlType(context, a.get(i).Type))
                 {
                     data.setError(new ScriptError("Cant convert " + context.type() + " to " + a.get(i).Type.ToString(), new Posision(0, 0)), db);
                     return null;
@@ -120,8 +140,11 @@ namespace script.variabel
             {
                 VariabelDatabase vd = db.createShadow(obj);
                 //wee quikly push variabel in a shadow of our database :)
-                for (int i = 0; i < getConstructor().Aguments.size(); i++)
-                    vd.push(getConstructor().Aguments.get(i).Name, cas[i], data);
+                if (Container.constructor.setVariabel)
+                {
+                    for (int i = 0; i < getConstructor().Aguments.size(); i++)
+                        vd.push(getConstructor().Aguments.get(i).Name, cas[i], data);
+                }
 
                 callConstructor(cas, vd, data, obj, pos);
             }

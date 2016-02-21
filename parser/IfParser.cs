@@ -10,7 +10,7 @@ namespace script.parser
         private EnegyData ed;
         private VariabelDatabase db;
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             this.token = token;
             this.ed = ed;

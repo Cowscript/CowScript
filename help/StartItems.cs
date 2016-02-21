@@ -1,6 +1,7 @@
 ﻿using script.builder;
 using script.variabel;
 using System;
+using System.Globalization;
 
 namespace script.help
 {
@@ -9,8 +10,64 @@ namespace script.help
         public static void CreateStartItems(EnegyData data, VariabelDatabase db)
         {
             createStringClass(data, db);
+            createIntClass(data, db);
         }
 
+        private static void createIntClass(EnegyData data, VariabelDatabase db)
+        {
+            Class i = new Class("int", data, db);
+
+            ClassMethods constructor = new ClassMethods(i, "");
+            constructor.Aguments.push("int", "double", new NullVariabel());
+            constructor.caller += Constructor_caller1;
+            constructor.createConstructor();
+
+            ClassMethods toInt = new ClassMethods(i, "toInt", true, "int");
+            toInt.caller += ToInt_caller;
+            toInt.create();
+
+            ClassMethods toString = new ClassMethods(i, "toString", true, "string");
+            toString.caller += ToString_caller1;
+            toString.create();
+
+            ClassStaticMethods convert = new ClassStaticMethods(i, "convert", true, "int");
+            convert.Aguments.push("string", "int");
+            convert.caller += Convert_caller;
+            convert.create();
+
+            db.pushClass(i, data);
+        }
+
+        private static CVar Constructor_caller1(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            if (stack[0] is NullVariabel)
+                obj.systemItems.Add("int", 0);
+            else
+                obj.systemItems.Add("int", stack[0].toInt(pos, data, db));
+            return null;
+        }
+
+        private static CVar ToString_caller1(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return StringVariabel.CreateString(data, db, pos, ((double)obj.systemItems["int"]).ToString(CultureInfo.GetCultureInfo("en-US")));
+        }
+
+        private static CVar Convert_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            double number;
+
+            if (double.TryParse(stack[0].toString(pos, data, db), out number))
+            {
+                return IntVariabel.createInt(data, db, pos, number);
+            }
+
+            return IntVariabel.createInt(data, db, pos, 0);
+        }
+
+        private static CVar ToInt_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return obj;
+        }
 
         private static void createStringClass(EnegyData data, VariabelDatabase db)
         {
@@ -79,7 +136,7 @@ namespace script.help
                 if (StringVariabel.isString(context))
                 {
                     format.appendParam(context.toString(pos, data, db));
-                }else if(context is IntVariabel)
+                }else if(IntVariabel.isInt(context))
                 {
                     format.appendParam(Convert.ToInt32(context.toInt(pos, data, db)));
                 }
@@ -113,7 +170,7 @@ namespace script.help
 
             foreach (string i in ((string)obj.systemItems["str"]).Split(new string[] { stack[0].toString(pos, data, db) }, StringSplitOptions.RemoveEmptyEntries))
             {
-                array.put(array.getNextID(), StringVariabel.CreateString(data, db, pos, i), pos, data, db);
+                array.put(array.getNextID(data, db, pos), StringVariabel.CreateString(data, db, pos, i), pos, data, db);
             }
 
             return array;
@@ -130,7 +187,7 @@ namespace script.help
 
         private static CVar IndexOf_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new IntVariabel(((string)obj.systemItems["str"]).IndexOf(stack[0].toString(pos, data, db)));
+            return IntVariabel.createInt(data, db, pos, ((string)obj.systemItems["str"]).IndexOf(stack[0].toString(pos, data, db)));
         }
 
         private static CVar Substr_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
@@ -145,7 +202,7 @@ namespace script.help
 
         private static CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new IntVariabel(((string)obj.systemItems["str"]).Length);
+            return IntVariabel.createInt(data, db, pos, ((string)obj.systemItems["str"]).Length);
         }
 
         private static CVar Constructor_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

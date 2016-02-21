@@ -1,5 +1,4 @@
-﻿using script.help;
-using script.stack;
+﻿using script.stack;
 using script.variabel;
 
 namespace script.builder
@@ -12,6 +11,13 @@ namespace script.builder
         public event CallFunctionEvent call;
         public VariabelDatabase extraVariabelDatabase { get; set; }
         public string ReturnType { get; set; }
+
+        public bool setVariabel { private set; get; }
+
+        public Function(bool setVariabel = false)
+        {
+            this.setVariabel = setVariabel;
+        }
 
         public CVar callFunction(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {

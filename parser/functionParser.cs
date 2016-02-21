@@ -11,17 +11,17 @@ namespace script.parser
     {
         public CVar parseNoName(EnegyData data, VariabelDatabase db, Token token)
         {
-            return parseFunction(data, db, token, false, false, false);
+            return parseFunction(data, db, token, false, false);
         }
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
-            return parseFunction(ed, db, token, isFile, true, false);
+            return parseFunction(ed, db, token, true, false);
         }
 
-        public CVar parseFunction(EnegyData ed, VariabelDatabase db, Token token, bool isFile, bool name, bool isPublic)
+        public CVar parseFunction(EnegyData ed, VariabelDatabase db, Token token, bool name, bool isPublic)
         { 
-            Function function = new Function();
+            Function function = new Function(true);//set variabel to true so wee can get variabels :)
 
             if (name)
             {

@@ -1,4 +1,5 @@
 ﻿using script.help;
+using script.Type;
 using System.Collections.Generic;
 
 namespace script.variabel
@@ -45,10 +46,12 @@ namespace script.variabel
             if (StringVariabel.isString(this))
             {
                 return StringVariabel.compare(this, var, pos, data, db);
+            }else if (IntVariabel.isInt(this))
+            {
+                return IntVariabel.compare(this, var, data, db, pos);
             }
 
-            data.setError(new ScriptError("Compara to object is not suppoerted yet", pos), db);
-            return false;
+            return this == var;
         }
 
         public override string type()
@@ -59,6 +62,32 @@ namespace script.variabel
         public bool containsItem(string name)
         {
             return items.ContainsKey(name);
+        }
+
+        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (IntVariabel.isInt(this))
+            {
+                return (double)systemItems["int"];
+            }
+
+            if (!items.ContainsKey("toInt"))
+            {
+                return base.toInt(pos, data, db);
+            }
+
+            if (!items["toInt"].isPublic)
+                return base.toInt(pos, data, db);
+
+            if (!items["toInt"].isMethod)
+                return base.toInt(pos, data, db);
+
+            if (((MethodVariabel)items["toInt"].Context).agumentSize() < 0)
+            {
+                return base.toInt(pos, data, db);
+            }
+
+            return ((MethodVariabel)items["toInt"].Context).call(new CVar[0], db, data, pos).toInt(pos, data, db);
         }
 
         public override string toString(Posision pos, EnegyData data, VariabelDatabase db)

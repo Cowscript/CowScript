@@ -11,7 +11,7 @@ namespace script
 {
     public class Energy : IDisposable
     {
-        public const string VERSION = "V0.3";
+        public const string VERSION = "V0.4";
         private EnegyData Data {  set;  get; }
 
         public VariabelDatabase VariabelDatabase { set; get; }
@@ -27,6 +27,10 @@ namespace script
             {
                 Config = new ScriptConfig()
             };
+
+            //set the impontans config so the script not can change it!
+            Data.Config.append("tcp.enable",         "false", false);
+            Data.Config.append("file.system.enable", "false", false);
 
             VariabelDatabase = new VariabelDatabase();
             StartItems.CreateStartItems(Data, VariabelDatabase);

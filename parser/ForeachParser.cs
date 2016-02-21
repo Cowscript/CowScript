@@ -7,7 +7,7 @@ namespace script.parser
     class ForeachParser : ParserInterface
     {
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
 
             if (token.next().type() != TokenType.LeftBue)

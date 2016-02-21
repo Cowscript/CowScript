@@ -21,11 +21,11 @@ namespace script
             }
             else if (c is double)
             {
-                return new IntVariabel((double)c);
+                return IntVariabel.createInt(data, db, new Posision(0,0), (double)c);
             }
             else if (c is int)
             {
-                return new IntVariabel(Convert.ToDouble((int)c));
+                return IntVariabel.createInt(data, db, new Posision(0, 0), Convert.ToDouble((int)c));
             }
             else if (c is ObjectVariabel)
                 return (ObjectVariabel)c;

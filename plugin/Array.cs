@@ -35,7 +35,7 @@ namespace script.plugin
 
         private CVar Count_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return new IntVariabel(((ArrayVariabel)stack[0]).length());
+            return IntVariabel.createInt(data, db, pos, ((ArrayVariabel)stack[0]).length());
         }
 
         private CVar HasValue_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)

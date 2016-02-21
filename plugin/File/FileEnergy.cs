@@ -15,7 +15,7 @@ namespace script.plugin.File
                 {
                     using (StreamReader r = new StreamReader(reader))
                     {
-                        Interprenter.parse(new Token(r, data, database), data, database, true);
+                        Interprenter.parseFile(new Token(r, data, database), data, database);
                     }
                 }
             }

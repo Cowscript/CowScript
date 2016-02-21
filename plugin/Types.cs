@@ -1,7 +1,4 @@
 ﻿using script.builder;
-using script.help;
-using System;
-using script.stack;
 using script.variabel;
 
 namespace script.plugin
@@ -17,11 +14,33 @@ namespace script.plugin
             type.call += Type_call;
             database.pushFunction(type, data);
 
+            Function getType = new Function();
+            getType.Name = "getType";
+            getType.agument.push("variabel");
+            getType.call += Type_call1;
+            database.pushFunction(getType, data);
+
+            //not supportet from V0.4
             Function toInt = new Function();
             toInt.Name = "toInt";
             toInt.agument.push("string", "context");
             toInt.call += ToInt_call;
             database.pushFunction(toInt, data);
+        }
+
+        private CVar Type_call1(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
+        {
+            if(stack[0].type() == "object")
+            {
+                return StringVariabel.CreateString(data, db, pos, ((ObjectVariabel)stack[0]).Name);
+            }
+
+            if(stack[0].type() == "class")
+            {
+                return StringVariabel.CreateString(data, db, pos, ((ClassVariabel)stack[0]).Name);
+            }
+
+            return StringVariabel.CreateString(data, db, pos, stack[0].type());
         }
 
         private CVar Type_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
@@ -41,7 +60,7 @@ namespace script.plugin
                 return new NullVariabel();
             }
 
-            return new IntVariabel(result);
+            return IntVariabel.createInt(data, db, pos, result);
         }
     }
 }

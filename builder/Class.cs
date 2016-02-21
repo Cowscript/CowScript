@@ -1,7 +1,6 @@
 ﻿using script.help;
 using script.stack;
 using script.variabel;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace script.builder
@@ -127,7 +126,7 @@ namespace script.builder
         private bool controlItems(string name)
         {
             if (items.ContainsKey(name)) {
-                data.setError(new ScriptError("A class items i alredy exists: " + name, new Posision(0, 0)), db);
+                data.setError(new ScriptError("A class items in '"+Name+"' alredy exists: " + name, new Posision(0, 0)), db);
                 return false;
             }
 
@@ -143,8 +142,9 @@ namespace script.builder
         public AgumentStack Aguments {set; get; }
         public string ReturnType { protected set; get; }
         protected Class c;
+        public bool setVariabel { protected set; get; }
 
-        public ClassItemsMethod(Class c, string name, string type)
+        public ClassItemsMethod(Class c, string name, string type, bool setVariabel = false)
         {
             Name = name;
             isPublic = true;
@@ -152,9 +152,10 @@ namespace script.builder
             Aguments = new AgumentStack();
             ReturnType = type;
             this.c = c;
+            this.setVariabel = setVariabel;
         }
 
-        public ClassItemsMethod(Class c, string name, bool isPublic, string type)
+        public ClassItemsMethod(Class c, string name, bool isPublic, string type, bool setVariabel = false)
         {
             Name = name;
             this.isPublic = isPublic;
@@ -162,9 +163,10 @@ namespace script.builder
             Aguments = new AgumentStack();
             ReturnType = type;
             this.c = c;
+            this.setVariabel = setVariabel;
         }
 
-        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic, string type)
+        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic, string type, bool setVariabel = false)
         {
             Name = name;
             this.isPublic = isPublic;
@@ -172,6 +174,7 @@ namespace script.builder
             Aguments = new AgumentStack();
             ReturnType = type;
             this.c = c;
+            this.setVariabel = setVariabel;
         }
 
         public void create()
@@ -185,11 +188,11 @@ namespace script.builder
         public delegate CVar Method(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassStaticMethods(Class c, string name) : base(c, name, true, true, null)
+        public ClassStaticMethods(Class c, string name, bool setVariabel = false) : base(c, name, true, true, null, setVariabel)
         {
         }
 
-        public ClassStaticMethods(Class c, string name, bool isPublic, string type) : base(c, name, isPublic, true, type)
+        public ClassStaticMethods(Class c, string name, bool isPublic, string type, bool setVariabel = false) : base(c, name, isPublic, true, type, setVariabel)
         {
         }
 
@@ -209,11 +212,11 @@ namespace script.builder
         public delegate CVar Method(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
         public event Method caller;
 
-        public ClassMethods(Class c, string name) : base(c, name, null)
+        public ClassMethods(Class c, string name, bool setVariabel = false) : base(c, name, null, setVariabel)
         {
         }
 
-        public ClassMethods(Class c, string name, bool isPublic, string type) : base(c, name, isPublic, type)
+        public ClassMethods(Class c, string name, bool isPublic, string type, bool setVariabel = false) : base(c, name, isPublic, type, setVariabel)
         {
         }
 

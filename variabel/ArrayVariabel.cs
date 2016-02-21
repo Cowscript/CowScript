@@ -48,13 +48,13 @@ namespace script.variabel
 
         private CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new IntVariabel(container.Count);
+            return IntVariabel.createInt(data, db, pos, container.Count);
         }
 
         //okay let get the next id :)
-        public IntVariabel getNextID()
+        public ObjectVariabel getNextID(EnegyData data, VariabelDatabase db, Posision posision)
         {
-            return new IntVariabel(nextID++);
+            return IntVariabel.createInt(data, db, posision, nextID++);
         }
 
         public int length()
@@ -64,7 +64,7 @@ namespace script.variabel
 
         public void put(CVar value, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            container.Add(getNextID().toString(pos, data, db), value);
+            container.Add(getNextID(data, db, pos).toString(pos, data, db), value);
         }
 
         //wee add one element in the array
@@ -120,7 +120,7 @@ namespace script.variabel
         {
             double k;
 
-            if(key is IntVariabel)
+            if(IntVariabel.isInt(key))
             {
                 k = key.toInt(pos, data, db);
             }else if(key is NullVariabel)
@@ -137,7 +137,7 @@ namespace script.variabel
 
 
             while (k >= nextID)
-                getNextID();
+                getNextID(data, db, pos);
         }
     }
 }

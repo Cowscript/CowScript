@@ -20,11 +20,6 @@ namespace script.token
         {
         }
 
-        public Posision getPosision()
-        {
-            return bp;
-        }
-
         /**
         *Detect if it is a part of variabel :)
         */
@@ -76,6 +71,8 @@ namespace script.token
 
             switch (c)
             {
+                case '?':
+                    return new TokenBuffer("?", TokenType.Ask, bp);
                 case '^':
                     return new TokenBuffer("^", TokenType.Power, bp);
                 case '{':
@@ -297,7 +294,7 @@ namespace script.token
                 return new TokenBuffer(name, TokenType.Is, pos.toPosision());
             }
 
-            return new TokenBuffer(name, TokenType.Variabel, this.pos.toPosision());
+            return new TokenBuffer(name, TokenType.Variabel, pos.toPosision());
         }
 
         private int pop()

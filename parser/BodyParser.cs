@@ -5,7 +5,7 @@ namespace script.parser
 {
     class BodyParser
     {
-        public static ArrayList parse(Token token, EnegyData data, VariabelDatabase db)
+        public static ArrayList parse(Token token, EnegyData data, VariabelDatabase db, bool needTubor = false)
         {
             ArrayList cache = new ArrayList();
             //wee control the next token to see if it {
@@ -30,6 +30,14 @@ namespace script.parser
                 if(token.getCache().type() != TokenType.RightTuborg)
                 {
                     data.setError(new ScriptError("Missing } got " + token.getCache().ToString(), token.getCache().posision()), db);
+                    return new ArrayList();
+                }
+            }
+            else
+            {
+                if (needTubor)
+                {
+                    data.setError(new ScriptError("Missing {", token.getCache().posision()), db);
                     return new ArrayList();
                 }
             }

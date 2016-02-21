@@ -1,6 +1,6 @@
 ﻿using script.builder;
-using script.help;
 using script.stack;
+using script.Type;
 
 namespace script.variabel
 {
@@ -9,6 +9,14 @@ namespace script.variabel
         private ClassStaticMethods method;
         private ClassVariabel c;
         private VariabelDatabase extra;
+
+        public override bool SetVariabel
+        {
+            get
+            {
+                return method.setVariabel;
+            }
+        }
 
         public StaticMethodVariabel(ClassStaticMethods m, ClassVariabel c, VariabelDatabase extra) : base(null, null, extra)
         {
@@ -41,7 +49,7 @@ namespace script.variabel
             {
                 CVar cache = method.call(c, db, call, data, pos);
 
-                if(!CallScriptFunction.compare(cache, method.ReturnType))
+                if(!TypeHandler.controlType(cache, method.ReturnType))
                 {
                     data.setError(new ScriptError("a static method '" + c.Name + "->" + method.Name + "' returns can not be convertet to '" + method.ReturnType + "'", pos), db);
                     return new NullVariabel();

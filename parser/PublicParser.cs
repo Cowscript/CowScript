@@ -6,22 +6,16 @@ namespace script.parser
     class PublicParser : ParserInterface
     {
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
-            if (!isFile)
-            {
-                ed.setError(new ScriptError("public [function/class] can only be uses when you parse file from use 'path'", token.getCache().posision()), db);
-                return null;
-            }
-
-            if(token.next().type() == TokenType.Function)
+            if (token.next().type() == TokenType.Function)
             {
                 functionParser p = new functionParser();
-                p.parseFunction(ed, db, token, true, true, true);
+                p.parseFunction(ed, db, token, true, true);
             }else if(token.getCache().type() == TokenType.Class)
             {
                 ClassParser p = new ClassParser();
-                p.parse(ed, db, token, true);
+                p.parse(ed, db, token);
             }
             else
             {

@@ -1,10 +1,23 @@
 ﻿using script.plugin;
 using script.variabel;
+using System.IO;
 
 namespace script
 {
     public class EnegyData
     {
+       public static int getAgumentSize(EnegyData data)
+        {
+            int size;
+
+            if(int.TryParse(data.Config.get("agument.buffer.size", "20"), out size))
+            {
+                return size;
+            }
+
+            return 20;
+        }
+
        public FunctionVariabel ErrorHandler { get; set; }
        public ScriptConfig Config { get; set; }  
        public virtual RunningState State { get; private set; }
@@ -42,6 +55,26 @@ namespace script
 
             if (ErrorHandler != null)
             {
+                if(Config.get("error.log.file", "null") != "null")
+                {
+                    FileStream fs;
+
+                    //wee should save the error in a file
+                    if(File.Exists(Config.get("error.log.file", "")))
+                    {
+                        fs = File.Create(Config.get("error.log.file", ""));
+                    }
+                    else
+                    {
+                        fs = File.OpenWrite(Config.get("error.log.file", ""));
+                    }
+
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.WriteLine("[Line: " + er.Posision.Line + ", Row: " + er.Posision.Row + "]" + er.Message);
+                    sw.Close();
+                    fs.Close();
+                }
+
                 //okay here may not be a error handler and state must be set to normal
                 FunctionVariabel eh = ErrorHandler;
                 ErrorHandler = null;

@@ -28,9 +28,9 @@ namespace script.plugin
             database.pushClass(r, data);
         }
 
-        private variabel.CVar Next_caller(variabel.ObjectVariabel obj, VariabelDatabase db, variabel.CVar[] stack, EnegyData data, Posision pos)
+        private CVar Next_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new IntVariabel(((System.Random)obj.systemItems["rand"]).Next(Convert.ToInt32(stack[0].toInt(pos, data, db)), Convert.ToInt32(stack[1].toInt(pos, data, db))));
+            return IntVariabel.createInt(data, db, pos, ((System.Random)obj.systemItems["rand"]).Next(Convert.ToInt32(stack[0].toInt(pos, data, db)), Convert.ToInt32(stack[1].toInt(pos, data, db))));
         }
 
         private variabel.CVar Seed_caller(variabel.ObjectVariabel obj, VariabelDatabase db, variabel.CVar[] stack, EnegyData data, Posision pos)

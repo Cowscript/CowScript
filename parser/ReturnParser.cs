@@ -6,11 +6,11 @@ namespace script.parser
     class ReturnParser : ParserInterface
     {
 
-        public CVar parse(EnegyData ed, VariabelDatabase db, Token token, bool isFile)
+        public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             if (token.next().type() != TokenType.End)
             {
-                ed.setReturn(new VariabelParser().parse(ed, db, token, isFile));
+                ed.setReturn(new VariabelParser().parse(ed, db, token));
             }
             else {
                 token.next();
