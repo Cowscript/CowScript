@@ -3,6 +3,7 @@ V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
  in 'for' when control if there need one more loop you can append more end one controler 'for(i=0;i<100, 1 > 0;i++)'
  unse more end one variabel 'unset one, two, tree, four;'
+ append option to load extra system plugin via dll files
  
 V0.5
 Rewriting the class handler.
