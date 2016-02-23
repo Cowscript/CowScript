@@ -4,7 +4,8 @@ V0.6
  in 'for' when control if there need one more loop you can append more end one controler 'for(i=0;i<100, 1 > 0;i++)'
  unse more end one variabel 'unset one, two, tree, four;'
  append option to load extra system plugin via dll files
- Show the file in error message
+ Show the file in error message.
+ Option to parse file from github.
  
 V0.5
 Rewriting the class handler.
