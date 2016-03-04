@@ -12,7 +12,9 @@ V0.6
  Push functions 'cosh', 'sinh' and 'tanh' to math plugin.
  Append method 'close' to Tcp class.
  Append "function<type>" to function agument type there tell what a function should return. If the function has no return type set it will return in a error.
-Append method to Energy 'reaset' there empty VariabelDatabase and set status to'Normal' so it is as it was when it was interlized
+Append method to Energy 'reaset' there empty VariabelDatabase and set status to'Normal' so it is as it was when it was interlized.
+ Remove StringVariabel and Intvariabel. Pus functions to create them to 'TypeHandler' and create method 'instanceof(CVar, CVar)' to it for control if a object came from a Class or not.
+ create Token isn there will look as this 'var isn var'. If it should work now it would look like this '!(var is var)' isn stay for 'is not'
  
 V0.5
 Rewriting the class handler.
