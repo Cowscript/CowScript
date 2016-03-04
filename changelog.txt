@@ -9,6 +9,9 @@ V0.6
  
 V0.5
 Rewriting the class handler.
+---bugfix---
+Error log handler only works when error function callback from the script site is set.
+Call function/method from program dont push variabels name in variabel database
 
 V0.4 Takes 23973,7051ms old test [approved to release]. new 36035,0161ms
   If the object has a method "toInt()" the variabel can be uses as int.
