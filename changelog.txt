@@ -12,7 +12,7 @@ V0.6
  Push functions 'cosh', 'sinh' and 'tanh' to math plugin.
  Append method 'close' to Tcp class.
  Append "function<type>" to function agument type there tell what a function should return. If the function has no return type set it will return in a error.
-Append method to Energy 'reaser' there empty VariabelDatabase and set status to'Normal' so it is as it was when it was interlized
+Append method to Energy 'reaset' there empty VariabelDatabase and set status to'Normal' so it is as it was when it was interlized
  
 V0.5
 Rewriting the class handler.
