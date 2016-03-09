@@ -16,6 +16,8 @@ Append method to Energy 'reaset' there empty VariabelDatabase and set status to'
  Remove StringVariabel and Intvariabel. Pus functions to create them to 'TypeHandler' and create method 'instanceof(CVar, CVar)' to it for control if a object came from a Class or not.
  create Token isn there will look as this 'var isn var'. If it should work now it would look like this '!(var is var)' isn stay for 'is not'
  Create token 'protected'
+ Add removeKey to array. Removed the key from the array.
+ Add removeValue to array. Removed the value in the array.
  
 V0.5
 Rewriting the class handler.
