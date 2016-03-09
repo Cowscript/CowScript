@@ -1,5 +1,6 @@
 ﻿using script.builder;
 using script.stack;
+using script.Type;
 using script.variabel;
 using System;
 using System.Globalization;
@@ -8,95 +9,95 @@ namespace script.plugin
 {
     class Time : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class time = new Class("Time");
 
-            ClassMethods constructor = new ClassMethods(time, null);
-
-            constructor.Aguments.push("int", "year", new NullVariabel());
-            constructor.Aguments.push("int", "month", new NullVariabel());
-            constructor.Aguments.push("int", "day", new NullVariabel());
-            constructor.Aguments.push("int", "hour", new NullVariabel());
-            constructor.Aguments.push("int", "minut", new NullVariabel());
-            constructor.Aguments.push("int", "second", new NullVariabel());
-            constructor.Aguments.push("int", "millisecond", new NullVariabel());
+            Method constructor = new Method("");
             
-            constructor.caller += Constructor_caller;
-            constructor.createConstructor();
+            constructor.GetAgumentStack().push("int", "year", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "month", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "day", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "hour", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "minut", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "second", new NullVariabel());
+            constructor.GetAgumentStack().push("int", "millisecond", new NullVariabel());
 
-            ClassMethods year = new ClassMethods(time, "year");
-            year.caller += Year_caller;
-            year.create();
+            constructor.SetBody(Constructor_caller);
+            time.SetConstructor(constructor, data, database, pos);
 
-            ClassMethods month = new ClassMethods(time, "month");
-            month.caller += Month_caller;
-            month.create();
+            Method year = new Method("year");
+            year.SetBody(Year_caller);
+            time.SetMethod(year, data, database, pos);
 
-            ClassMethods week = new ClassMethods(time, "week");
-            week.caller += Week_caller;
-            week.create();
+            Method month = new Method("month");
+            month.SetBody(Month_caller);
+            time.SetMethod(month, data, database, pos);
 
-            ClassMethods dayOfWeek = new ClassMethods(time, "dayOfWeek");
-            dayOfWeek.caller += DayOfWeek_caller;
-            dayOfWeek.create();
+            Method week = new Method("week");
+            week.SetBody(Week_caller);
+            time.SetMethod(week, data, database, pos);
 
-            ClassMethods day = new ClassMethods(time, "day");
-            day.caller += Day_caller;
-            day.create();
+            Method dayOfWeek = new Method("dayOfWeek");
+            dayOfWeek.SetBody(DayOfWeek_caller);
+            time.SetMethod(dayOfWeek, data, database, pos);
 
-            ClassMethods minute = new ClassMethods(time, "minute");
-            minute.caller += Minute_caller;
-            minute.create();
+            Method day = new Method("day");
+            day.SetBody(Day_caller);
+            time.SetMethod(day, data, database, pos);
 
-            ClassMethods times = new ClassMethods(time, "hour");
-            times.caller += Times_caller;
-            times.create();
+            Method minute = new Method("minute");
+            minute.SetBody(Minute_caller);
+            time.SetMethod(minute, data, database, pos);
 
-            ClassMethods second = new ClassMethods(time, "second");
-            second.caller += Second_caller;
-            second.create();
+            Method times = new Method("hour");
+            times.SetBody(Times_caller);
+            time.SetMethod(times, data, database, pos);
 
-            ClassMethods millisecond = new ClassMethods(time, "millisecond");
-            millisecond.caller += Millisecond_caller;
-            millisecond.create();
+            Method second = new Method("second");
+            second.SetBody(Second_caller);
+            time.SetMethod(second, data, database, pos);
+
+            Method millisecond = new Method("millisecond");
+            millisecond.SetBody(Millisecond_caller);
+            time.SetMethod(millisecond, data, database, pos);
 
             database.pushClass(time, data);
         }
 
-        private CVar Millisecond_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Millisecond_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Millisecond);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Millisecond, data, db, pos);
         }
 
-        private CVar Second_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Second_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Second);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Second, data, db, pos);
         }
 
-        private CVar Times_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Times_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Hour);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Hour, data, db, pos);
         }
 
-        private CVar Minute_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Minute_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Minute);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Minute, data, db, pos);
         }
 
-        private CVar Day_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Day_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Day);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Day, data, db, pos);
         }
 
-        private CVar DayOfWeek_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar DayOfWeek_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, (double)((DateTime)obj.systemItems["time"]).DayOfWeek);
+            return Types.toInt((double)((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).DayOfWeek, data, db, pos);
         }
 
-        private CVar Week_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Week_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            DateTime dt = (DateTime)obj.systemItems["time"];
+            DateTime dt = (DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"];
 
             DayOfWeek dow = CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(dt);
 
@@ -105,75 +106,75 @@ namespace script.plugin
                 dt = dt.AddDays(3);
             }
 
-            return IntVariabel.createInt(data, db, pos, CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(dt, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday));
+            return Types.toInt(CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(dt, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday), data, db, pos);
         }
 
-        private CVar Month_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Month_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Month);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Month, data, db, pos);
         }
 
-        private CVar Year_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Year_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((DateTime)obj.systemItems["time"]).Year);
+            return Types.toInt(((DateTime)TypeHandler.ToObjectVariabel(obj).systemItems["time"]).Year, data, db, pos);
         }
 
-        private CVar Constructor_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Constructor_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             DateTime dt = new DateTime();
 
             int append;
 
-            if(IntVariabel.isInt(stack[0]))
+            if(!(stack[0] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[0].toInt(pos, data, db)) - dt.Year;
                 if(append != 0)
                     dt = dt.AddYears(append);
             }
 
-            if (IntVariabel.isInt(stack[1]))
+            if (!(stack[1] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[1].toInt(pos, data, db)) - dt.Month;
                 if (append != 0)
                     dt = dt.AddMonths(append);
             }
 
-            if (IntVariabel.isInt(stack[2]))
+            if (!(stack[2] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[2].toInt(pos, data, db)) - dt.Day;
                 if (append != 0)
                     dt = dt.AddDays(append);
             }
 
-            if (IntVariabel.isInt(stack[3]))
+            if (!(stack[3] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[3].toInt(pos, data, db)) - dt.Hour;
                 if(append != 0)
                     dt = dt.AddHours(append);
             }
 
-            if (IntVariabel.isInt(stack[4]))
+            if (!(stack[4] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[4].toInt(pos, data, db)) - dt.Minute;
                 if(append != 0)
                     dt = dt.AddMinutes(append);
             }
 
-            if (IntVariabel.isInt(stack[5]))
+            if (!(stack[5] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[5].toInt(pos, data, db)) - dt.Second;
                 if(append != 0)
                     dt = dt.AddSeconds(append);
             }
 
-            if (IntVariabel.isInt(stack[6]))
+            if (!(stack[6] is NullVariabel))
             {
                 append = Convert.ToInt32(stack[6].toInt(pos, data, db)) - dt.Millisecond;
                 if(append != 0)
                     dt = dt.AddMilliseconds(append);
             }
 
-            obj.systemItems.Add("time", dt);
+            TypeHandler.ToObjectVariabel(obj).systemItems.Add("time", dt);
             return new NullVariabel();
         }
     }

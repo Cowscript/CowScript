@@ -1,7 +1,5 @@
-﻿using System;
-using script.builder;
-using script.help;
-using script.stack;
+﻿using script.builder;
+using script.Type;
 using script.variabel;
 
 namespace script.plugin
@@ -9,7 +7,7 @@ namespace script.plugin
     class Array : PluginInterface
     {
         //no support from V0.3
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             //no support from V0.2
             Function count = new Function();
@@ -35,7 +33,7 @@ namespace script.plugin
 
         private CVar Count_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((ArrayVariabel)stack[0]).length());
+            return Types.toInt(((ArrayVariabel)stack[0]).length(), data, db, pos);
         }
 
         private CVar HasValue_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)

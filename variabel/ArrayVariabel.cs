@@ -1,4 +1,6 @@
 ﻿using script.builder;
+using script.Container;
+using script.Type;
 using System;
 using System.Collections.Generic;
 
@@ -9,33 +11,35 @@ namespace script.variabel
         private int nextID = 0;
         private Dictionary<string, CVar> container = new Dictionary<string, CVar>();
 
-        public ArrayVariabel() : base("array")
+        public ArrayVariabel(EnegyData data, VariabelDatabase db, Posision pos) : base(new ClassVariabel(new Class()), new Dictionary<string, PointerContainer>(), new Dictionary<string, MethodContainer>(), null, new System.Collections.ArrayList())
         {
             Class c = new Class("array");
 
-            ClassMethods length = new ClassMethods(c, "length");
-            length.caller += Length_caller;
-            length.create();
+            Method length = new Method("length");
+            length.SetBody(Length_caller);
+            c.SetMethod(length, data, db, pos);
 
-            ClassMethods hasValue = new ClassMethods(c, "hasValue");
-            hasValue.Aguments.push("context");
-            hasValue.caller += HasValue_caller;
-            hasValue.create();
+            Method hasValue = new Method("hasValue");
+            hasValue.GetAgumentStack().push("context");
+            hasValue.SetBody(HasValue_caller);
+            c.SetMethod(hasValue, data, db, pos);
 
-            ClassMethods hasKey = new ClassMethods(c, "hasKey");
-            hasKey.Aguments.push("context");
-            hasKey.caller += HasKey_caller;
-            hasKey.create();
+            Method hasKey = new Method("hasKey");
+            hasKey.GetAgumentStack().push("string", "context");
+            hasKey.SetBody(HasKey_caller);
+            c.SetMethod(hasKey, data, db, pos);
 
-            items = new ClassVariabel(c).createNew(new CVar[0], new VariabelDatabase(), new EnegyData(), new Posision(0,0)).items;
+            ClassVariabel i = new ClassVariabel(c);
+            ObjectVariabel o = i.createNew(db, data, new CVar[0], pos);
+            Items = o.Items;
         }
 
-        private CVar HasKey_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar HasKey_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return new BooleanVariabel(keyExists(stack[0], pos, data, db));
         }
 
-        private CVar HasValue_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar HasValue_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             foreach(string key in Keys())
             {
@@ -46,15 +50,15 @@ namespace script.variabel
             return new BooleanVariabel(false);
         }
 
-        private CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Length_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, container.Count);
+            return Types.toInt(container.Count, data, db, pos);
         }
 
         //okay let get the next id :)
         public ObjectVariabel getNextID(EnegyData data, VariabelDatabase db, Posision posision)
         {
-            return IntVariabel.createInt(data, db, posision, nextID++);
+            return Types.toInt((double)nextID++, data, db, posision);
         }
 
         public int length()
@@ -98,7 +102,7 @@ namespace script.variabel
 
         public CVar get(string key, Posision pos, EnegyData data, VariabelDatabase db)
         {
-            return get(StringVariabel.CreateString(data, db, pos, key), pos, data, db);
+            return get(Types.toString(key, data, db, pos), pos, data, db);
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
@@ -120,13 +124,13 @@ namespace script.variabel
         {
             double k;
 
-            if(IntVariabel.isInt(key))
+            if(Types.instanceof((ClassVariabel)db.get("int", data), (ObjectVariabel)key))
             {
                 k = key.toInt(pos, data, db);
             }else if(key is NullVariabel)
             {
                 k = 0;
-            }else if(StringVariabel.isString(key) && System.Text.RegularExpressions.Regex.IsMatch(key.toString(pos, data, db), "^[0-9]*?$"))
+            }else if(Types.instanceof((ClassVariabel)db.get("string", data), (ObjectVariabel)key) && System.Text.RegularExpressions.Regex.IsMatch(key.toString(pos, data, db), "^[0-9]*?$"))
             {
                 k = Convert.ToDouble(key.toString(pos, data, db));
             }

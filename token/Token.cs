@@ -292,6 +292,9 @@ namespace script.token
             }else if(name == "is")
             {
                 return new TokenBuffer(name, TokenType.Is, pos.toPosision());
+            }else if(name == "extends")
+            {
+                return new TokenBuffer(name, TokenType.Extends, pos.toPosision());
             }
 
             return new TokenBuffer(name, TokenType.Variabel, pos.toPosision());

@@ -1,4 +1,5 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 using System;
 using System.Globalization;
@@ -9,122 +10,121 @@ namespace script.help
     {
         public static void CreateStartItems(EnegyData data, VariabelDatabase db)
         {
-            createStringClass(data, db);
-            createIntClass(data, db);
+            createStringClass(data, db, new Posision(0,0));
+            createIntClass(data, db, new Posision(0,0));
         }
 
-        private static void createIntClass(EnegyData data, VariabelDatabase db)
+        private static void createIntClass(EnegyData data, VariabelDatabase db, Posision pos)
         {
-            Class i = new Class("int", data, db);
+            Class i = new Class("int");
 
-            ClassMethods constructor = new ClassMethods(i, "");
-            constructor.Aguments.push("int", "double", new NullVariabel());
-            constructor.caller += Constructor_caller1;
-            constructor.createConstructor();
+            Method constructor = new Method(null);
+            constructor.GetAgumentStack().push("int", "double", new NullVariabel());
+            constructor.SetBody(Constructor_caller1);
+            i.SetConstructor(constructor, data, db, pos);
 
-            ClassMethods toInt = new ClassMethods(i, "toInt", true, "int");
-            toInt.caller += ToInt_caller;
-            toInt.create();
+            Method toInt = new Method("toInt");
+            toInt.SetBody(ToInt_caller);
+            i.SetMethod(toInt, data, db, pos);
 
-            ClassMethods toString = new ClassMethods(i, "toString", true, "string");
-            toString.caller += ToString_caller1;
-            toString.create();
+            Method toString = new Method("toString");
+            toString.SetBody(ToString_caller1);
+            i.SetMethod(toString, data, db, pos);
 
-            ClassStaticMethods convert = new ClassStaticMethods(i, "convert", true, "int");
-            convert.Aguments.push("string", "int");
-            convert.caller += Convert_caller;
-            convert.create();
+            Method convert = new Method("convert");
+            convert.SetStatic();
+            convert.GetAgumentStack().push("string", "int");
+            convert.SetBody(Convert_caller);
+            i.SetMethod(convert, data, db, pos);
 
             db.pushClass(i, data);
         }
 
-        private static CVar Constructor_caller1(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Constructor_caller1(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if (stack[0] is NullVariabel)
-                obj.systemItems.Add("int", 0);
-            else
-                obj.systemItems.Add("int", stack[0].toInt(pos, data, db));
+            TypeHandler.ToObjectVariabel(obj).systemItems.Add("int", (stack[0] is NullVariabel ? 0 : stack[0].toInt(pos, data, db)));
             return null;
         }
 
-        private static CVar ToString_caller1(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToString_caller1(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return StringVariabel.CreateString(data, db, pos, ((double)obj.systemItems["int"]).ToString(CultureInfo.GetCultureInfo("en-US")));
+            return Types.toString(((double)TypeHandler.ToObjectVariabel(obj).systemItems["int"]).ToString(CultureInfo.GetCultureInfo("en-US")), data, db, pos);
         }
 
-        private static CVar Convert_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Convert_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             double number;
 
             if (double.TryParse(stack[0].toString(pos, data, db), out number))
             {
-                return IntVariabel.createInt(data, db, pos, number);
+                return Types.toInt(number, data, db, pos);
             }
 
-            return IntVariabel.createInt(data, db, pos, 0);
+            return Types.toInt(0, data, db, pos);
         }
 
-        private static CVar ToInt_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToInt_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return obj;
         }
 
-        private static void createStringClass(EnegyData data, VariabelDatabase db)
+        private static void createStringClass(EnegyData data, VariabelDatabase db, Posision pos)
         {
-            Class s = new Class("string", data, db);
+            Class s = new Class("string");
 
-            ClassStaticMethods format = new ClassStaticMethods(s, "format");
-            format.Aguments.push("string", "query");
-            format.Aguments.push("array", "parameters");
-            format.caller += Format_caller;
-            format.create();
+            Method format = new Method("format");
+            format.SetStatic();
+            format.GetAgumentStack().push("string", "query");
+            format.GetAgumentStack().push("array", "parameters");
+            format.SetBody(Format_caller);
+            s.SetMethod(format, data, db, pos);
 
             //constructor :)
-            ClassMethods constructor = new ClassMethods(s, "constructor");
-            constructor.Aguments.push("string", "s", new NullVariabel());
-            constructor.caller += Constructor_caller;
-            constructor.createConstructor();
+            Method constructor = new Method(null);
+            constructor.GetAgumentStack().push("string", "s", new NullVariabel());
+            constructor.SetBody(Constructor_caller);
+            s.SetConstructor(constructor, data, db, pos);
 
-            ClassMethods length = new ClassMethods(s, "length");
-            length.caller += Length_caller;
-            length.create();
+            Method length = new Method("length");
+            length.SetBody(Length_caller);
+            s.SetMethod(length, data, db, pos);
 
-            ClassMethods substr = new ClassMethods(s, "substr");
-            substr.Aguments.push("int", "min");
-            substr.Aguments.push("int", "max", new NullVariabel());
-            substr.caller += Substr_caller;
-            substr.create();
+            Method substr = new Method("substr");
+            substr.GetAgumentStack().push("int", "min");
+            substr.GetAgumentStack().push("int", "max", new NullVariabel());
+            substr.SetBody(Substr_caller);
+            s.SetMethod(substr, data, db, pos);
 
-            ClassMethods indexOf = new ClassMethods(s, "indexOf");
-            indexOf.caller += IndexOf_caller;
-            indexOf.Aguments.push("string", "serche");
-            indexOf.create();
+            Method indexOf = new Method("indexOf");
+            indexOf.GetAgumentStack().push("string", "serche");
+            indexOf.SetBody(IndexOf_caller);
+            s.SetMethod(indexOf, data, db, pos);
 
-            ClassMethods toChars = new ClassMethods(s, "toChars");
-            toChars.caller += ToChars_caller;
-            toChars.create();
+            Method toChars = new Method("toChars");
+            toChars.SetBody(ToChars_caller);
+            s.SetMethod(toChars, data, db, pos);
 
-            ClassMethods split = new ClassMethods(s, "split");
-            split.Aguments.push("string", "string");
-            split.caller += Split_caller; ;
-            split.create();
+            Method split = new Method("split");
+            split.GetAgumentStack().push("string", "string");
+            split.SetBody(Split_caller);
+            s.SetMethod(split, data, db, pos);
 
-            ClassMethods toLower = new ClassMethods(s, "toLower");
-            toLower.caller += ToLower_caller; ;
-            toLower.create();
+            Method toLower = new Method("toLower");
+            toLower.SetBody(ToLower_caller);
+            s.SetMethod(toLower, data, db, pos);
 
-            ClassMethods toUpper = new ClassMethods(s, "toUpper");
-            toUpper.caller += ToUpper_caller; ;
-            toUpper.create();
+            Method toUpper = new Method("toUpper");
+            toUpper.SetBody(ToUpper_caller);
+            s.SetMethod(toUpper, data, db, pos);
 
-            ClassMethods toString = new ClassMethods(s, "toString");
-            toString.caller += ToString_caller;
-            toString.create();
+            Method toString = new Method("toString");
+            toString.SetBody(ToString_caller);
+            s.SetMethod(toString, data, db, pos);
 
             db.pushClass(s, data);
         }
 
-        private static CVar Format_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Format_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             StringFormater format = new StringFormater();
             ArrayVariabel array = (ArrayVariabel)stack[1];
@@ -133,10 +133,10 @@ namespace script.help
             {
                 CVar context = array.get(key, pos, data, db);
 
-                if (StringVariabel.isString(context))
+                if (Types.instanceof((ClassVariabel)db.get("string", data), (ObjectVariabel)context))
                 {
                     format.appendParam(context.toString(pos, data, db));
-                }else if(IntVariabel.isInt(context))
+                }else if(Types.instanceof((ClassVariabel)db.get("int", data), (ObjectVariabel)context))
                 {
                     format.appendParam(Convert.ToInt32(context.toInt(pos, data, db)));
                 }
@@ -146,73 +146,68 @@ namespace script.help
                 }
             }
 
-            return StringVariabel.CreateString(data, db, pos, format.format(stack[0].toString(pos, data, db)));
+            return Types.toString(format.format(stack[0].toString(pos, data, db)), data, db, pos);
         }
 
-        private static CVar ToString_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToString_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return obj;
         }
 
-        private static CVar ToUpper_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToUpper_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return StringVariabel.CreateString(data, db, pos, ((string)obj.systemItems["str"]).ToUpper());
+            return Types.toString(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).ToUpper(), data, db, pos);
         }
 
-        private static CVar ToLower_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToLower_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return StringVariabel.CreateString(data, db, pos, ((string)obj.systemItems["str"]).ToLower());
+            return Types.toString(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).ToLower(), data, db, pos);
         }
 
-        private static CVar Split_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Split_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            ArrayVariabel array = new ArrayVariabel();
+            ArrayVariabel array = new ArrayVariabel(data, db, pos);
 
-            foreach (string i in ((string)obj.systemItems["str"]).Split(new string[] { stack[0].toString(pos, data, db) }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (string i in ((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).Split(new string[] { stack[0].toString(pos, data, db) }, StringSplitOptions.RemoveEmptyEntries))
             {
-                array.put(array.getNextID(data, db, pos), StringVariabel.CreateString(data, db, pos, i), pos, data, db);
+                array.put(array.getNextID(data, db, pos), Types.toString(i, data, db, pos), pos, data, db);
             }
 
             return array;
         }
 
-        private static CVar ToChars_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar ToChars_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            ArrayVariabel array = new ArrayVariabel();
-            foreach (char c in ((string)obj.systemItems["str"]).ToCharArray())
-                array.put(StringVariabel.CreateString(data, db, pos, c.ToString()), pos, data, db);
+            ArrayVariabel array = new ArrayVariabel(data, db, pos);
+            foreach (char c in ((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).ToCharArray())
+                array.put(Types.toString(c.ToString(), data, db, pos), pos, data, db);
 
             return array;
         }
 
-        private static CVar IndexOf_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar IndexOf_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((string)obj.systemItems["str"]).IndexOf(stack[0].toString(pos, data, db)));
+            return Types.toInt(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).IndexOf(stack[0].toString(pos, data, db)), data, db, pos);
         }
 
-        private static CVar Substr_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Substr_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             if (stack[1] is NullVariabel)
             {
-                return StringVariabel.CreateString(data, db, pos, ((string)obj.systemItems["str"]).Substring((int)stack[0].toInt(pos, data, db)));
+                return Types.toString(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).Substring((int)stack[0].toInt(pos, data, db)), data, db, pos);
             }
 
-            return StringVariabel.CreateString(data, db, pos, ((string)obj.systemItems["str"]).Substring((int)stack[0].toInt(pos, data, db), (int)stack[1].toInt(pos, data, db)));
+            return Types.toString(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).Substring((int)stack[0].toInt(pos, data, db), (int)stack[1].toInt(pos, data, db)), data, db, pos);
         }
 
-        private static CVar Length_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Length_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, ((string)obj.systemItems["str"]).Length);
+            return Types.toInt(((string)TypeHandler.ToObjectVariabel(obj).systemItems["str"]).Length, data, db, pos);
         }
 
-        private static CVar Constructor_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private static CVar Constructor_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if (stack[0] is NullVariabel)
-            {
-                obj.systemItems.Add("str", "");
-            }
-            else
-                obj.systemItems.Add("str", stack[0].toString(pos, data, db));
+            TypeHandler.ToObjectVariabel(obj).systemItems.Add("str", stack[0] is NullVariabel ? "" : stack[0].toString(pos, data, db));
 
             return null;
         }

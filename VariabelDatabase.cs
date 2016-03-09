@@ -1,6 +1,6 @@
 ﻿using script.builder;
-using script.help;
 using script.variabel;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,14 +13,14 @@ namespace script
         private ArrayList types = new ArrayList();
         private Dictionary<string, CVar> container = new Dictionary<string, CVar>();
         private Dictionary<string, CVar> global = new Dictionary<string, CVar>();
+        private ArrayList garbageContainer = new ArrayList();
+        private ArrayList garbageType = new ArrayList();
 
         public ObjectVariabel Object { private set; get; }
         public ClassVariabel C { private set; get; }
 
         public VariabelDatabase()
         {
-            types.Add("string");
-            types.Add("int");
             types.Add("bool");
             types.Add("array");
             types.Add("function");
@@ -39,21 +39,21 @@ namespace script
 
         public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types)
         {
-            this.global = new Dictionary<string, CVar>(global);
-            this.types = new ArrayList(types);
+            this.global = global;
+            this.types = types;
         }
 
         public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types, ObjectVariabel obj)
         {
-            this.global = new Dictionary<string, CVar>(global);
-            this.types = new ArrayList(types);
+            this.global = global;
+            this.types = types;
             Object = obj;
         }
 
         public VariabelDatabase(Dictionary<string, CVar> global, ArrayList types, ClassVariabel c)
         {
-            this.global = new Dictionary<string, CVar>(global);
-            this.types = new ArrayList(types);
+            this.global = global;
+            this.types = types;
             C = c;
         }
 
@@ -92,13 +92,16 @@ namespace script
         {
             controleOveride(function.Name, data);
             global.Add(function.Name, new FunctionVariabel(function));
+            garbageContainer.Add(function.Name);
         }
 
         public void pushClass(Class c, EnegyData data)
         {
-            controleOveride(c.Name, data);
-            types.Add(c.Name);//now is this class a types :)
-            global.Add(c.Name, new ClassVariabel(c));
+            controleOveride(c.GetContainer().Name, data);
+            types.Add(c.GetContainer().Name);//now is this class a types :)
+            garbageType.Add(c.GetContainer().Name);
+            global.Add(c.GetContainer().Name, new ClassVariabel(c));
+            garbageContainer.Add(c.GetContainer().Name);
         }
 
         public VariabelDatabase createShadow()
@@ -133,6 +136,22 @@ namespace script
         public void removeVariabel(string name)
         {
             container.Remove(name);
+        }
+
+        //
+        //Summary:
+        // Remove all global items there is happend in this variabel database
+        public void garbageCollector()
+        {
+            foreach(string name in garbageContainer)
+            {
+                global.Remove(name);
+            }
+
+            foreach(string name in garbageType)
+            {
+                types.Remove(name);
+            }
         }
     }
 }

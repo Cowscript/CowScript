@@ -40,8 +40,35 @@ namespace script.parser
                 builder = new Class();
             }
 
+            if(token.next().type() == TokenType.Extends)
+            {
+                if(token.next().type() != TokenType.Variabel)
+                {
+                    ed.setError(new ScriptError("Missing variabel after extends", token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
 
-            if(token.next().type() != TokenType.LeftTuborg)
+                //control if the variabel exteis in the variabel database
+                if (!db.isExists(token.getCache().ToString()))
+                {
+                    ed.setError(new ScriptError("Unknown variabel: " + token.getCache().ToString(), token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
+
+                CVar buffer = db.get(token.getCache().ToString(), ed);
+
+                if(!(buffer is ClassVariabel))
+                {
+                    ed.setError(new ScriptError(token.getCache().ToString() + " is not a class", token.getCache().posision()), db);
+                    return new NullVariabel();
+                }
+
+                builder.Extends((ClassVariabel)buffer);
+                token.next();
+            }
+
+
+            if(token.getCache().type() != TokenType.LeftTuborg)
             {
                 ed.setError(new ScriptError("Missing { after class name", token.getCache().posision()), db);
                 return new NullVariabel();
@@ -64,7 +91,7 @@ namespace script.parser
                 db.pushClass(builder, ed);
                 if (db is FileVariabelDatabase)
                 {
-                    builder.extraVariabelDatabase = db;
+                    builder.SetExtraVariabelDatabase(db);
                     ((FileVariabelDatabase)db).VariabelDatabase.pushClass(builder, ed);
                 }
                 return null;
@@ -91,7 +118,7 @@ namespace script.parser
             {
                 token.next();
                 return isStatic(false, token, data);
-            }else if(token.getCache().type() == TokenType.Variabel && token.getCache().ToString() == builder.Name)
+            }else if(token.getCache().type() == TokenType.Variabel && token.getCache().ToString() == builder.GetContainer().Name)
             {
                 return buildConstructor(token, data);
             }
@@ -126,29 +153,34 @@ namespace script.parser
             //it is a variabel :)
             //okay it is a variabel ?
             if (token.getCache().type() != TokenType.Variabel) {
-                data.setError(new ScriptError("1 Unknown token in class (" + builder.Name + ") body: " + token.getCache().ToString() + " | " + token.getCache().type().ToString(), token.getCache().posision()), db);
+                data.setError(new ScriptError("1 Unknown token in class (" + builder.GetContainer().Name + ") body: " + token.getCache().ToString() + " | " + token.getCache().type().ToString(), token.getCache().posision()), db);
                 return false;
             }
 
-            string name = token.getCache().ToString();
-            CVar value = new NullVariabel();
-
+            Pointer pointer = new Pointer(token.getCache().ToString());
+            
             if(token.next().type() == TokenType.Assigen)
             {
                 token.next();
-                VariabelParser p = new VariabelParser();
-                value = p.parse(data, db, token);
+                pointer.SetDefault(new VariabelParser().parse(data, db, token));
             }else if(token.getCache().type() == TokenType.End)
             {
                 token.next();
             }
             else
             {
-                data.setError(new ScriptError("2 Unknown token in class ("+builder.Name+") body: " + token.getCache().ToString(), token.getCache().posision()), db);
+                data.setError(new ScriptError("2 Unknown token in class ("+builder.GetContainer().Name+") body: " + token.getCache().ToString(), token.getCache().posision()), db);
                 return false;
             }
 
-            builder.addVariabel(name, value, isStatic, isPublic);
+
+            if (isStatic)
+                pointer.SetStatic();
+
+            if (!isPublic)
+                pointer.SetPrivate();
+
+            builder.SetPointer(pointer, data, db, token.getCache().posision());
             return true;
         }
 
@@ -175,39 +207,30 @@ namespace script.parser
                 }
             }
 
+            Method method = new Method(token.getCache().ToString());
+
+            token.next();
+
             if (isStatic)
-                buildStaticMethod(isPublic, token, data, type);
-            else
-                buildNonStaticMethod(isPublic, token, data, type);
+                method.SetStatic();
+
+            method.SetAgumentStack(AgumentParser.parseAguments(token, db, data));
+            method.SetBody(new CallScriptMethod(method.GetAgumentStack(), BodyParser.parse(token, data, db)).call);
+            method.SetVariabel();//in this way the script can use agument as name :)
+
+            builder.SetMethod(method, data, db, token.getCache().posision());
+            token.next();
             return true;
-        }
-
-        public void buildStaticMethod(bool isPublic, Token token, EnegyData data, string type)
-        {
-            ClassStaticMethods m = new ClassStaticMethods(builder, token.getCache().ToString(), isPublic, type, true);
-            token.next();
-            m.Aguments = AgumentParser.parseAguments(token, db, data);
-            m.caller += new CallScriptMethod(m.Aguments, BodyParser.parse(token, data, db)).call;
-            m.create();
-            token.next();
-        }
-
-        public void buildNonStaticMethod(bool isPublic, Token token, EnegyData data, string type) {
-            ClassMethods m = new ClassMethods(builder, token.getCache().ToString(), isPublic, type, true);
-            token.next();
-            m.Aguments = AgumentParser.parseAguments(token, db, data);
-            m.caller += new CallScriptMethod(m.Aguments, BodyParser.parse(token, data, db)).call;
-            m.create();
-            token.next();
         }
 
         private bool buildConstructor(Token token, EnegyData data)
         {
-            ClassMethods cm = new ClassMethods(builder, null, true, null, true);
+            Method cm = new Method(null);
             token.next();
-            cm.Aguments = AgumentParser.parseAguments(token, db, data);
-            cm.caller += new CallScriptMethod(cm.Aguments, BodyParser.parse(token, data, db)).call;
-            cm.createConstructor();
+            cm.SetAgumentStack(AgumentParser.parseAguments(token, db, data));
+            cm.SetBody(new CallScriptMethod(cm.GetAgumentStack(), BodyParser.parse(token, data, db)).call);
+            cm.SetVariabel();
+            builder.SetConstructor(cm, data, db, token.getCache().posision());
             token.next();
             return true;
         }

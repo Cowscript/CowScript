@@ -60,5 +60,6 @@
         Continue,
         Is,
         Ask,
+        Extends,
     }
 }

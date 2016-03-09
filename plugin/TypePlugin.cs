@@ -1,11 +1,12 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 
 namespace script.plugin
 {
-    class Types : PluginInterface
+    class TypePlugin : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function type = new Function();
             type.Name = "type";
@@ -32,15 +33,15 @@ namespace script.plugin
         {
             if(stack[0].type() == "object")
             {
-                return StringVariabel.CreateString(data, db, pos, ((ObjectVariabel)stack[0]).Name);
+                return Types.toString(((ObjectVariabel)stack[0]).Name, data, db, pos);
             }
 
             if(stack[0].type() == "class")
             {
-                return StringVariabel.CreateString(data, db, pos, ((ClassVariabel)stack[0]).Name);
+                return Types.toString(((ClassVariabel)stack[0]).Name, data, db, pos);
             }
 
-            return StringVariabel.CreateString(data, db, pos, stack[0].type());
+            return Types.toString(stack[0].type(), data, db, pos);
         }
 
         private CVar Type_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
@@ -60,7 +61,7 @@ namespace script.plugin
                 return new NullVariabel();
             }
 
-            return IntVariabel.createInt(data, db, pos, result);
+            return Types.toInt(result, data, db, pos);
         }
     }
 }

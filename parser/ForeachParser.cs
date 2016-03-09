@@ -1,4 +1,5 @@
 ﻿using script.token;
+using script.Type;
 using script.variabel;
 using System.Collections;
 
@@ -69,7 +70,7 @@ namespace script.parser
                 if (ed.State != RunningState.Normal)
                     break;
 
-                db.push(firstVariabel, (secondVariabel != null ? StringVariabel.CreateString(ed, db, token.getCache().posision(), key) : array.get(key, token.getCache().posision(), ed, db)), ed);
+                db.push(firstVariabel, (secondVariabel != null ? Types.toString(key, ed, db, token.getCache().posision()) : array.get(key, token.getCache().posision(), ed, db)), ed);
                 if (secondVariabel != null)
                     db.push(secondVariabel, array.get(key, token.getCache().posision(), ed, db), ed);
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);

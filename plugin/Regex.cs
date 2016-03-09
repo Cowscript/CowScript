@@ -1,46 +1,48 @@
 ﻿using script.builder;
 using script.stack;
+using script.Type;
 using script.variabel;
 
 namespace script.plugin
 {
     class Regex : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class regex = new Class("Regex");
 
-            ClassMethods rConstructor = new ClassMethods(regex, null);
-            rConstructor.caller += RConstructor_caller;
-            rConstructor.Aguments.push("string", "regex");
-            rConstructor.createConstructor();
+            Method rConstructor = new Method("");
+            rConstructor.GetAgumentStack().push("string", "regex");
+            rConstructor.SetBody(RConstructor_caller);
+            regex.SetMethod(rConstructor, data, database, pos);
 
-            //wee need a pointer there is called str :)
-            regex.addVariabel("regex", false, false);//str is not static and is not public :)
+            Pointer rg = new Pointer("regex");
+            rg.SetPrivate();
+            regex.SetPointer(rg, data, database, pos);
 
-            ClassMethods match = new ClassMethods(regex, "match");
-            match.caller += Match_caller;
-            match.Aguments.push("string", "str");
-            match.create();
+            Method match = new Method("match");
+            match.GetAgumentStack().push("string", "str");
+            match.SetBody(Match_caller);
+            regex.SetMethod(match, data, database, pos);
 
-            ClassMethods exec = new ClassMethods(regex, "exec");
-            exec.caller += Exec_caller;
-            exec.Aguments.push("string", "str");
-            exec.create();
+            Method exec = new Method("exec");
+            exec.GetAgumentStack().push("string", "str");
+            exec.SetBody(Exec_caller);
+            regex.SetMethod(exec, data, database, pos);
 
             database.pushClass(regex, data);
         }
 
-        private CVar Exec_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Exec_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
 
-            System.Text.RegularExpressions.MatchCollection matchs = System.Text.RegularExpressions.Regex.Matches(stack[0].toString(pos, data, db), @obj.get("regex").toString(pos, data, db));
+            System.Text.RegularExpressions.MatchCollection matchs = System.Text.RegularExpressions.Regex.Matches(stack[0].toString(pos, data, db), @TypeHandler.ToObjectVariabel(obj).get("regex").toString(pos, data, db));
 
-            ArrayVariabel array = new ArrayVariabel();
+            ArrayVariabel array = new ArrayVariabel(data, db, pos);
 
             foreach (System.Text.RegularExpressions.Match match in matchs)
             {
-                ArrayVariabel subArray = new ArrayVariabel();
+                ArrayVariabel subArray = new ArrayVariabel(data, db, pos);
 
                 if (!match.Success)
                     continue;
@@ -50,7 +52,7 @@ namespace script.plugin
                     System.Text.RegularExpressions.Group group = match.Groups[i];
 
                     if (group.Success)
-                        subArray.put(StringVariabel.CreateString(data, db, pos, group.Value), pos, data, db);
+                        subArray.put(Types.toString(group.Value, data, db, pos), pos, data, db);
                 }
 
                 array.put(array.getNextID(data, db, pos), subArray, pos, data, db);
@@ -59,14 +61,14 @@ namespace script.plugin
             return array;
         }
 
-        private CVar Match_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Match_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return new BooleanVariabel(System.Text.RegularExpressions.Regex.IsMatch(stack[0].toString(pos, data, db), @obj.get("regex").toString(pos, data, db)));
+            return new BooleanVariabel(System.Text.RegularExpressions.Regex.IsMatch(stack[0].toString(pos, data, db), @TypeHandler.ToObjectVariabel(obj).get("regex").toString(pos, data, db)));
         }
 
-        private CVar RConstructor_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar RConstructor_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            obj.appendToPointer("regex", stack[0]);
+            TypeHandler.ToObjectVariabel(obj).appendToPointer("regex", stack[0]);
             return new NullVariabel();
         }
     }

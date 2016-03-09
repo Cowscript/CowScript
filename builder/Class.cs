@@ -1,5 +1,4 @@
-﻿using script.help;
-using script.stack;
+﻿using script.Container;
 using script.variabel;
 using System.Collections.Generic;
 
@@ -7,232 +6,93 @@ namespace script.builder
 {
     public class Class
     {
-        private Dictionary<string, ClassItems> items = new Dictionary<string, ClassItems>();
-        public string Name { private set; get; }
-        public ClassMethods constructor { private set; get; }
-        private EnegyData data;
-        private VariabelDatabase db;
-        public VariabelDatabase extraVariabelDatabase { get; set; }
+        private ClassContainer container;
 
-        public Class(string name, EnegyData data, VariabelDatabase db) { Name = name; this.data = data; this.db = db; }
-        public Class(string name) { Name = name; data = new EnegyData(); }
-        public Class() {data = new EnegyData(); }
-
-        public void setStaticData(Dictionary<string, ClassStaticData> i, ClassVariabel var)
+        public Class(string name)
         {
-            foreach(ClassItems d in items.Values)
-            {
-                if (d.IsMethod && d.Method.isStatic)
-                    i.Add(d.Name, new ClassStaticData()
-                    {
-                        isMethod = true,
-                        Context = new StaticMethodVariabel((ClassStaticMethods)d.Method, var, extraVariabelDatabase),
-                        isPublic = d.Method.isPublic,
-                        extraVariabelDatabase = extraVariabelDatabase,
-                    });
-                else if (!d.IsMethod && d.IsStatic)
-                    i.Add(d.Name, new ClassStaticData() {
-                        isMethod = false,
-                        Context = d.Context,
-                        isPublic = d.IsPublic,
-                        extraVariabelDatabase = extraVariabelDatabase,
-                    });
-            }
+            container = Create(name);
         }
 
-        public void addVariabel(string name, CVar context, bool isStatic, bool isPublic)
+        public Class()
         {
-            if (!controlItems(name))
-                return;
+            container = Create(null);
+        }
 
-            items.Add(name, new ClassItems()
+        public void Extends(ClassVariabel extends)
+        {
+            container.Extends.Add(extends);
+        }
+
+        public ClassContainer GetContainer()
+        {
+            return container;
+        }
+
+        public void SetMethod(Method method, EnegyData data, VariabelDatabase db, Posision pos)
+        {
+            MethodContainer mc = method.GetMethodContainer();
+
+            if(!Control(mc.Name, data, db, pos))
             {
-                IsMethod = false,
+                return;
+            }
+
+            if (mc.IsStatic)
+                container.StaticMethod.Add(mc.Name, mc);
+            else
+                container.Methods.Add(mc.Name, mc);
+        }
+
+        public void SetPointer(Pointer pointer, EnegyData data, VariabelDatabase db, Posision pos)
+        {
+            PointerContainer pc = pointer.GetPointerContainer();
+
+            Control(pc.Name, data, db, pos);//control if the class contains the name already
+
+            if (pc.IsStatic)
+                container.StaticPointer.Add(pc.Name, pc);
+            else
+                container.Pointer.Add(pc.Name, pc);
+        }
+
+        public void SetConstructor(Method method, EnegyData data, VariabelDatabase db, Posision pos)
+        {
+            if(container.Constructor != null)
+            {
+                data.setError(new ScriptError("A class can only have one constructor", pos), db);
+                return;
+            }
+
+            container.Constructor = method.GetMethodContainer();
+        }
+        
+        public void SetExtraVariabelDatabase(VariabelDatabase ex)
+        {
+            container.ExtraVariabelDatabase = ex;
+        }
+
+        private ClassContainer Create(string name)
+        {
+            return new ClassContainer()
+            {
                 Name = name,
-                Context = context,
-                IsStatic = isStatic,
-                IsPublic = isPublic,
-                extraVariabelDatabase = extraVariabelDatabase,
-            });
+                Methods = new Dictionary<string, MethodContainer>(),
+                StaticMethod = new Dictionary<string, MethodContainer>(),
+                Pointer = new Dictionary<string, PointerContainer>(),
+                StaticPointer = new Dictionary<string, PointerContainer>(),
+                Extends = new System.Collections.ArrayList(),
+            };
         }
 
-        public void addVariabel(string name, bool isStatic, bool isPublic)
+        private bool Control(string name, EnegyData data, VariabelDatabase db, Posision pos)
         {
-            addVariabel(name, new NullVariabel(), isStatic, isPublic);
-        }
-
-        public void addMethod(ClassItemsMethod m)
-        {
-            if (!controlItems(m.Name))
+            if (container.StaticPointer.ContainsKey(name) || container.Pointer.ContainsKey(name) || container.Methods.ContainsKey(name)  || container.StaticMethod.ContainsKey(name))
             {
-                data.setError(new ScriptError("You can only add one method: " + m.Name, new Posision(0, 0)), db);
-                return;
-            }
-
-            items.Add(m.Name, new ClassItems()
-            {
-                IsMethod = true,
-                Method = m,
-                Name = m.Name,
-                extraVariabelDatabase = extraVariabelDatabase,
-            });
-        }
-
-        public void addConstructor(ClassMethods m)
-        {
-            if (constructor != null)
-            {
-                data.setError(new ScriptError("A class can only have one constructor", new Posision(0, 0)), db);
-                return;
-            }
-
-            constructor = m;
-        }
-
-        public ObjectVariabel createObject()
-        {
-            ObjectVariabel obj = new ObjectVariabel(Name);
-
-            foreach(ClassItems item in items.Values)
-            {
-                if (item.IsMethod)
-                {
-                    if (item.Method.isStatic)
-                        continue;
-                    obj.put(new ObjectItemData()
-                    {
-                        isMethod = true,
-                        Name = item.Method.Name,
-                        Context = new MethodVariabel((ClassMethods)item.Method, obj, extraVariabelDatabase),
-                        isPublic = item.Method.isPublic,
-                        isStatic = item.Method.isStatic
-                    });
-                }
-                else
-                    obj.put(new ObjectItemData()
-                    {
-                        isMethod = false,
-                        Name = item.Name,
-                        Context = item.Context,
-                        isPublic = item.IsPublic,
-                        isStatic = item.IsStatic,
-                        extraVariabelDatabase = extraVariabelDatabase,
-                    });
-            }
-
-            return obj;
-        }
-
-        private bool controlItems(string name)
-        {
-            if (items.ContainsKey(name)) {
-                data.setError(new ScriptError("A class items in '"+Name+"' alredy exists: " + name, new Posision(0, 0)), db);
+                data.setError(new ScriptError("You can not put more end one item in the class with the same name", pos), db);
                 return false;
             }
 
             return true;
-        }
-    }
-
-    public abstract class ClassItemsMethod
-    {
-        public string Name { protected set; get; }
-        public bool isPublic { protected set; get; }
-        public bool isStatic { protected set; get; }
-        public AgumentStack Aguments {set; get; }
-        public string ReturnType { protected set; get; }
-        protected Class c;
-        public bool setVariabel { protected set; get; }
-
-        public ClassItemsMethod(Class c, string name, string type, bool setVariabel = false)
-        {
-            Name = name;
-            isPublic = true;
-            isStatic = false;
-            Aguments = new AgumentStack();
-            ReturnType = type;
-            this.c = c;
-            this.setVariabel = setVariabel;
-        }
-
-        public ClassItemsMethod(Class c, string name, bool isPublic, string type, bool setVariabel = false)
-        {
-            Name = name;
-            this.isPublic = isPublic;
-            isStatic = false;
-            Aguments = new AgumentStack();
-            ReturnType = type;
-            this.c = c;
-            this.setVariabel = setVariabel;
-        }
-
-        public ClassItemsMethod(Class c, string name, bool isPublic, bool isStatic, string type, bool setVariabel = false)
-        {
-            Name = name;
-            this.isPublic = isPublic;
-            this.isStatic = isStatic;
-            Aguments = new AgumentStack();
-            ReturnType = type;
-            this.c = c;
-            this.setVariabel = setVariabel;
-        }
-
-        public void create()
-        {
-            c.addMethod(this);
-        }
-    }
-
-    public class ClassStaticMethods : ClassItemsMethod
-    {
-        public delegate CVar Method(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
-        public event Method caller;
-
-        public ClassStaticMethods(Class c, string name, bool setVariabel = false) : base(c, name, true, true, null, setVariabel)
-        {
-        }
-
-        public ClassStaticMethods(Class c, string name, bool isPublic, string type, bool setVariabel = false) : base(c, name, isPublic, true, type, setVariabel)
-        {
-        }
-
-        public CVar call(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
-        {
-            CVar cc = caller(c, db, stack, data, pos);
-
-            if (cc == null)
-                return new NullVariabel();
-
-            return cc;
-        }
-    }
-
-    public class ClassMethods : ClassItemsMethod
-    {
-        public delegate CVar Method(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos);
-        public event Method caller;
-
-        public ClassMethods(Class c, string name, bool setVariabel = false) : base(c, name, null, setVariabel)
-        {
-        }
-
-        public ClassMethods(Class c, string name, bool isPublic, string type, bool setVariabel = false) : base(c, name, isPublic, type, setVariabel)
-        {
-        }
-
-        public void createConstructor()
-        {
-            c.addConstructor(this);
-        }
-
-        public CVar call(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
-        {
-            CVar c = caller(obj, db, stack, data, pos);
-
-            if (c == null)
-                return new NullVariabel();
-
-            return c;
         }
     }
 }

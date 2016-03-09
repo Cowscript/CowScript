@@ -1,4 +1,5 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 using System;
 using System.IO;
@@ -14,7 +15,7 @@ namespace script.plugin
             obj.appendToPointer("em", msg);
         }
 
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             if(data.Config.get("tcp.enable", "false") != "true")
             {
@@ -24,100 +25,108 @@ namespace script.plugin
 
             Class tcp = new Class("Tcp");
 
-            tcp.addVariabel("ie", new BooleanVariabel(false), false, false);
-            tcp.addVariabel("em", new NullVariabel(), false, false);
+            Pointer ie = new Pointer("ie");
+            ie.SetPrivate();
+            tcp.SetPointer(ie, data, database, pos);
 
-            ClassMethods constructor = new ClassMethods(tcp, "");
-            constructor.Aguments.push("string", "host");
-            constructor.Aguments.push("int", "port");
-            constructor.caller += Constructor_caller;
-            constructor.createConstructor();
+            Pointer em = new Pointer("em");
+            em.SetPrivate();
+            tcp.SetPointer(em, data, database, pos);
 
-            ClassMethods writeLine = new ClassMethods(tcp, "writeLine");
-            writeLine.caller += WriteLine_caller;
-            writeLine.Aguments.push("string", "message");
-            writeLine.create();
+            Method constructor = new Method("");
+            constructor.GetAgumentStack().push("string", "host");
+            constructor.GetAgumentStack().push("int", "port");
+            constructor.SetBody(Constructor_caller);
+            tcp.SetConstructor(constructor, data, database, pos);
 
-            ClassMethods readLine = new ClassMethods(tcp, "readLine", true, "string");
-            readLine.caller += ReadLine_caller;
-            readLine.create();
+            Method writeLine = new Method("writeLine");
+            writeLine.GetAgumentStack().push("string", "message");
+            writeLine.SetBody(WriteLine_caller);
+            tcp.SetMethod(writeLine, data, database, pos);
 
-            ClassMethods isError = new ClassMethods(tcp, "isError", true, "bool");
-            isError.caller += IsError_caller;
-            isError.create();
+            Method readLine = new Method("readLine");
+            readLine.SetReturnType("string");
+            readLine.SetBody(ReadLine_caller);
+            tcp.SetMethod(readLine, data, database, pos);
 
-            ClassMethods getError = new ClassMethods(tcp, "getError", true, "string");
-            getError.caller += GetError_caller;
-            getError.create();
+            Method isError = new Method("isError");
+            isError.SetReturnType("bool");
+            isError.SetBody(IsError_caller);
+            tcp.SetMethod(isError, data, database, pos);
+
+            Method getError = new Method("getError");
+            getError.SetReturnType("string");
+            getError.SetBody(GetError_caller);
+            tcp.SetMethod(getError, data, database, pos);
             
             database.pushClass(tcp, data);
         }
 
-        private CVar GetError_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar GetError_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return obj.get("em");
+            return TypeHandler.ToObjectVariabel(obj).get("em");
         }
 
-        private CVar IsError_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar IsError_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            return obj.get("ie");
+            return TypeHandler.ToObjectVariabel(obj).get("ie");
         }
 
-        private CVar ReadLine_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar ReadLine_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if(obj.get("ie").toBoolean(pos, data, db))
+            if(TypeHandler.ToObjectVariabel(obj).get("ie").toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("Tou can not use 'Tcp->readLine()' when there are error in tcp connection", pos), db);
                 return null;
             }
 
             try {
-                string respons = ((StreamReader)obj.systemItems["reader"]).ReadLine();
+                string respons = ((StreamReader)TypeHandler.ToObjectVariabel(obj).systemItems["reader"]).ReadLine();
 
                 if (respons == null)
                     return new NullVariabel();
 
-                return StringVariabel.CreateString(data, db, pos, respons);
+                return Types.toString(respons, data, db, pos);
             }catch(IOException e)
             {
-                setError(StringVariabel.CreateString(data, db, pos, e.Message), obj);
+                setError(Types.toString(e.Message, data, db, pos), TypeHandler.ToObjectVariabel(obj));
                 return new NullVariabel();
             }
         }
 
-        private CVar WriteLine_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar WriteLine_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if(obj.get("ie").toBoolean(pos, data, db))
+            if(TypeHandler.ToObjectVariabel(obj).get("ie").toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("You can not use 'Tcp->writeLine(string)' when there are error in tcp connection", pos), db);
                 return null;
             }
 
             try {
-                ((StreamWriter)obj.systemItems["writer"]).WriteLine(stack[0].toString(pos, data, db));
+                ((StreamWriter)TypeHandler.ToObjectVariabel(obj).systemItems["writer"]).WriteLine(stack[0].toString(pos, data, db));
                 return new BooleanVariabel(true);
             }catch(IOException e)
             {
-                setError(StringVariabel.CreateString(data, db, pos, e.Message), obj);
+                setError(Types.toString(e.Message, data, db, pos), TypeHandler.ToObjectVariabel(obj));
                 return new BooleanVariabel(false);
             }
             
         }
 
-        private CVar Constructor_caller(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Constructor_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             try {
                 TcpClient client = new TcpClient(stack[0].toString(pos, data, db), Convert.ToInt32(stack[1].toInt(pos, data, db)));
-                obj.systemItems.Add("client", client);
+                TypeHandler.ToObjectVariabel(obj).systemItems.Add("client", client);
 
                 StreamWriter writer = new StreamWriter(client.GetStream());
-                obj.systemItems.Add("writer", writer);
+                TypeHandler.ToObjectVariabel(obj).systemItems.Add("writer", writer);
 
                 StreamReader reader = new StreamReader(client.GetStream());
-                obj.systemItems.Add("reader", reader);
+                TypeHandler.ToObjectVariabel(obj).systemItems.Add("reader", reader);
             }catch(SocketException se)
             {
-                setError(StringVariabel.CreateString(data, db, pos, se.Message), obj);
+                setError(Types.toString(se.Message, data, db, pos), TypeHandler.ToObjectVariabel(obj));
             }
 
             return null;

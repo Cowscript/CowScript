@@ -1,52 +1,114 @@
 ﻿using script.builder;
-using script.help;
-using script.stack;
-using script.Type;
-using System.Collections.Generic;
+using script.Container;
 
 namespace script.variabel
 {
     public class ClassVariabel : CVar
     {
-        private Class Container;
-        protected Dictionary<string, ClassStaticData> staticItems = new Dictionary<string, ClassStaticData>();
-        private VariabelDatabase extra = null;
+        public ClassContainer Container;
 
         public virtual string Name { get { return Container.Name; } }
 
         public ClassVariabel(Class c)
         {
-            Container = c;
-            extra = c.extraVariabelDatabase;
-            c.setStaticData(staticItems, this);
+            //here wee get the data about this class :)
+            Container = c.GetContainer();
         }
 
-        public ClassStaticData getItem(string name)
+        public bool hasConstructor()
         {
-            return staticItems[name];
+            return Container.Constructor != null;
         }
 
-        public bool containsStaticItem(string name)
+        public bool ContainItem(string name)
         {
-            return staticItems.ContainsKey(name);
+            return Container.StaticMethod.ContainsKey(name) || Container.StaticPointer.ContainsKey(name);
         }
 
-        public virtual bool hasConstructor()
+        public bool IsMethod(string name)
         {
-            return Container.constructor != null;
+            return Container.StaticMethod.ContainsKey(name);
         }
 
-        public virtual ClassMethods getConstructor()
+        public bool IsPointer(string name)
         {
-            return Container.constructor;
+            return Container.StaticPointer.ContainsKey(name);
         }
 
-        public virtual void callConstructor(CVar[] c, VariabelDatabase db, EnegyData d, ObjectVariabel obj, Posision pos)
+        public bool IsPublic(string name)
         {
-            if (!hasConstructor())
-                return;
+            if (IsMethod(name))
+                return Container.StaticMethod[name].IsPublic;
 
-            new MethodVariabel(Container.constructor, obj, extra).call(c, db, d, pos);
+            return Container.StaticPointer[name].IsPublic;
+        }
+        
+        public CVar get(string name)
+        {
+            if (IsMethod(name))
+                return new StaticMethodVariabel(Container.StaticMethod[name], this, Container.ExtraVariabelDatabase);
+
+            return new PointerVariabel(Container.StaticPointer[name]);
+        }
+
+        public MethodContainer getConstructor()
+        {
+            return Container.Constructor;
+        }
+
+        public ObjectVariabel createNew(VariabelDatabase db, EnegyData data, CVar[] call, Posision pos)
+        {
+            //wee create a new object and return the object to the system :)
+            ObjectVariabel obj = new ObjectVariabel(this, Container.Pointer, Container.Methods, Container.ExtraVariabelDatabase, Container.Extends);
+
+            if (hasConstructor())
+            {
+                VariabelDatabase vd = db.createShadow(obj);
+                if (Container.Constructor.SetVariabel)
+                {
+                    for (int i = 0; i < Container.Constructor.Agument.size(); i++)
+                        vd.push(Container.Constructor.Agument.get(i).Name, call[i], data);
+                }
+                CallConstructor(vd, call, data, pos, obj);
+            }
+
+            return obj;
+        }
+
+        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (!Container.StaticMethod.ContainsKey("toString"))
+                return base.toString(pos, data, db);
+
+            //it contain a method toString
+            if (!Container.StaticMethod["toString"].IsPublic)
+                return base.toString(pos, data, db);
+
+            //it is public
+            if (Container.StaticMethod["toString"].Agument.size() != 0)
+                return base.toString(pos, data, db);
+
+            //it has no aguments :)
+            StaticMethodVariabel toString = new StaticMethodVariabel(Container.StaticMethod["toString"], this, Container.ExtraVariabelDatabase);
+            return toString.call(new CVar[0], toString.getShadowVariabelDatabase(db), data, pos).toString(pos, data, db);
+        }
+
+        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
+        {
+            if (!Container.StaticMethod.ContainsKey("toInt"))
+                return base.toInt(pos, data, db);
+
+            //it contain a method toString
+            if (!Container.StaticMethod["toInt"].IsPublic)
+                return base.toInt(pos, data, db);
+
+            //it is public
+            if (Container.StaticMethod["toInt"].Agument.size() != 0)
+                return base.toInt(pos, data, db);
+
+            //it has no aguments :)
+            StaticMethodVariabel toInt = new StaticMethodVariabel(Container.StaticMethod["toInt"], this, Container.ExtraVariabelDatabase);
+            return toInt.call(new CVar[0], toInt.getShadowVariabelDatabase(db), data, pos).toInt(pos, data, db);
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
@@ -59,97 +121,9 @@ namespace script.variabel
             return "class";
         }
 
-        public override double toInt(Posision pos, EnegyData data, VariabelDatabase db)
+        private void CallConstructor(VariabelDatabase db, CVar[] call, EnegyData data, Posision pos, ObjectVariabel obj)
         {
-            if (!containsStaticItem("toInt"))
-                return base.toInt(pos, data, db);
-
-            ClassStaticData d = getItem("toString");
-
-            if (!d.isPublic)
-                return base.toInt(pos, data, db);
-
-            if (!d.isMethod)
-                return base.toInt(pos, data, db);
-
-            if (((StaticMethodVariabel)d.Context).agumentSize() != 0)
-                return base.toInt(pos, data, db);
-
-            return ((MethodVariabel)d.Context).call(new CVar[0], db, data, pos).toInt(pos, data, db);
-        }
-
-        public override string toString(Posision pos, EnegyData data, VariabelDatabase db)
-        {
-            if (!containsStaticItem("toString"))
-                return base.toString(pos, data, db);
-
-            ClassStaticData d = getItem("toString");
-
-            if (!d.isPublic)
-                return base.toString(pos, data, db);
-
-            if (!d.isMethod)
-                return base.toString(pos, data, db);
-
-            if (((StaticMethodVariabel)d.Context).agumentSize() != 0)
-                return base.toString(pos, data, db);
-
-            return ((MethodVariabel)d.Context).call(new CVar[0], db, data, pos).toString(pos, data, db);
-        }
-
-        public ObjectVariabel createNew(VariabelDatabase db, EnegyData data, Posision pos, params object[] inputs)
-        {
-            int length = hasConstructor() ? Container.constructor.Aguments.size() : 0;
-            AgumentStack a = hasConstructor() ? Container.constructor.Aguments : new AgumentStack();
-
-            CVar[] stack = new CVar[length];
-            int i = 0;
-            for (; i < length && i < inputs.Length; i++)
-            {
-                CVar context = ScriptConverter.convert(inputs[i], data, db);
-                if (a.get(i).hasType() && !TypeHandler.controlType(context, a.get(i).Type))
-                {
-                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + a.get(i).Type.ToString(), new Posision(0, 0)), db);
-                    return null;
-                }
-
-                //okay let cache the parameters :)
-                stack[i] = context;
-            }
-
-            //wee take a new for loop to get other parameters there is not has been set :)
-            for (; i < a.size(); i++)
-            {
-                if (!a.get(i).hasValue())
-                {
-                    data.setError(new ScriptError("Missing agument", new Posision(0, 0)), db);
-                    return null;
-                }
-
-                stack[i] = a.get(i).Value;
-            }
-
-            return createNew(stack, db, data, pos);
-        }
-
-        public ObjectVariabel createNew(CVar[] cas, VariabelDatabase db, EnegyData data, Posision pos)
-        {
-            ObjectVariabel obj = Container.createObject();
-
-            if (hasConstructor())
-            {
-                VariabelDatabase vd = db.createShadow(obj);
-                //wee quikly push variabel in a shadow of our database :)
-                if (Container.constructor.setVariabel)
-                {
-                    for (int i = 0; i < getConstructor().Aguments.size(); i++)
-                        vd.push(getConstructor().Aguments.get(i).Name, cas[i], data);
-                }
-
-                callConstructor(cas, vd, data, obj, pos);
-            }
-
-            return obj;    
+            new MethodVariabel(Container.Constructor, obj, Container.ExtraVariabelDatabase).call(call, db, data, pos);
         }
     }
 }

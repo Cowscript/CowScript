@@ -1,4 +1,5 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 using System.IO;
 
@@ -6,7 +7,7 @@ namespace script.plugin
 {
     class Files : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             if(data.Config.get("file.system.enable", "false") != "true")
             {
@@ -16,46 +17,51 @@ namespace script.plugin
 
             Class f = new Class("File");
 
-            ClassStaticMethods exsist = new ClassStaticMethods(f, "exists");
-            exsist.Aguments.push("string", "dir");
-            exsist.caller += Exsist_caller;
-            exsist.create();
+            Method exsist = new Method("exists");
+            exsist.SetStatic();
+            exsist.GetAgumentStack().push("string", "dir");
+            exsist.SetBody(Exsist_caller);
+            f.SetMethod(exsist, data, database, pos);
 
-            ClassStaticMethods create = new ClassStaticMethods(f, "create");
-            create.Aguments.push("string", "dir");
-            create.Aguments.push("string", "contex", new NullVariabel());
-            create.caller += Create_caller;
-            create.create();
+            Method create = new Method("create");
+            create.SetStatic();
+            create.GetAgumentStack().push("string", "dir");
+            create.GetAgumentStack().push("string", "context", new NullVariabel());
+            create.SetBody(Create_caller);
+            f.SetMethod(create, data, database, pos);
 
-            ClassStaticMethods delete = new ClassStaticMethods(f, "delete");
-            delete.Aguments.push("string", "dir");
-            delete.caller += Delete_caller;
-            delete.create();
+            Method delete = new Method("delete");
+            delete.SetStatic();
+            delete.GetAgumentStack().push("string", "dir");
+            delete.SetBody(Delete_caller);
+            f.SetMethod(delete, data, database, pos);
 
-            ClassStaticMethods write = new ClassStaticMethods(f, "write");
-            write.Aguments.push("string", "dir");
-            write.Aguments.push("string", "context");
-            write.caller += Write_caller;
-            write.create();
+            Method write = new Method("write");
+            write.SetStatic();
+            write.GetAgumentStack().push("string", "dir");
+            write.GetAgumentStack().push("string", "context");
+            write.SetBody(Write_caller);
+            f.SetMethod(write, data, database, pos);
 
-            ClassStaticMethods read = new ClassStaticMethods(f, "read");
-            read.Aguments.push("string", "dir");
-            read.caller += Read_caller;
-            read.create();
+            Method read = new Method("read");
+            read.SetStatic();
+            read.GetAgumentStack().push("string", "dir");
+            read.SetBody(Read_caller);
+            f.SetMethod(read, data, database, pos);
 
             database.pushClass(f, data);
         }
 
-        private CVar Read_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Read_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if (!((StaticMethodVariabel)c.getItem("exists").Context).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
+            if (!((StaticMethodVariabel)TypeHandler.ToObjectVariabel(c).get("exists")).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("'" + stack[0].toString(pos, data, db) + "' dont exists and there for can not be readed from", pos), db);
                 return null;
             }
 
             try {
-                return StringVariabel.CreateString(data, db, pos, System.IO.File.ReadAllText(stack[0].toString(pos, data, db)));
+                return Types.toString(System.IO.File.ReadAllText(stack[0].toString(pos, data, db)), data, db, pos);
             }catch(IOException e)
             {
                 data.setError(new ScriptError("Failed to read from '" + stack[0].toString(pos, data, db) + "': " + e.Message, pos), db);
@@ -64,9 +70,9 @@ namespace script.plugin
             return null;
         }
 
-        private CVar Write_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Write_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if (!((StaticMethodVariabel)c.getItem("exists").Context).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
+            if (!((StaticMethodVariabel)TypeHandler.ToObjectVariabel(c).get("exists")).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("'" + stack[0].toString(pos, data, db) + "' dont exists and there for can not be writet in", pos), db);
                 return null;
@@ -82,9 +88,9 @@ namespace script.plugin
             return null;
         }
 
-        private CVar Delete_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Delete_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if (!((StaticMethodVariabel)c.getItem("exists").Context).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
+            if (!((StaticMethodVariabel)TypeHandler.ToObjectVariabel(c).get("exists")).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("'" + stack[0].toString(pos, data, db) + "' dont exists and there for can not be deleted", pos), db);
                 return null;
@@ -100,9 +106,9 @@ namespace script.plugin
             return null;
         }
 
-        private CVar Create_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Create_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            if(((StaticMethodVariabel)c.getItem("exists").Context).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
+            if(((StaticMethodVariabel)TypeHandler.ToObjectVariabel(c).get("exists")).call(data, db, stack[0].toString(pos, data, db)).toBoolean(pos, data, db))
             {
                 data.setError(new ScriptError("'" + stack[0].toString(pos, data, db) + "' exists and there for can not be createt", pos), db);
                 return null;
@@ -130,7 +136,7 @@ namespace script.plugin
             return null;
         }
 
-        private CVar Exsist_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Exsist_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return new BooleanVariabel(System.IO.File.Exists(stack[0].toString(pos, data, db)));
         }

@@ -139,14 +139,13 @@ namespace script.help
             switch (type)
             {
                 case "string":
-                    if (StringVariabel.isString(var))
+                    if (Types.instanceof((ClassVariabel)db.get("string", data), (ObjectVariabel)var))
                         return var;
-
-                    return StringVariabel.CreateString(data, db, pos, var.toString(pos, data, db));
+                    return Types.toString(var.toString(pos, data, db), data, db, pos); 
                 case "int":
-                    if (IntVariabel.isInt(var))
+                    if (Types.instanceof((ClassVariabel)db.get("int", data), (ObjectVariabel)var))
                         return var;
-                    return IntVariabel.createInt(data, db, pos, var.toInt(pos, data, db));
+                    return Types.toInt(var.toInt(pos, data, db), data, db, pos);
                 default:
                     return var;
             }

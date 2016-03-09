@@ -1,6 +1,7 @@
 ﻿using script.builder;
 using script.stack;
 using script.Type;
+using System;
 
 namespace script.variabel
 {
@@ -49,7 +50,7 @@ namespace script.variabel
             }
 
             CVar r = func.callFunction(call, db, data, pos);
-
+            db.garbageCollector();
             if(func.ReturnType != null)
             {
                 //this function is lock to a type :)
@@ -71,39 +72,42 @@ namespace script.variabel
 
         public virtual CVar call(EnegyData data, VariabelDatabase db, params object[] parameters)
         {
+            //wee push the parameters in vd :)
             CVar[] stack = new CVar[func.agument.size()];
-            VariabelDatabase vd = db.createShadow();
+            AgumentStack agument = getStatck();
+            VariabelDatabase vd = getShadowVariabelDatabase(db);
+            
             int i = 0;
-            for(; i < parameters.Length && i <= func.agument.size(); i++)
+
+            for (; i < parameters.Length; i++)
             {
                 CVar context = ScriptConverter.convert(parameters[i], data, db);
-                if (func.agument.get(i).hasType() && !TypeHandler.controlType(context, func.agument.get(i).Type))
+                if(agument.get(i).hasType() && !TypeHandler.controlType(context, agument.get(i).Type))
                 {
-                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + func.agument.get(i).Type.ToString(), new Posision(0, 0)), db);
+                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + agument.get(i).Type.ToString(), new Posision(0, 0)), db);
                     return new NullVariabel();
                 }
 
-                //okay let cache the parameters :)
                 stack[i] = context;
-                if(SetVariabel)
-                    vd.push(func.agument.get(i).Name, context, data);
+            
+                if (SetVariabel)
+                    vd.push(agument.get(i).Name, context, data);
             }
 
-            //wee take a new for loop to get other parameters there is not has been set :)
-            for(; i < func.agument.size(); i++)
+            for (; i < stack.Length; i++)
             {
-                if (!func.agument.get(i).hasValue())
+                if (!agument.get(i).hasType())
                 {
                     data.setError(new ScriptError("Missing agument to " + func.Name, new Posision(0, 0)), db);
                     return new NullVariabel();
                 }
 
-                stack[i] = func.agument.get(i).Value;
-                if(SetVariabel)
-                    vd.push(func.agument.get(i).Name, stack[i], data);
+                stack[i] = agument.get(i).Value;
+                if (SetVariabel)
+                    vd.push(agument.get(i).Name, stack[i], data);
             }
 
-            return call(stack, db, data, new Posision(0,0));
+            return call(stack, vd, data, new Posision(0, 0));
         }
 
         public override string type()

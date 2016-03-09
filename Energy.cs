@@ -11,7 +11,7 @@ namespace script
 {
     public class Energy : IDisposable
     {
-        public const string VERSION = "V0.4";
+        public const string VERSION = "V0.5";
         private EnegyData Data {  set;  get; }
 
         public VariabelDatabase VariabelDatabase { set; get; }
@@ -48,7 +48,7 @@ namespace script
 
         public void parse(string script)
         {
-            parse(new StringReader(script));
+            parse((TextReader)new StringReader(script));
         }
 
         public void parse(StringReader reader)
@@ -118,6 +118,11 @@ namespace script
             }
 
             return Data.ErrorData;
+        }
+
+        public void appendMethodToClass(Method method, Class c)
+        {
+            c.SetMethod(method, Data, VariabelDatabase, new Posision(0, 0));
         }
     }
 }

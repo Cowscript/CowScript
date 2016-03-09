@@ -16,7 +16,7 @@ namespace script.parser
             if(ed.Plugin.exists(plugin))
             {
                 //wee has the plugin and load it :)
-                ed.Plugin.open(db, plugin, ed);
+                ed.Plugin.open(db, plugin, ed, token.getCache().posision());
             }
             else
             {

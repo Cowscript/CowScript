@@ -1,38 +1,43 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 
 namespace script.plugin
 {
     class Config : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
-            Class config = new Class("Config", data, database);
+            Class config = new Class("Config");
 
-            ClassStaticMethods get = new ClassStaticMethods(config, "get", true, "string");
-            get.Aguments.push("string", "name");
-            get.caller += Get_caller;
-            get.create();
+            Method get = new Method("get");
+            get.GetAgumentStack().push("string", "name");
+            get.SetBody(Get_caller);
+            get.SetStatic();
+            config.SetMethod(get, data, database, pos);
 
-            ClassStaticMethods isScriptLock = new ClassStaticMethods(config, "isScriptLock", true, "bool");
-            isScriptLock.caller += IsScriptLock_caller;
-            isScriptLock.create();
+            Method isScriptLock = new Method("isScriptLock");
+            isScriptLock.SetBody(IsScriptLock_caller);
+            isScriptLock.SetStatic();
+            config.SetMethod(isScriptLock, data, database, pos);
 
-            ClassStaticMethods set = new ClassStaticMethods(config, "set");
-            set.Aguments.push("string", "name");
-            set.Aguments.push("string", "value");
-            set.caller += Set_caller;
-            set.create();
+            Method set = new Method("set");
+            set.GetAgumentStack().push("string", "name");
+            set.GetAgumentStack().push("string", "value");
+            set.SetBody(Set_caller);
+            set.SetStatic();
+            config.SetMethod(set, data, database, pos);
 
-            ClassStaticMethods isLocked = new ClassStaticMethods(config, "isLocked", true, "bool");
-            isLocked.Aguments.push("string", "name");
-            isLocked.caller += IsLocked_caller;
-            isLocked.create();
+            Method isLocked = new Method("isLocked");
+            isLocked.SetStatic();
+            isLocked.GetAgumentStack().push("string", "name");
+            isLocked.SetBody(IsLocked_caller);
+            config.SetMethod(isLocked, data, database, pos);
 
             database.pushClass(config, data);
         }
 
-        private CVar IsLocked_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar IsLocked_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             string name = stack[0].toString(pos, data, db);
 
@@ -45,7 +50,7 @@ namespace script.plugin
             return new BooleanVariabel(data.Config.isAllowedOverride(name));
         }
 
-        private CVar Set_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Set_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             if (data.Config.isScriptLock)
             {
@@ -65,12 +70,12 @@ namespace script.plugin
             return null;
         }
 
-        private CVar IsScriptLock_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar IsScriptLock_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             return new BooleanVariabel(data.Config.isScriptLock);
         }
 
-        private CVar Get_caller(ClassVariabel c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        private CVar Get_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             string name = stack[0].toString(pos, data, db);
 
@@ -80,7 +85,7 @@ namespace script.plugin
                 return new NullVariabel();
             }
 
-            return StringVariabel.CreateString(data, db, pos, data.Config.get(name, ""));
+            return Types.toString(data.Config.get(name, ""), data, db, pos);
         }
     }
 }

@@ -5,6 +5,7 @@ using script.builder;
 using script.help;
 using script.stack;
 using System.Globalization;
+using script.Type;
 
 namespace script.parser
 {
@@ -191,7 +192,7 @@ namespace script.parser
                     ClassVariabel c = (var is ClassVariabel ? (ClassVariabel)var : (ClassVariabel)next);
                     ObjectVariabel o = (var is ClassVariabel ? (ObjectVariabel)next : (ObjectVariabel)var);
 
-                    return new BooleanVariabel(c.Name == o.Name);
+                    return new BooleanVariabel(Types.instanceof(c, o));
                 }
 
                 return new BooleanVariabel(false);
@@ -211,14 +212,17 @@ namespace script.parser
                 if(buffer.type() == TokenType.Plus)
                 {
                     CVar b = gange(parse);
-                    if (IntVariabel.isInt(b) && IntVariabel.isInt(var))
-                        var = IntVariabel.createInt(data, db, buffer.posision(), var.toInt(buffer.posision(), data, db) + b.toInt(token.getCache().posision(), data, db));
-                    else
-                        var = StringVariabel.CreateString(data, db, token.getCache().posision(), var.toString(buffer.posision(), data, db) + b.toString(token.getCache().posision(), data, db));
+                    if (parse)
+                    {
+                        if (Types.instanceof((ClassVariabel)db.get("int", data), (ObjectVariabel)b) && Types.instanceof((ClassVariabel)db.get("int", data), (ObjectVariabel)var))
+                            var = Types.toInt(var.toInt(buffer.posision(), data, db) + b.toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
+                        else
+                            var = Types.toString(var.toString(buffer.posision(), data, db) + b.toString(token.getCache().posision(), data, db), data, db, token.getCache().posision());
+                    }
                 }
                 else
                 {
-                    var = IntVariabel.createInt(data, db, buffer.posision(), var.toInt(buffer.posision(), data, db) - gange(parse).toInt(token.getCache().posision(), data, db));
+                    var = Types.toInt(var.toInt(buffer.posision(), data, db) - gange(parse).toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
                 }
             }
 
@@ -235,11 +239,11 @@ namespace script.parser
                 token.next();
                 if(buffer.type() == TokenType.Gange)
                 {
-                    var = IntVariabel.createInt(data, db, token.getCache().posision(), var.toInt(buffer.posision(), data, db) * power(parse).toInt(token.getCache().posision(), data, db));
+                    var = Types.toInt(var.toInt(buffer.posision(), data, db) * power(parse).toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
                 }
                 else
                 {
-                    var = IntVariabel.createInt(data, db, token.getCache().posision(), var.toInt(buffer.posision(), data, db) / power(parse).toInt(token.getCache().posision(), data, db));
+                    var = Types.toInt(var.toInt(buffer.posision(), data, db) / power(parse).toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
                 }
             }
 
@@ -254,7 +258,7 @@ namespace script.parser
                 token.next();
                 if (parse)
                 {
-                    var = IntVariabel.createInt(data, db, token.getCache().posision(), Math.Pow(var.toInt(token.getCache().posision(), data, db), power(parse).toInt(token.getCache().posision(), data, db)));
+                    var = Types.toInt(Math.Pow(var.toInt(token.getCache().posision(), data, db), power(parse).toInt(token.getCache().posision(), data, db)), data, db, token.getCache().posision());
                 }
                 else
                     negetave(parse);
@@ -270,13 +274,13 @@ namespace script.parser
             {
                 token.next();
                 if (parse)
-                    return IntVariabel.createInt(data, db, token.getCache().posision(), -atom(parse).toInt(token.getCache().posision(), data, db));
+                    return Types.toInt(-atom(parse).toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
                 return atom(parse);
             }else if(token.getCache().type() == TokenType.Plus)
             {
                 token.next();
                 if (parse)
-                    return IntVariabel.createInt(data, db, token.getCache().posision(), +atom(parse).toInt(token.getCache().posision(), data, db));
+                    return Types.toInt(+atom(parse).toInt(token.getCache().posision(), data, db), data, db, token.getCache().posision());
                 return atom(parse);
             }
 
@@ -290,12 +294,12 @@ namespace script.parser
             if ((buffer = token.getCache()).type() == TokenType.String)
             {
                 token.next();
-                return StringVariabel.CreateString(data, db, buffer.posision(), buffer.ToString());
+                return Types.toString(buffer.ToString(), data, db, buffer.posision());
             }
             else if (buffer.type() == TokenType.Int)
             {
                 token.next();
-                return IntVariabel.createInt(data, db, buffer.posision(), double.Parse(buffer.ToString(), NumberStyles.Currency, CultureInfo.GetCultureInfo("en-US")));
+                return Types.toInt(double.Parse(buffer.ToString(), NumberStyles.Currency, CultureInfo.GetCultureInfo("en-US")), data, db, token.getCache().posision());
             }
             else if (buffer.type() == TokenType.Bool)
             {
@@ -341,14 +345,14 @@ namespace script.parser
                     token.next();
                     if (parse)
                     {
-                        db.push(buffer.ToString(), varCache = IntVariabel.createInt(data, db, token.getCache().posision(), db.get(buffer.ToString(), data).toInt(p, data, db) + 1), data);
+                        db.push(buffer.ToString(), varCache = Types.toInt(db.get(buffer.ToString(), data).toInt(p, data, db) + 1, data, db, token.getCache().posision()), data);
                     }
                 }else if(token.getCache().type() == TokenType.MinusOne)
                 {
                     token.next();
                     if (parse)
                     {
-                        db.push(buffer.ToString(), varCache = IntVariabel.createInt(data, db, token.getCache().posision(), db.get(buffer.ToString(), data).toInt(p, data, db) - 1), data);
+                        db.push(buffer.ToString(), varCache = Types.toInt(db.get(buffer.ToString(), data).toInt(p, data, db) - 1, data, db, token.getCache().posision()), data);
                     }
 
                 }
@@ -396,11 +400,11 @@ namespace script.parser
                 ParseFunctionCallResult pfcr;
 
                 if (parse && cObject.hasConstructor())
-                    pfcr = CallScriptFunction.parseCall(parse, cObject.getConstructor().Aguments, new VariabelDatabase(), token, this, data, cObject.getConstructor().setVariabel);
+                    pfcr = CallScriptFunction.parseCall(parse, cObject.getConstructor().Agument, db.createShadow(), token, this, data, cObject.getConstructor().SetVariabel);
                 else
                     pfcr = CallScriptFunction.parseCall(parse, new AgumentStack(), db, token, this, data, false);
 
-                return handleAfterVariabel(cObject.createNew(pfcr.Call, db, data, token.getCache().posision()), parse);
+                return handleAfterVariabel(cObject.createNew(db, data, pfcr.Call, token.getCache().posision()), parse);
             }
             else if (buffer.type() == TokenType.Self) {
                 if (parse && db.C == null)
@@ -488,20 +492,20 @@ namespace script.parser
 
         private CVar assignStaticObject(ClassVariabel c, string item, bool isSelf, bool parse)
         {
-            if (parse && !c.containsStaticItem(item))
+            if (parse && !c.ContainItem(item))
             {
                 data.setError(new ScriptError("'" + c.Name + "' do not contain a static item there is been called: " + item, token.getCache().posision()), db);
                 return new NullVariabel();
             }
 
 
-            if (parse && c.getItem(item).isMethod)
+            if (parse && c.IsMethod(item))
             {
                  data.setError(new ScriptError("You can`t append value to static method", token.getCache().posision()), db);
                 return new NullVariabel();
             }
 
-            if (parse && !isSelf && !c.getItem(item).isPublic)
+            if (parse && !isSelf && !c.IsPublic(item))
             {
                 data.setError(new ScriptError("You can`t use a private static variabel", token.getCache().posision()), db);
                 return new NullVariabel();
@@ -511,7 +515,7 @@ namespace script.parser
             CVar newValue = handleAfterVariabel(getBooleanPrefix(parse), parse);
 
             if (parse)
-                c.getItem(item).Context = newValue;
+                ((PointerVariabel)c.get(item)).setValue(newValue);
 
             return newValue;
         }
@@ -546,13 +550,13 @@ namespace script.parser
 
         private CVar handleStatic(ClassVariabel c, string item, bool isSelf, bool parse)
         {
-            if (parse && !c.containsStaticItem(item))
+            if (parse && !c.ContainItem(item))
             {
                 data.setError(new ScriptError("'" + c.Name + "' has no static item call: " + item, token.getCache().posision()), db);
                 return new NullVariabel();
             }
 
-            if (parse && !isSelf && !c.getItem(item).isPublic)
+            if (parse && !isSelf && !c.IsPublic(item))
             {
                 data.setError(new ScriptError("'" + c.Name + "->" + item + "' is not public", token.getCache().posision()), db);
                 return new NullVariabel();
@@ -560,7 +564,7 @@ namespace script.parser
 
             
             //this is only for pointer :)
-            if (!c.getItem(item).isMethod)
+            if (c.IsPointer(item))
             {
                 if(token.getCache().type() == TokenType.PlusOne)
                 {
@@ -568,7 +572,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        c.getItem(item).Context = IntVariabel.createInt(data, db, token.getCache().posision(), c.getItem(item).Context.toInt(token.getCache().posision(), data, db) + 1);
+                        ((PointerVariabel)c.get(item)).setValue(Types.toInt(((PointerVariabel)c.get(item)).getValue().toInt(token.getCache().posision(), data, db) + 1, data, db, token.getCache().posision()));
                     }
                 }else if(token.getCache().type() == TokenType.MinusOne)
                 {
@@ -576,12 +580,12 @@ namespace script.parser
 
                     if (parse)
                     {
-                        c.getItem(item).Context = IntVariabel.createInt(data, db, token.getCache().posision(), c.getItem(item).Context.toInt(token.getCache().posision(), data, db) - 1);
+                        ((PointerVariabel)c.get(item)).setValue(Types.toInt(((PointerVariabel)c.get(item)).getValue().toInt(token.getCache().posision(), data, db) - 1, data, db, token.getCache().posision()));
                     }
                 }
             }
 
-            return handleAfterVariabel(parse ? c.getItem(item).Context : new NullVariabel(), parse);
+            return handleAfterVariabel(parse ? (c.IsPointer(item) ? ((PointerVariabel)c.get(item)).getValue() : c.get(item)) : new NullVariabel(), parse);
         }
         
         private CVar handleObject(ObjectVariabel obj, string item, bool isThis, bool parse)
@@ -607,7 +611,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        obj.appendToPointer(item, IntVariabel.createInt(data, db, token.getCache().posision(), obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
+                        obj.appendToPointer(item, Types.toInt(((PointerVariabel)obj.get(item)).getValue().toInt(token.getCache().posision(), data, db) + 1, data, db, token.getCache().posision()));
                     }
                 }
                 else if (token.getCache().type() == TokenType.MinusOne)
@@ -616,7 +620,7 @@ namespace script.parser
 
                     if (parse)
                     {
-                        obj.appendToPointer(item, IntVariabel.createInt(data, db, token.getCache().posision(), obj.get(item).toInt(token.getCache().posision(), data, db) + 1));
+                        obj.appendToPointer(item, Types.toInt(((PointerVariabel)obj.get(item)).getValue().toInt(token.getCache().posision(), data, db) - 1, data, db, token.getCache().posision()));
                     }
                 }
             }
@@ -626,7 +630,7 @@ namespace script.parser
 
         private CVar initArray(bool parse)
         {
-            ArrayVariabel array = new ArrayVariabel();
+            ArrayVariabel array = new ArrayVariabel(data, db, token.getCache().posision());
 
             if(token.next().type() != TokenType.RightBoks)
             {
@@ -776,13 +780,13 @@ namespace script.parser
                         if (variabel is ClassVariabel)
                             assignStaticObject(parse ? (ClassVariabel)variabel : new ClassVariabel(new Class("")), item, false, parse);
                         else
-                            assignObject(parse ? (ObjectVariabel)variabel : new ObjectVariabel(""), item, parse, false);
+                            assignObject(parse ? (ObjectVariabel)variabel : new ObjectVariabel(new ClassVariabel(new Class()), new System.Collections.Generic.Dictionary<string, Container.PointerContainer>(), new System.Collections.Generic.Dictionary<string, Container.MethodContainer>(), null, new System.Collections.ArrayList()), item, parse, false);
                     }
 
                     if(variabel is ClassVariabel)
                         return handleStatic(parse ? (ClassVariabel)variabel : new ClassVariabel(new Class("")), item, false, parse);
 
-                    return handleObject(parse ? (ObjectVariabel)variabel : new ObjectVariabel(""), item, false, parse);
+                    return handleObject(parse ? (ObjectVariabel)variabel : new ObjectVariabel(new ClassVariabel(new Class()), new System.Collections.Generic.Dictionary<string, Container.PointerContainer>(), new System.Collections.Generic.Dictionary<string, Container.MethodContainer>(), null, new System.Collections.ArrayList()), item, false, parse);
             }
 
             return variabel;

@@ -46,12 +46,12 @@ namespace script
             }
 
             token.next();
-            //run thrue the script (if Run is true and return is null)
-            while (data.State == RunningState.Normal && token.getCache().type() != TokenType.EOF)
+            TokenType type;
+            while (data.State == RunningState.Normal && (type = token.getCache().type()) != TokenType.EOF)
             {
-                if (parsers.ContainsKey(token.getCache().type()))
+                if (parsers.ContainsKey(type))
                 {   
-                    parsers[token.getCache().type()].parse(data, db, token);
+                    parsers[type].parse(data, db, token);
                 }
                 else
                 {

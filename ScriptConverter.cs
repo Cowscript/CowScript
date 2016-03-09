@@ -1,4 +1,5 @@
-﻿using script.variabel;
+﻿using script.Type;
+using script.variabel;
 using System;
 
 namespace script
@@ -9,7 +10,7 @@ namespace script
         {
             if (c is string)
             {
-                return StringVariabel.CreateString(data, db, new Posision(0,0), (string)c);
+                return Types.toString((string)c, data, db, new Posision(0,0));
             }
             else if (c is bool)
             {
@@ -21,11 +22,11 @@ namespace script
             }
             else if (c is double)
             {
-                return IntVariabel.createInt(data, db, new Posision(0,0), (double)c);
+                return Types.toInt((double)c, data, db, new Posision(0,0));
             }
             else if (c is int)
             {
-                return IntVariabel.createInt(data, db, new Posision(0, 0), Convert.ToDouble((int)c));
+                return Types.toInt(Convert.ToDouble((int)c), data, db, new Posision(0,0));
             }
             else if (c is ObjectVariabel)
                 return (ObjectVariabel)c;

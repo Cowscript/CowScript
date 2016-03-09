@@ -10,7 +10,7 @@ namespace script.plugin
         {
             //wee push plugin in this container :)
             container.Add("error",  new Error());
-            container.Add("type",   new Types());
+            container.Add("type",   new TypePlugin());
             container.Add("array",  new Array());
             container.Add("regex",  new Regex());
             container.Add("base64", new Base64());
@@ -27,9 +27,9 @@ namespace script.plugin
             return container.ContainsKey(name);
         }
 
-        public void open(VariabelDatabase database, string name, EnegyData data)
+        public void open(VariabelDatabase database, string name, EnegyData data, Posision pos)
         {
-            container[name].open(database, data);
+            container[name].open(database, data, pos);
         }
     }
 }

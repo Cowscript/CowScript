@@ -1,17 +1,17 @@
-﻿using script.builder;
-using script.help;
+﻿
+using script.Container;
 using script.stack;
 using script.Type;
 
 namespace script.variabel
 {
-    class MethodVariabel : FunctionVariabel
+    public class MethodVariabel : FunctionVariabel
     {
-        private ClassMethods method;
         private ObjectVariabel obj;
         private VariabelDatabase extraVariabelDatabase;
+        private MethodContainer method;
 
-        public MethodVariabel(ClassMethods method, ObjectVariabel obj, VariabelDatabase extra) : base(null)
+        public MethodVariabel(MethodContainer method, ObjectVariabel obj, VariabelDatabase extra) : base(null)
         {
             this.method = method;
             this.obj = obj;
@@ -22,18 +22,26 @@ namespace script.variabel
         {
             get
             {
-                return method.setVariabel;
+                return method.SetVariabel;
+            }
+        }
+
+        public bool IsPublic
+        {
+            get
+            {
+                return method.IsPublic;
             }
         }
 
         public override int agumentSize()
         {
-            return method.Aguments.size();
+            return method.Agument.size();
         }
 
         public override AgumentStack getStatck()
         {
-            return method.Aguments;
+            return method.Agument;
         }
 
         public override VariabelDatabase getShadowVariabelDatabase(VariabelDatabase db)
@@ -48,53 +56,56 @@ namespace script.variabel
                 db = getShadowVariabelDatabase(extraVariabelDatabase);
                 if (SetVariabel)
                 {
-                    for (int i = 0; i < method.Aguments.size(); i++)
-                        db.push(method.Aguments.get(i).Name, call[i], data);
+                    for (int i = 0; i < method.Agument.size(); i++)
+                        db.push(method.Agument.get(i).Name, call[i], data);
                 }
             }
+
+            CVar cache = method.Body(obj, db, call, data, pos);
+            db.garbageCollector();
             if(method.ReturnType != null)
             {
-                CVar cache = method.call(obj, db, call, data, pos);
                 if(!TypeHandler.controlType(cache, method.ReturnType))
                 {
                     data.setError(new ScriptError("a method '" + obj.Name + "->"+method.Name+"' returns can not be convertet to '" + method.ReturnType + "'", pos), db);
                     return new NullVariabel();
                 }
             }
-            return method.call(obj, db, call, data, pos);
+
+            return cache;
         }
 
         public override CVar call(EnegyData data, VariabelDatabase db, params object[] parameters)
         {
-            CVar[] stack = new CVar[method.Aguments.size()];
+            CVar[] stack = new CVar[method.Agument.size()];
             VariabelDatabase vd = getShadowVariabelDatabase(db);
 
-            for (int i = 0; i < parameters.Length && i <= method.Aguments.size(); i++)
+            for (int i = 0; i < parameters.Length && i <= method.Agument.size(); i++)
             {
                 CVar context = ScriptConverter.convert(parameters[i], data, db);
-                if (method.Aguments.get(i).hasType() && !TypeHandler.controlType(context, method.Aguments.get(i).Type))
+                if (method.Agument.get(i).hasType() && !TypeHandler.controlType(context, method.Agument.get(i).Type))
                 {
-                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + method.Aguments.get(i).Type.ToString(), new Posision(0, 0)), db);
+                    data.setError(new ScriptError("Cant convert " + context.type() + " to " + method.Agument.get(i).Type.ToString(), new Posision(0, 0)), db);
                 }
 
                 //okay let cache the parameters :)
                 stack[0] = context;
                 if(SetVariabel)
-                    vd.push(method.Aguments.get(i).Name, stack[0], data);
+                    vd.push(method.Agument.get(i).Name, stack[0], data);
             }
 
             //wee take a new for loop to get other parameters there is not has been set :)
-            for (int i = stack.Length; i < method.Aguments.size(); i++)
+            for (int i = stack.Length; i < method.Agument.size(); i++)
             {
-                if (!method.Aguments.get(i).hasValue())
+                if (!method.Agument.get(i).hasValue())
                 {
                     data.setError(new ScriptError("Missing agument to " + method.Name, new Posision(0, 0)), db);
                     return new NullVariabel();
                 }
 
-                stack[i] = method.Aguments.get(i).Value;
+                stack[i] = method.Agument.get(i).Value;
                 if(SetVariabel)
-                    vd.push(method.Aguments.get(i).Name, method.Aguments.get(i).Value, data);
+                    vd.push(method.Agument.get(i).Name, method.Agument.get(i).Value, data);
             }
 
             return call(stack, db, data, new Posision(0,0));

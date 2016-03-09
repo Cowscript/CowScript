@@ -16,6 +16,14 @@ namespace script.help
             Agument = agument;
         }
 
+        public CVar call(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            if (obj is ObjectVariabel)
+                return call((ObjectVariabel)obj, db, stack, data, pos);
+
+            return call((ClassVariabel)obj, db, stack, data, pos);
+        }
+
         public CVar call(ObjectVariabel obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
             //interprenter.setObject(obj);

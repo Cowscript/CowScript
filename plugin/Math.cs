@@ -1,11 +1,12 @@
 ﻿using script.builder;
+using script.Type;
 using script.variabel;
 
 namespace script.plugin
 {
     class Math : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function cos = new Function();
             cos.Name = "cos";
@@ -29,17 +30,17 @@ namespace script.plugin
 
         private CVar Sin_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, System.Math.Sin(stack[0].toInt(pos, data, db)));
+            return Types.toInt(System.Math.Sin(stack[0].toInt(pos, data, db)), data, db, pos);
         }
 
         private CVar Tan_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, System.Math.Tan(stack[0].toInt(pos, data, db)));
+            return Types.toInt(System.Math.Tan(stack[0].toInt(pos, data, db)), data, db, pos);
         }
 
         private CVar Cos_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
         {
-            return IntVariabel.createInt(data, db, pos, System.Math.Cos(stack[0].toInt(pos, data, db)));
+            return Types.toInt(System.Math.Cos(stack[0].toInt(pos, data, db)), data, db, pos);
         }
     }
 }

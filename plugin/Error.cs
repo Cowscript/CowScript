@@ -7,7 +7,7 @@ namespace script.plugin
 {
     class Error : PluginInterface
     {
-        public void open(VariabelDatabase database, EnegyData data)
+        public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function error = new Function();
             error.Name = "error";

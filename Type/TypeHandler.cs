@@ -5,6 +5,11 @@ namespace script.Type
 {
     class TypeHandler
     {
+        public static ObjectVariabel ToObjectVariabel(CVar var)
+        {
+            return (ObjectVariabel)var;
+        }
+
         public static bool controlType(CVar variabel, string type)
         {
             //both int and string got a valid method toString and int has toInt
@@ -43,16 +48,14 @@ namespace script.Type
 
         private static bool controlMethod(ObjectVariabel obj, string name, int agumentSize)
         {
-            if (!obj.items.ContainsKey(name))
+            if(!obj.containsItem(name))
             {
-                Console.WriteLine("Has no item: " + name);
                 return false;
             }
 
             //control the method size
             if (((MethodVariabel)obj.get(name)).agumentSize() != agumentSize)
             {
-                Console.WriteLine("the " + name + " take " + ((MethodVariabel)obj.get(name)).agumentSize() + " aguments");
                 return false;
             }
 
