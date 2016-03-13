@@ -18,3 +18,9 @@ The parser will always try to offer older version of script to work in never ver
 
 In C# has Math.sin(double) and so on but wee will take benefits off function so Math.sin(double) is sin(int) in cowscript
 More context will be added
+
+#Support.
+
+CowScript will only support 3 beta version at the same time. This meaning it will never get bugfix updates or change. Bur if there is a security issue it will get a security fix.
+
+But CowScript will also suppurt 3 alpha release at the same times. This will get bugfix but never change. Therfor can you use Alpha release in long time and without change in you setup to fit in CowScript changes
