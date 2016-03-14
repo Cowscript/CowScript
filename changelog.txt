@@ -6,7 +6,6 @@ V0.6
  append option to load extra system plugin via dll files
  Add method 'getRegex()' to Regex class to get the regex string there is used.
  Add method 'updateRegex(string)' to update the regex string. Will throw errorif the string is empty.
- Function name should be set in a constructor and not as now in a variabel.
  Push functions 'cosh', 'sinh' and 'tanh' to math plugin.
  Append method 'close' to Tcp class.
  Append "function<type>" to function agument type there tell what a function should return. If the function has no return type set it will return in a error.
