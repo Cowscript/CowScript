@@ -4,8 +4,6 @@ V0.6
  in 'for' when control if there need one more loop you can append more end one controler 'for(i=0;i<100, 1 > 0;i++)'
  unset more end one variabel 'unset one, two, tree, four;'
  append option to load extra system plugin via dll files
- Show the file in error message.
- Option to parse file from github.
  Add method 'getRegex()' to Regex class to get the regex string there is used.
  Add method 'updateRegex(string)' to update the regex string. Will throw errorif the string is empty.
  Function name should be set in a constructor and not as now in a variabel.
