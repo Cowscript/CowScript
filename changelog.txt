@@ -17,7 +17,6 @@ Append method to Energy 'reaset' there empty VariabelDatabase and set status to'
  Add removeValue to array. Removed the value in the array.
  Append protectet method 'set' to string class. Can be uses to append string to string object. 
  Append protectet method 'set' to int class. Can be uses to append int to int object.
- Use for, while, foreach and if with out useing { and }
  Allow _ in beginning of variabel name.
 ---Bugfix---
 If error file exists it will try to create it else it will try to write in it. 
