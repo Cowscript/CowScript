@@ -1,7 +1,8 @@
 ----------------- change log -----------------
+V0.7
+Remove posision in token buffer and add it in EnergyData. Every time you call token.next() it will update EnergyData posision.
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
- in 'for' when control if there need one more loop you can append more end one controler 'for(i=0;i<100, 1 > 0;i++)'
  unset more end one variabel 'unset one, two, tree, four;'
  append option to load extra system plugin via dll files
  Add method 'getRegex()' to Regex class to get the regex string there is used.
