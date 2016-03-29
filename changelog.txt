@@ -3,7 +3,8 @@ V0.7
 Remove posision in token buffer and add it in EnergyData. Every time you call token.next() it will update EnergyData posision.
 Update ObjectVariable so it not look after id every time it look after items but get the object of it.
 Append method "arrayAppend(key, value)" to array variabel. The system call this mthod every time it append context to array
-Append method "arrayGet(key)" to array class. It is called every time a context is trying to get from a array
+Append method "arrayGet(key)" to array class. It is called every time a context is trying to get from a array.
+If the string in agument in 'toInt' not can be converted to int the function will now be converted to -1
 
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
