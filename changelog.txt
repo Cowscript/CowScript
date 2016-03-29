@@ -6,6 +6,8 @@ Append method "arrayAppend(key, value)" to array variabel. The system call this 
 Append method "arrayGet(key)" to array class. It is called every time a context is trying to get from a array.
 If the string in agument in 'toInt' not can be converted to int the function will now be converted to -1.
 Extrends more end one class 'class one extend too, tree, four{'
+Append << and >> operater.
+Append support for hexadecimal.
 
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
