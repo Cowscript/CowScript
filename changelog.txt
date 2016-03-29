@@ -4,6 +4,8 @@ Remove posision in token buffer and add it in EnergyData. Every time you call to
 Update ObjectVariable so it not look after id every time it look after items but get the object of it.
 Append method "arrayAppend(key, value)" to array variabel. The system call this mthod every time it append context to array
 Append method "arrayGet(key)" to array class. It is called every time a context is trying to get from a array.
+Append method "arrayNextKey" to array class. When it is called it will take the next key and return it. Will be uses in foreach.
+Remove class "ArrayVariabel" and from the further work as string and int. A helper class will be created to help to get and append context.
 If the string in agument in 'toInt' not can be converted to int the function will now be converted to -1.
 Extrends more end one class 'class one extend too, tree, four{'
 Append << and >> operater.
