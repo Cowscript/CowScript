@@ -10,6 +10,7 @@ If the string in agument in 'toInt' not can be converted to int the function wil
 Extrends more end one class 'class one extend too, tree, four{'
 Append << and >> operater.
 Append support for hexadecimal.
+Create aguments there contain all agument in a function when it is called.
 
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
