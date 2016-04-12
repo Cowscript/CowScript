@@ -51,3 +51,10 @@ asset(MyName->sGetName() == "jugolo", "Test width static class method failed");
 name = new MyName();
 name->setName("jugolo");
 asset(name->getName() == "jugolo", "Test width class method failed");
+
+testFunc = func(text){
+   return "hallo "+text;
+};
+
+asset(testFunc("CowScript") == "hallo CowScript", "Variabel func dont works");
+testFunc = null;
