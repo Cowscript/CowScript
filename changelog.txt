@@ -13,6 +13,7 @@ Append support for % operater.
 Append support for hexadecimal.
 Create aguments there contain all agument in a function when it is called.
 Append config value "theread.use". When set to true (set true by default) the system is allow to use thered (but not the script when it theread is supportet). This config value can not be change by the script.
+Redesigne Token system so or can handle the news task.
 
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
