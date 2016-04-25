@@ -1,19 +1,32 @@
 ----------------- change log -----------------
+V1.0
+Bugfix and change only there do it better.
+After this a new lexer will be createt in new language 'javascript'
+Append function useTcp() in tcp plugin there tell about the support for tcp.
+Append function useFiles() in file plugin there tell about support for access file system.
+Append function parserLanguage() there tell wich program langauge the parser is writing in.
+
+V0.8
+Create class Theread 
+Append static method 'create(function callback)' start a new theread and call the callback in it
+Append static method 'count()' there return numbers of theread there is active.
+
 V0.7
 Remove posision in token buffer and add it in EnergyData. Every time you call token.next() it will update EnergyData posision.
 Update ObjectVariable so it not look after id every time it look after items but get the object of it.
-Append method "arrayAppend(key, value)" to array variabel. The system call this mthod every time it append context to array
-Append method "arrayGet(key)" to array class. It is called every time a context is trying to get from a array.
-Append method "arrayNextKey" to array class. When it is called it will take the next key and return it. Will be uses in foreach.
+Append method "push(key, value)" to array variabel. The system call this mthod every time it append context to array
+Append method "get(key)" to array class. It is called every time a context is trying to get from a array.
+Append method "nextKey" to array class. When it is called it will take the next key and return it. Will be uses in foreach.
 Remove class "ArrayVariabel" and from the further work as string and int. A helper class will be created to help to get and append context.
-If the string in agument in 'toInt' not can be converted to int the function will now be converted to -1.
+If a class extrends array class the object can use [ and ] like normely array. 
 Extrends more end one class 'class one extend too, tree, four{'
 Append << and >> operater.
 Append support for % operater.
 Append support for hexadecimal.
 Create aguments there contain all agument in a function when it is called.
 Append config value "theread.use". When set to true (set true by default) the system is allow to use thered (but not the script when it theread is supportet). This config value can not be change by the script.
-Redesigne Token system so or can handle the news task.
+Redesigne Token system so it can be used in multi theard system
+Remove status in EnergyData class and put isError in it so it can be used in MultiTherad system.
 
 V0.6
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
