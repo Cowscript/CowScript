@@ -28,6 +28,21 @@ namespace script.Type
 
             if (variabel.type() == "object" && ((ObjectVariabel)variabel).Name == type)
                 return true;
+            
+            //control if the type is function
+            if(type.IndexOf("function") == 0)
+            {
+                //control if the hole type contain 'function'
+                if(type == "function")
+                {
+                    return variabel.type() == "function" || variabel.type() == "method";
+                }
+                
+                if (type.Substring(8, 1) != "<" || type.Substring(type.Length-1) != ">")
+                    return false;
+                string rt = type.Substring(9, type.Length - 10);
+                return variabel.type() == "function" && ((FunctionVariabel)variabel).func.ReturnType == rt || variabel.type() == "method" && ((MethodVariabel)variabel).method.ReturnType == rt;
+            }
 
             //funtion can also be method and method funtion
             if (variabel.type() == "function" && type == "method" || variabel.type() == "method" && type == "function")

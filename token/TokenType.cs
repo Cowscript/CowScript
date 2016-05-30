@@ -41,6 +41,7 @@
         RightTuborg,
         Public,
         Private,
+        Protected,
         Static,
         Function,
         Return,
@@ -59,6 +60,7 @@
         Break,
         Continue,
         Is,
+        Isn,
         Ask,
         Extends,
     }

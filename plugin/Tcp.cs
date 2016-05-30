@@ -9,6 +9,8 @@ namespace script.plugin
 {
     class Tcp : PluginInterface
     {
+        public string Name { get { return "tcp"; } }
+
         public static void setError(CVar msg, ObjectVariabel obj)
         {
             obj.appendToPointer("ie", new BooleanVariabel(true));
@@ -26,11 +28,11 @@ namespace script.plugin
             Class tcp = new Class("Tcp");
 
             Pointer ie = new Pointer("ie");
-            ie.SetPrivate();
+            ie.SetLevel(ClassItemAccessLevel.Private);
             tcp.SetPointer(ie, data, database, pos);
 
             Pointer em = new Pointer("em");
-            em.SetPrivate();
+            em.SetLevel(ClassItemAccessLevel.Private);
             tcp.SetPointer(em, data, database, pos);
 
             Method constructor = new Method("");
@@ -58,8 +60,20 @@ namespace script.plugin
             getError.SetReturnType("string");
             getError.SetBody(GetError_caller);
             tcp.SetMethod(getError, data, database, pos);
+
+            Method close = new Method("close");
+            close.SetBody(Close_caller);
+            tcp.SetMethod(close, data, database, pos);
             
             database.pushClass(tcp, data);
+        }
+
+        private CVar Close_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            ((TcpClient)TypeHandler.ToObjectVariabel(obj).systemItems["client"]).Close();
+            ((StreamReader)TypeHandler.ToObjectVariabel(obj).systemItems["reader"]).Close();
+            ((StreamWriter)TypeHandler.ToObjectVariabel(obj).systemItems["writer"]).Close();
+            return null;
         }
 
         private CVar GetError_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

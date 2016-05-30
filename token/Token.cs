@@ -25,7 +25,7 @@ namespace script.token
         */
         public static bool isVariabelChar(int c)
         {
-            return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+            return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') || c == '_';
         }
 
         public static bool isInt(int c)
@@ -215,7 +215,7 @@ namespace script.token
 
             int c;
 
-            while (isVariabelChar((c = peek())) || isInt(c) || c == '_')
+            while (isVariabelChar((c = peek())) || isInt(c))
                 builder.Append((char)pop());
 
             string name = builder.ToString();
@@ -223,76 +223,110 @@ namespace script.token
             if (reservedVariabelName.Contains(name))
                 return error(name + " is resevd and there for you are not allow to use it", pos.toPosision());
 
-            if (name == "if") {
+            if (name == "if")
+            {
                 return new TokenBuffer("if", TokenType.If, pos.toPosision());
-            } else if (name == "elseif") {
+            }
+            else if (name == "elseif")
+            {
                 return new TokenBuffer("elseif", TokenType.Elseif, pos.toPosision());
-            } else if (name == "else") {
+            }
+            else if (name == "else")
+            {
                 return new TokenBuffer("else", TokenType.Else, pos.toPosision());
-            } else if (name == "true" || name == "false")
+            }
+            else if (name == "true" || name == "false")
             {
                 return new TokenBuffer(name, TokenType.Bool, pos.toPosision());
-            } else if (name == "null")
+            }
+            else if (name == "null")
             {
                 return new TokenBuffer(name, TokenType.Null, pos.toPosision());
-            } else if (name == "class")
+            }
+            else if (name == "class")
             {
                 return new TokenBuffer(name, TokenType.Class, pos.toPosision());
-            } else if (name == "public")
+            }
+            else if (name == "public")
             {
                 return new TokenBuffer(name, TokenType.Public, pos.toPosision());
-            } else if (name == "private")
+            }
+            else if (name == "private")
             {
                 return new TokenBuffer(name, TokenType.Private, pos.toPosision());
-            } else if (name == "static")
+            }else if(name == "protected")
+            {
+                return new TokenBuffer(name, TokenType.Protected, pos.toPosision());
+            }
+            else if (name == "static")
             {
                 return new TokenBuffer(name, TokenType.Static, pos.toPosision());
-            } else if (name == "function" || name == "func")
+            }
+            else if (name == "function" || name == "func")
             {
                 return new TokenBuffer(name, TokenType.Function, pos.toPosision());
-            } else if (name == "return")
+            }
+            else if (name == "return")
             {
                 return new TokenBuffer(name, TokenType.Return, pos.toPosision());
-            } else if (name == "use")
+            }
+            else if (name == "use")
             {
                 return new TokenBuffer(name, TokenType.Use, pos.toPosision());
-            } else if (name == "foreach")
+            }
+            else if (name == "foreach")
             {
                 return new TokenBuffer(name, TokenType.Foreach, pos.toPosision());
-            } else if (name == "as")
+            }
+            else if (name == "as")
             {
                 return new TokenBuffer(name, TokenType.As, pos.toPosision());
-            } else if (name == "new")
+            }
+            else if (name == "new")
             {
                 return new TokenBuffer(name, TokenType.New, pos.toPosision());
-            } else if (name == "this")
+            }
+            else if (name == "this")
             {
                 return new TokenBuffer(name, TokenType.This, pos.toPosision());
-            } else if (name == "self")
+            }
+            else if (name == "self")
             {
                 return new TokenBuffer(name, TokenType.Self, pos.toPosision());
-            } else if (name == "while")
+            }
+            else if (name == "while")
             {
                 return new TokenBuffer(name, TokenType.While, pos.toPosision());
-            } else if (name == "repeat")
+            }
+            else if (name == "repeat")
             {
                 return new TokenBuffer(name, TokenType.Repeat, pos.toPosision());
-            } else if (name == "for")
+            }
+            else if (name == "for")
             {
                 return new TokenBuffer(name, TokenType.For, pos.toPosision());
-            } else if (name == "unset")
+            }
+            else if (name == "unset")
             {
                 return new TokenBuffer(name, TokenType.Unset, pos.toPosision());
-            } else if (name == "break")
+            }
+            else if (name == "break")
             {
                 return new TokenBuffer(name, TokenType.Break, pos.toPosision());
-            } else if (name == "continue")
+            }
+            else if (name == "continue")
             {
                 return new TokenBuffer(name, TokenType.Continue, pos.toPosision());
-            }else if(name == "is")
+            }
+            else if (name == "is")
             {
                 return new TokenBuffer(name, TokenType.Is, pos.toPosision());
-            }else if(name == "extends")
+            }
+            else if (name == "isn")
+            {
+                return new TokenBuffer(name, TokenType.Isn, pos.toPosision());
+            }
+            else if (name == "extends")
             {
                 return new TokenBuffer(name, TokenType.Extends, pos.toPosision());
             }

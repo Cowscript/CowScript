@@ -22,9 +22,9 @@ namespace script.builder
             Container.IsStatic = true;
         }
 
-        public void setPrivate()
+        public void setLevel( ClassItemAccessLevel level)
         {
-            Container.IsPublic = false;
+            Container.Level = level;
         }
 
         public void SetAgumentStack(AgumentStack stack)
@@ -58,7 +58,7 @@ namespace script.builder
             {
                 Name = name,
                 IsStatic = false,
-                IsPublic = true,
+                Level = ClassItemAccessLevel.Public,
                 Agument = new AgumentStack(),
                 SetVariabel = false,
             };

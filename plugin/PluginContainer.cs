@@ -9,17 +9,22 @@ namespace script.plugin
         public PluginContainer()
         {
             //wee push plugin in this container :)
-            container.Add("error",  new Error());
-            container.Add("type",   new TypePlugin());
-            container.Add("array",  new Array());
-            container.Add("regex",  new Regex());
-            container.Add("base64", new Base64());
-            container.Add("time",   new Time());
-            container.Add("random", new Random());
-            container.Add("parser", new Parser());
-            container.Add("math",   new Math());
-            container.Add("config", new Config());
-            container.Add("tcp",    new Tcp());
+            push(new Error());
+            push(new TypePlugin());
+            push(new Array());
+            push(new Regex());
+            push(new Base64());
+            push(new Time());
+            push(new Random());
+            push(new Parser());
+            push(new Math());
+            push(new Config());
+            push(new Tcp());
+        }
+
+        public void push(PluginInterface plugin)
+        {
+            container.Add(plugin.Name, plugin);
         }
 
         public bool exists(string name)

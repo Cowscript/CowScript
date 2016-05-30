@@ -4,6 +4,7 @@ using script.builder;
 using script.help;
 using script.stack;
 using script.plugin.File;
+using script.Type;
 
 namespace script.parser
 {
@@ -55,7 +56,7 @@ namespace script.parser
             {
                 if(token.next().type() == TokenType.Variabel)
                 {
-                    if (db.isType(token.getCache().ToString()))
+                    if (Types.IsType(token.getCache().ToString(), db))
                     {
                         function.ReturnType = token.getCache().ToString();
                         token.next();

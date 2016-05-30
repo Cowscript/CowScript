@@ -8,7 +8,7 @@ namespace script.parser
     {
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
-            if(token.next().type() != TokenType.LeftBue)
+            if (token.next().type() != TokenType.LeftBue)
             {
                 ed.setError(new ScriptError("Missing ( after 'for'", token.getCache().posision()), db);
                 return null;
@@ -46,7 +46,7 @@ namespace script.parser
             //init the data :)
             new VariabelParser().parseNoEnd(ed, db, new TokenCache(init, ed, db));
 
-            while(ed.State == RunningState.Normal && new VariabelParser().parseNoEnd(ed, db, new TokenCache(status, ed, db)).toBoolean(token.getCache().posision(), ed, db))
+            while (ed.State == RunningState.Normal && new VariabelParser().parseNoEnd(ed, db, new TokenCache(status, ed, db)).toBoolean(token.getCache().posision(), ed, db))
             {
                 Interprenter.parse(new TokenCache(body, ed, db), ed, db);
                 if (ed.State == RunningState.Normal)
@@ -60,14 +60,14 @@ namespace script.parser
         {
             TokenBuffer buffer;
             ArrayList b = new ArrayList();
-            while((buffer = token.next()).type() != TokenType.EOF && buffer.type() != (isEnd ? TokenType.End : TokenType.RightBue))
+            while ((buffer = token.next()).type() != TokenType.EOF && buffer.type() != (isEnd ? TokenType.End : TokenType.RightBue))
             {
                 b.Add(buffer);
             }
 
-            if(token.getCache().type() != (isEnd ? TokenType.End : TokenType.RightBue))
+            if (token.getCache().type() != (isEnd ? TokenType.End : TokenType.RightBue))
             {
-                data.setError(new ScriptError("Missing "+(isEnd ? ";" : ")")+" got: " + token.getCache().ToString(), token.getCache().posision()), db);
+                data.setError(new ScriptError("Missing " + (isEnd ? ";" : ")") + " got: " + token.getCache().ToString(), token.getCache().posision()), db);
                 return new ArrayList();
             }
 

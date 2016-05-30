@@ -95,4 +95,11 @@ namespace script.builder
             return true;
         }
     }
+
+    public enum ClassItemAccessLevel
+    {
+        Public, 
+        Private,
+        Protected,
+    }
 }

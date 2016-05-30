@@ -7,6 +7,9 @@ namespace script.plugin
 {
     class Files : PluginInterface
     {
+
+        public string Name { get { return "file"; } }
+
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             if(data.Config.get("file.system.enable", "false") != "true")

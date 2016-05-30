@@ -6,6 +6,8 @@ namespace script.plugin
 {
     class Config : PluginInterface
     {
+        public string Name { get { return "config"; } }
+
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class config = new Class("Config");

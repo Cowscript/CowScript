@@ -29,9 +29,44 @@ namespace script.variabel
             hasKey.SetBody(HasKey_caller);
             c.SetMethod(hasKey, data, db, pos);
 
+            Method removeKey = new Method("removeKey");
+            removeKey.GetAgumentStack().push("string", "key");
+            removeKey.SetBody(RemoveKey_caller);
+            c.SetMethod(removeKey, data, db, pos);
+
+            Method removeValue = new Method("removeValue");
+            removeValue.GetAgumentStack().push("value");
+            removeValue.SetBody(RemoveValue_caller);
+            c.SetMethod(removeValue, data, db, pos);
+
             ClassVariabel i = new ClassVariabel(c);
             ObjectVariabel o = i.createNew(db, data, new CVar[0], pos);
             Items = o.Items;
+        }
+
+        private CVar RemoveValue_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            foreach(string key in container.Keys)
+            {
+                if(container[key].compare(stack[0], pos, data, db))
+                {
+                    container.Remove(key);
+                    return new BooleanVariabel(true);
+                }
+            }
+
+            return new BooleanVariabel(false);
+        }
+
+        private CVar RemoveKey_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            string key = stack[0].toString(pos, data, db);
+
+            if (!container.ContainsKey(key))
+                return new BooleanVariabel(false);
+
+            container.Remove(key);
+            return new BooleanVariabel(true);
         }
 
         private CVar HasKey_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

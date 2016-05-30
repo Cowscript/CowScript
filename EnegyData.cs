@@ -57,22 +57,15 @@ namespace script
 
             if (Config.get("error.log.file", "null") != "null")
             {
-                FileStream fs;
-
-                //wee should save the error in a file
-                if (File.Exists(Config.get("error.log.file", "")))
+                if (!File.Exists(Config.get("error.log.file", "null")))
                 {
-                    fs = File.Create(Config.get("error.log.file", ""));
-                }
-                else
-                {
-                    fs = File.OpenWrite(Config.get("error.log.file", ""));
+                    File.Create(Config.get("error.log.file", "null")).Close();
                 }
 
-                StreamWriter sw = new StreamWriter(fs);
+                StreamWriter sw = new StreamWriter(Config.get("error.log.file", "null"), true);
                 sw.WriteLine("[Line: " + er.Posision.Line + ", Row: " + er.Posision.Row + "]" + er.Message);
+                sw.Flush();
                 sw.Close();
-                fs.Close();
             }
 
             if (ErrorHandler != null)

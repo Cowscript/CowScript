@@ -6,12 +6,13 @@ using script.token;
 using System;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 
 namespace script
 {
     public class Energy : IDisposable
     {
-        public const string VERSION = "V0.5";
+        public const string VERSION = "V0.6";
         private EnegyData Data {  set;  get; }
 
         public VariabelDatabase VariabelDatabase { set; get; }
@@ -123,6 +124,48 @@ namespace script
         public void appendMethodToClass(Method method, Class c)
         {
             c.SetMethod(method, Data, VariabelDatabase, new Posision(0, 0));
+        }
+
+        public void LoadDLLFiles(string dir)
+        {
+            if (!Directory.Exists(dir))
+            {
+                return;
+            }
+
+            foreach(string file in Directory.GetFiles(dir, "*.dll"))
+            {
+                HandleDLL(Assembly.LoadFile(file));
+            }
+        }
+
+        public void Reaset()
+        {
+            VariabelDatabase = new VariabelDatabase();
+            Data.setNormal();
+        }
+
+        private void HandleDLL(Assembly assembly)
+        {
+            foreach(System.Type type in assembly.GetTypes())
+            {
+                if(type.IsClass && !type.IsAbstract && type.IsPublic)
+                {
+                    foreach(System.Type type2 in type.FindInterfaces(new TypeFilter(ReturnTrue), null))
+                    {
+                        //first wee look if it is PluginInterface :)
+                        if(type2 == typeof(PluginInterface))
+                        {
+                            Data.Plugin.push(Activator.CreateInstance(type) as PluginInterface);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool ReturnTrue(System.Type m, object filterCriteria)
+        {
+            return true;
         }
     }
 }

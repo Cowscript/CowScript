@@ -36,6 +36,7 @@ namespace script.stack
             if(token.getCache().type() != TokenType.RightBue)
             {
                 data.setError(new ScriptError("Missing ) after function aguments got: " + token.getCache().ToString(), token.getCache().posision()), database);
+                return new AgumentStack();
             }
 
             return agument;
@@ -46,16 +47,50 @@ namespace script.stack
             string name = null;
             CVar value = null;
 
-            //okay wee got a variabel. control if it is a type :)
-            if (database.isType(token.getCache().ToString()))
+            //wee control if it is function :)
+            if(token.getCache().ToString() == "function")
+            {
+                if(token.next().type() == TokenType.Greater)
+                {
+                    //it is a function with return type :)
+                    if (!database.isType(token.next().ToString()))
+                    {
+                        data.setError(new ScriptError("Unknown type: " + token.getCache().ToString(), token.getCache().posision()), database);
+                        return false;
+                    }
+
+                    type = "function<" + token.getCache().ToString() + ">";
+
+                    if(token.next().type() != TokenType.Less)
+                    {
+                        data.setError(new ScriptError("Missing > in end of function return type agument", token.getCache().posision()), database);
+                    }
+
+                    token.next();
+                }
+                else
+                {
+                    type = "function";
+                }
+
+                //okay let try to find the name 
+                if (token.getCache().type() != TokenType.Variabel)
+                {
+                    data.setError(new ScriptError("After type there must be a variabel", token.getCache().posision()), database);
+                    return false;
+                }
+
+                name = token.getCache().ToString();
+            }
+            else if (database.isType(token.getCache().ToString()))
             {
                 //yes it is a type :)
                 type = token.getCache().ToString();
 
                 //okay let try to find the name 
-                if(token.next().type() != TokenType.Variabel)
+                if (token.next().type() != TokenType.Variabel)
                 {
-                    data.setError(new ScriptError("After type there must be a type", token.getCache().posision()), database);
+                    data.setError(new ScriptError("After type there must be a variabel", token.getCache().posision()), database);
                     return false;
                 }
 

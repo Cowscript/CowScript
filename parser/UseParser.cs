@@ -1,6 +1,7 @@
 ﻿using script.plugin.File;
 using script.token;
 using script.variabel;
+using System;
 using System.IO;
 
 namespace script.parser
@@ -10,26 +11,44 @@ namespace script.parser
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
             token.next();
-            string plugin = new VariabelParser().parse(ed, db, token).toString(token.getCache().posision(), ed, db);
 
+            includePlugin(new VariabelParser().parseNoEnd(ed, db, token).toString(token.getCache().posision(), ed, db), ed, db, token);
+
+            while (token.getCache().type() == TokenType.Comma)
+            {
+                token.next();
+                includePlugin(new VariabelParser().parseNoEnd(ed, db, token).toString(token.getCache().posision(), ed, db), ed, db, token);
+            }
+
+            if(token.getCache().type() != TokenType.End)
+            {
+                ed.setError(new ScriptError("Missing ; in end of use. got: "+token.getCache().ToString(), token.getCache().posision()), db);
+                return null;
+            }
+
+            token.next();
+
+            return new NullVariabel();
+        }
+
+        private void includePlugin(string name, EnegyData ed, VariabelDatabase db, Token token)
+        {
             //control if the plugin exists in the system
-            if(ed.Plugin.exists(plugin))
+            if (ed.Plugin.exists(name))
             {
                 //wee has the plugin and load it :)
-                ed.Plugin.open(db, plugin, ed, token.getCache().posision());
+                ed.Plugin.open(db, name, ed, token.getCache().posision());
             }
             else
             {
-                if(ed.Config.get("file.enabled", "false") == "false")
+                if (ed.Config.get("file.enabled", "false") == "false")
                 {
                     ed.setError(new ScriptError("It is not allow to use file in use. 'file.enabled' is not set.", token.getCache().posision()), db);
-                    return new NullVariabel();
+                    return;
                 }
 
-                parseFile(ed, db, token.getCache().posision(), plugin);
+                parseFile(ed, db, token.getCache().posision(), name);
             }
-
-            return new NullVariabel();
         }
 
         private void parseFile(EnegyData ed, VariabelDatabase db, Posision pos, string plugin)

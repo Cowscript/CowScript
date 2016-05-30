@@ -1,7 +1,8 @@
 ﻿namespace script.plugin
 {
-    interface PluginInterface
+    public interface PluginInterface
     {
+        string Name { get; }
         void open(VariabelDatabase database, EnegyData data, Posision pos);
     }
 }

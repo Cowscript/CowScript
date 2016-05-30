@@ -6,16 +6,11 @@ namespace script.plugin
 {
     class Array : PluginInterface
     {
+        public string Name { get { return "array"; } }
+
         //no support from V0.3
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
-            //no support from V0.2
-            Function count = new Function();
-            count.Name = "count";
-            count.agument.push("array", "array");
-            count.call += Count_call;
-            database.pushFunction(count, data);
-
             Function hasValue = new Function();
             hasValue.Name = "hasValue";
             hasValue.agument.push("array", "array");
@@ -29,11 +24,6 @@ namespace script.plugin
             hasKey.agument.push("context");
             hasKey.call += HasKey_call;
             database.pushFunction(hasKey, data);
-        }
-
-        private CVar Count_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)
-        {
-            return Types.toInt(((ArrayVariabel)stack[0]).length(), data, db, pos);
         }
 
         private CVar HasValue_call(CVar[] stack, VariabelDatabase db, EnegyData data, Posision pos)

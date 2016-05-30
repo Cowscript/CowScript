@@ -38,9 +38,9 @@ namespace script.variabel
         public bool IsPublic(string name)
         {
             if (IsMethod(name))
-                return Container.StaticMethod[name].IsPublic;
+                return Container.StaticMethod[name].Level == ClassItemAccessLevel.Public;
 
-            return Container.StaticPointer[name].IsPublic;
+            return Container.StaticPointer[name].Level == ClassItemAccessLevel.Public;
         }
         
         public CVar get(string name)
@@ -81,7 +81,7 @@ namespace script.variabel
                 return base.toString(pos, data, db);
 
             //it contain a method toString
-            if (!Container.StaticMethod["toString"].IsPublic)
+            if (Container.StaticMethod["toString"].Level != ClassItemAccessLevel.Public)
                 return base.toString(pos, data, db);
 
             //it is public
@@ -99,7 +99,7 @@ namespace script.variabel
                 return base.toInt(pos, data, db);
 
             //it contain a method toString
-            if (!Container.StaticMethod["toInt"].IsPublic)
+            if (Container.StaticMethod["toInt"].Level != ClassItemAccessLevel.Public)
                 return base.toInt(pos, data, db);
 
             //it is public

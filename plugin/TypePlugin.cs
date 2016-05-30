@@ -6,6 +6,7 @@ namespace script.plugin
 {
     class TypePlugin : PluginInterface
     {
+        public string Name { get { return "type"; } }
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function type = new Function();

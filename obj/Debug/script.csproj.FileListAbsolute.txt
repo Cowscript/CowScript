@@ -1,0 +1,6 @@
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\obj\Debug\script.csprojResolveAssemblyReference.cache
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\bin\Debug\script.pdb
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\obj\Debug\script.pdb
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\bin\Debug\script.dll.config
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\bin\Debug\script.dll
+C:\Users\Ronnie\Documents\Visual Studio 2015\Projects\script\script\obj\Debug\script.dll

@@ -1,5 +1,5 @@
 ﻿using script.builder;
-using script.stack;
+using System;
 using script.Type;
 using script.variabel;
 
@@ -7,6 +7,9 @@ namespace script.plugin
 {
     class Regex : PluginInterface
     {
+
+        public string Name { get { return "regex"; } }
+
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class regex = new Class("Regex");
@@ -14,10 +17,10 @@ namespace script.plugin
             Method rConstructor = new Method("");
             rConstructor.GetAgumentStack().push("string", "regex");
             rConstructor.SetBody(RConstructor_caller);
-            regex.SetMethod(rConstructor, data, database, pos);
+            regex.SetConstructor(rConstructor, data, database, pos);
 
             Pointer rg = new Pointer("regex");
-            rg.SetPrivate();
+            rg.SetLevel(ClassItemAccessLevel.Private);
             regex.SetPointer(rg, data, database, pos);
 
             Method match = new Method("match");
@@ -30,7 +33,33 @@ namespace script.plugin
             exec.SetBody(Exec_caller);
             regex.SetMethod(exec, data, database, pos);
 
+            Method getRegex = new Method("getRegex");
+            getRegex.SetBody(GetRegex_caller);
+            regex.SetMethod(getRegex, data, database, pos);
+
+            Method updateRegex = new Method("updateRegex");
+            updateRegex.GetAgumentStack().push("string", "regex");
+            updateRegex.SetBody(UpdateRegex_caller);
+            regex.SetMethod(updateRegex, data, database, pos);
+
             database.pushClass(regex, data);
+        }
+
+        private CVar UpdateRegex_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            if(stack[0].toString(pos, data, db) == "")
+            {
+                data.setError(new ScriptError("Regex->updateRegex(string) a regex string can´t be empty", pos), db);
+                return null;
+            }
+
+            TypeHandler.ToObjectVariabel(obj).appendToPointer("regex", stack[0]);
+            return null;
+        }
+
+        private CVar GetRegex_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            return TypeHandler.ToObjectVariabel(obj).get("regex");
         }
 
         private CVar Exec_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
@@ -68,7 +97,11 @@ namespace script.plugin
 
         private CVar RConstructor_caller(CVar obj, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
         {
-            TypeHandler.ToObjectVariabel(obj).appendToPointer("regex", stack[0]);
+            if(!TypeHandler.ToObjectVariabel(obj).appendToPointer("regex", stack[0]))
+            {
+                data.setError(new ScriptError("Could not append " + stack[0].toString(pos, data, db) + " to regex object 'Regex'", pos), db);
+                return new NullVariabel();
+            }
             return new NullVariabel();
         }
     }

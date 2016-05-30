@@ -9,6 +9,7 @@ namespace script.plugin
 {
     class Base64 : PluginInterface
     {
+        public string Name { get { return "base64"; } }
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class base64 = new Class("Base64");

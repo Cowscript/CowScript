@@ -3,6 +3,7 @@ using script.help;
 using script.plugin.File;
 using script.stack;
 using script.token;
+using script.Type;
 using script.variabel;
 
 namespace script.parser
@@ -110,45 +111,52 @@ namespace script.parser
         private bool build(Token token, EnegyData data)
         {
             //here wee control if it private or public. protected is comming when class system is builder more avancrede
-            if(token.getCache().type() == TokenType.Public)
+            if (token.getCache().type() == TokenType.Public)
             {
                 token.next();
-                return isStatic(true, token, data);
-            }else if(token.getCache().type() == TokenType.Private)
+                return isStatic(ClassItemAccessLevel.Public, token, data);
+            }
+            else if (token.getCache().type() == TokenType.Private)
             {
                 token.next();
-                return isStatic(false, token, data);
-            }else if(token.getCache().type() == TokenType.Variabel && token.getCache().ToString() == builder.GetContainer().Name)
+                return isStatic(ClassItemAccessLevel.Private, token, data);
+            }
+            else if (token.getCache().type() == TokenType.Protected)
+            {
+                token.next();
+                return isStatic(ClassItemAccessLevel.Protected, token, data);
+            }
+            else if (token.getCache().type() == TokenType.Variabel && token.getCache().ToString() == builder.GetContainer().Name)
             {
                 return buildConstructor(token, data);
             }
             else
             {
-                return isStatic(true, token, data);
+                return isStatic(ClassItemAccessLevel.Public, token, data);
             }
         }
 
-        private bool isStatic(bool isPublic, Token token, EnegyData data)
+        private bool isStatic(ClassItemAccessLevel level, Token token, EnegyData data)
         {
             if(token.getCache().type() == TokenType.Static)
             {
                 token.next();
-                return buildBody(isPublic, true, token, data);
+                return buildBody(level, true, token, data);
             }else
-                return buildBody(isPublic, false, token, data);
+                return buildBody(level, false, token, data);
         }
 
-        private bool buildBody(bool isPublic, bool isStatic, Token token, EnegyData data)
+        private bool buildBody(ClassItemAccessLevel level, bool isStatic, Token token, EnegyData data)
         {
             if (token.getCache().type() == TokenType.Function) //it is a function :)
             {
                 token.next();
-                return buildMethod(isPublic, isStatic, token, data);
+                return buildMethod(level, isStatic, token, data);
             }else
-                return buildVariabel(isPublic, isStatic, token, data);
+                return buildVariabel(level, isStatic, token, data);
         }
 
-        private bool buildVariabel(bool isPublic, bool isStatic, Token token, EnegyData data)
+        private bool buildVariabel(ClassItemAccessLevel level, bool isStatic, Token token, EnegyData data)
         {
             //it is a variabel :)
             //okay it is a variabel ?
@@ -177,14 +185,13 @@ namespace script.parser
             if (isStatic)
                 pointer.SetStatic();
 
-            if (!isPublic)
-                pointer.SetPrivate();
+            pointer.SetLevel(level);
 
             builder.SetPointer(pointer, data, db, token.getCache().posision());
             return true;
         }
 
-        private bool buildMethod(bool isPublic, bool isStatic, Token token, EnegyData data)
+        private bool buildMethod(ClassItemAccessLevel level, bool isStatic, Token token, EnegyData data)
         {
             //control if there are is name after function :)
             if (token.getCache().type() != TokenType.Variabel)
@@ -196,7 +203,7 @@ namespace script.parser
             string type = null;
 
             //okay the name can be a type so wee control it here :)
-            if (db.isType(token.getCache().ToString()))
+            if (Types.IsType(token.getCache().ToString(), db))
             {
                 type = token.getCache().ToString();
 
@@ -217,6 +224,7 @@ namespace script.parser
             method.SetAgumentStack(AgumentParser.parseAguments(token, db, data));
             method.SetBody(new CallScriptMethod(method.GetAgumentStack(), BodyParser.parse(token, data, db)).call);
             method.SetVariabel();//in this way the script can use agument as name :)
+            method.setLevel(level);
 
             builder.SetMethod(method, data, db, token.getCache().posision());
             token.next();

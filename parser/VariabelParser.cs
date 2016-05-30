@@ -196,6 +196,26 @@ namespace script.parser
                 }
 
                 return new BooleanVariabel(false);
+            }else if(token.getCache().type() == TokenType.Isn)
+            {
+                token.next();
+                CVar next = sum(parse);
+
+                if (parse && !(var is ClassVariabel || next is ClassVariabel))
+                {
+                    data.setError(new ScriptError("The node befor isn or after must be class identify", token.getCache().posision()), db);
+                    return new BooleanVariabel(false);
+                }
+
+                if (parse)
+                {
+                    ClassVariabel c = (var is ClassVariabel ? (ClassVariabel)var : (ClassVariabel)next);
+                    ObjectVariabel o = (var is ClassVariabel ? (ObjectVariabel)next : (ObjectVariabel)var);
+
+                    return new BooleanVariabel(!Types.instanceof(c, o));
+                }
+
+                return new BooleanVariabel(false);
             }
 
             return var;
@@ -209,7 +229,7 @@ namespace script.parser
             while ((buffer = token.getCache()).type() == TokenType.Plus || buffer.type() == TokenType.Minus)
             {
                 token.next();
-                if(buffer.type() == TokenType.Plus)
+                if (buffer.type() == TokenType.Plus)
                 {
                     CVar b = gange(parse);
                     if (parse)

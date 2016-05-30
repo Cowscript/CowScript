@@ -121,7 +121,19 @@ namespace script.help
             toString.SetBody(ToString_caller);
             s.SetMethod(toString, data, db, pos);
 
+            Method set = new Method("set");
+            set.GetAgumentStack().push("string", "context");
+            set.setLevel(ClassItemAccessLevel.Protected);
+            set.SetBody(Set_caller);
+            s.SetMethod(set, data, db, pos);
+
             db.pushClass(s, data);
+        }
+
+        private static CVar Set_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)
+        {
+            TypeHandler.ToObjectVariabel(c).systemItems["str"] = stack[0].toString(pos, data, db);
+            return null;
         }
 
         private static CVar Format_caller(CVar c, VariabelDatabase db, CVar[] stack, EnegyData data, Posision pos)

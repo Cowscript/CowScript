@@ -7,6 +7,7 @@ namespace script.plugin
 {
     class Error : PluginInterface
     {
+        public string Name { get { return "error"; } }
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function error = new Function();

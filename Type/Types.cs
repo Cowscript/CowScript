@@ -31,5 +31,22 @@ namespace script.Type
 
             return false;
         }
+
+        public static bool IsType(string control, VariabelDatabase db)
+        {
+            if(control.IndexOf("function") == 0)
+            {
+                if (control == "function")
+                    return true;
+
+                if(control.Substring(8,1) == "<" && control.Substring(control.Length-1, 1) == ">")
+                {
+                    string buffer = control.Substring(8);
+                    return IsType(buffer.Substring(0, buffer.Length - 1), db);
+                }
+            }
+
+            return db.isType(control);
+        }
     }
 }

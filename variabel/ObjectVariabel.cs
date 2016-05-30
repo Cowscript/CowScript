@@ -1,4 +1,5 @@
-﻿using script.Container;
+﻿using script.builder;
+using script.Container;
 using script.Type;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace script.variabel
                     Name = p.Name,
                     Context = p.DefaultValue,
                     IsPointer = true,
-                    IsPublic = p.IsPublic
+                    Level = p.Level,
                 };
                 i++;
             }
@@ -49,7 +50,7 @@ namespace script.variabel
                     Name = m.Name,
                     Context = new MethodVariabel(m, this, extra),
                     IsPointer = false,
-                    IsPublic = m.IsPublic
+                    Level = m.Level,
                 };
                 i++;
             }
@@ -84,13 +85,13 @@ namespace script.variabel
             int i;
             if((i = getIDByName(name)) != -1)
             {
-                return Items[i].IsPublic;
+                return Items[i].Level == ClassItemAccessLevel.Public;
             }
 
             return false;
         }
 
-        public void appendToPointer(string name, CVar value)
+        public bool appendToPointer(string name, CVar value)
         {
             int i;
             if((i=getIDByName(name)) != -1)
@@ -98,8 +99,11 @@ namespace script.variabel
                 if (Items[i].IsPointer)
                 {
                     Items[i].Context = value;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public override bool compare(CVar var, Posision pos, EnegyData data, VariabelDatabase db)
@@ -140,7 +144,7 @@ namespace script.variabel
             {
                 t = owner.Container.Methods["toInt"];
                 //let us test it and see what happens :)
-                if (t.Agument.size() == 0 && t.IsPublic)
+                if (t.Agument.size() == 0 && t.Level == ClassItemAccessLevel.Public)
                 {
                     toInt = (MethodVariabel)Items[getIDByName("toInt")].Context;
                     return toInt.call(new CVar[0], toInt.getShadowVariabelDatabase(db), data, pos).toInt(pos, data, db);
@@ -156,7 +160,7 @@ namespace script.variabel
                 if (extends.Name != "int" && extends.Container.Methods.ContainsKey("toInt"))
                 {
                     t = extends.Container.Methods["toInt"];
-                    if (t.Agument.size() == 0 && t.IsPublic)
+                    if (t.Agument.size() == 0 && t.Level == ClassItemAccessLevel.Public)
                     {
                         toInt = (MethodVariabel)Items[getIDByName("toInt")].Context;
                         return toInt.call(new CVar[0], toInt.getShadowVariabelDatabase(db), data, pos).toInt(pos, data, db);
@@ -191,7 +195,7 @@ namespace script.variabel
             {
                 t = owner.Container.Methods["toString"];
                 //let us test it and see what happens :)
-                if(t.Agument.size() == 0 && t.IsPublic)
+                if(t.Agument.size() == 0 && t.Level == ClassItemAccessLevel.Public)
                 {
                     toString = (MethodVariabel)Items[getIDByName("toString")].Context;
                     return toString.call(new CVar[0], toString.getShadowVariabelDatabase(db), data, pos).toString(pos, data, db);
@@ -207,7 +211,7 @@ namespace script.variabel
                 if(extends.Name != "string" && extends.Container.Methods.ContainsKey("toString"))
                 {
                     t = extends.Container.Methods["toString"];
-                    if(t.Agument.size() == 0 && t.IsPublic)
+                    if(t.Agument.size() == 0 && t.Level == ClassItemAccessLevel.Public)
                     {
                         toString = (MethodVariabel)Items[getIDByName("toString")].Context;
                         return toString.call(new CVar[0], toString.getShadowVariabelDatabase(db), data, pos).toString(pos, data, db);
@@ -239,7 +243,7 @@ namespace script.variabel
                             Name = p.Name,
                             Context = p.DefaultValue,
                             IsPointer = true,
-                            IsPublic = p.IsPublic
+                            Level = p.Level
                         });
                     }
                 }
@@ -253,7 +257,7 @@ namespace script.variabel
                             Name = m.Name,
                             Context = new MethodVariabel(m, this, extra),
                             IsPointer = false,
-                            IsPublic = m.IsPublic
+                            Level = m.Level
                         });
                     }
                 }

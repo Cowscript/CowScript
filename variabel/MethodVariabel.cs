@@ -1,4 +1,5 @@
 ﻿
+using script.builder;
 using script.Container;
 using script.stack;
 using script.Type;
@@ -9,7 +10,7 @@ namespace script.variabel
     {
         private ObjectVariabel obj;
         private VariabelDatabase extraVariabelDatabase;
-        private MethodContainer method;
+        public MethodContainer method;
 
         public MethodVariabel(MethodContainer method, ObjectVariabel obj, VariabelDatabase extra) : base(null)
         {
@@ -26,11 +27,11 @@ namespace script.variabel
             }
         }
 
-        public bool IsPublic
+        public ClassItemAccessLevel GetLevel
         {
             get
             {
-                return method.IsPublic;
+                return method.Level;
             }
         }
 

@@ -9,6 +9,7 @@ namespace script.plugin
 {
     class Time : PluginInterface
     {
+        public string Name { get { return "time"; } }
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class time = new Class("Time");

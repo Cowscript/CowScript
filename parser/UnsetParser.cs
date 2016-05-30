@@ -8,35 +8,46 @@ namespace script.parser
     {
         public CVar parse(EnegyData ed, VariabelDatabase db, Token token)
         {
-            if(token.next().type() != TokenType.Variabel)
-            {
-                ed.setError(new ScriptError("Missing variabel after 'unset'", token.getCache().posision()), db);
-                return null;
-            }
 
-            string varName = token.getCache().ToString();
+            UnsetNext(token, ed, db);
 
-            if (!db.isExists(varName))
-            {
-                ed.setError(new ScriptError("Unknown variabel: " + varName, token.getCache().posision()), db);
-                return null;
-            }
+            while (token.next().type() == TokenType.Comma)
+                UnsetNext(token, ed, db);
 
-            if (!db.allowedOveride(varName))
-            {
-                ed.setError(new ScriptError("You can not unset: " + varName, token.getCache().posision()), db);
-                return null;
-            }
 
-            if(token.next().type() != TokenType.End)
+            if(token.getCache().type() != TokenType.End)
             {
                 ed.setError(new ScriptError("Missing ; in end of unset", token.getCache().posision()), db);
                 return null;
             }
-
-            db.removeVariabel(varName);
             token.next();
             return null;
+        }
+
+        private void UnsetNext(Token token, EnegyData data, VariabelDatabase db)
+        {
+            if(token.next().type() != TokenType.Variabel)
+            {
+                data.setError(new ScriptError("Missing variabel in 'unset' statmenet", token.getCache().posision()), db);
+                return;
+            }
+
+            //control wee has the variabel in the variabel database. 
+            if (!db.isExists(token.getCache().ToString()))
+            {
+                data.setError(new ScriptError("Unknown variabel: " + token.getCache().ToString(), token.getCache().posision()), db);
+                return;
+            }
+
+            //is this variabel a global. 
+            if (!db.allowedOveride(token.getCache().ToString()))
+            {
+                data.setError(new ScriptError("You can not unset the variabel: " + token.getCache().ToString(), token.getCache().posision()), db);
+                return;
+            }
+
+            //unset the variabel. 
+            db.removeVariabel(token.getCache().ToString());
         }
     }
 }

@@ -6,6 +6,8 @@ namespace script.plugin
 {
     class Parser : PluginInterface
     {
+        public string Name { get { return "parser"; } }
+
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Function version = new Function();

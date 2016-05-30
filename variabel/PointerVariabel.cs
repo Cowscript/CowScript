@@ -15,7 +15,7 @@ namespace script.variabel
         {
             get
             {
-                return pointer.IsPublic;
+                return pointer.Level == builder.ClassItemAccessLevel.Public;
             }
         }
 

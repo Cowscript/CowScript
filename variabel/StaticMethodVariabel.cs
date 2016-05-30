@@ -6,7 +6,7 @@ namespace script.variabel
 {
     class StaticMethodVariabel : MethodVariabel
     {
-        private MethodContainer method;
+        public MethodContainer method = null;
         private ClassVariabel c;
         private VariabelDatabase extra;
 

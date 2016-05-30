@@ -1,4 +1,5 @@
-﻿using script.stack;
+﻿using script.builder;
+using script.stack;
 using script.variabel;
 
 namespace script.Container
@@ -9,7 +10,7 @@ namespace script.Container
 
         public string Name { set; get; }
         public bool IsStatic { set; get; }
-        public bool IsPublic { set; get; }
+        public ClassItemAccessLevel Level { set; get; }
         public AgumentStack Agument { set; get; }
         public MethodDelegate Body { set; get; }
         public bool SetVariabel { set; get; }

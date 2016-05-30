@@ -22,9 +22,9 @@ namespace script.builder
             pointer.IsStatic = true;
         }
 
-        public void SetPrivate()
+        public void SetLevel(ClassItemAccessLevel level)
         {
-            pointer.IsPublic = false;
+            pointer.Level = level;
         }
 
         public void SetDefault(CVar defaultValue)
@@ -38,7 +38,7 @@ namespace script.builder
             {
                 Name = name,
                 IsStatic = false,
-                IsPublic = true,
+                Level = ClassItemAccessLevel.Public,
                 DefaultValue = new NullVariabel(),
             };
         }

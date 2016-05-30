@@ -1,4 +1,5 @@
-﻿using script.variabel;
+﻿using script.builder;
+using script.variabel;
 
 namespace script.Container
 {
@@ -6,7 +7,7 @@ namespace script.Container
     {
         public string Name { set; get; }
         public bool IsStatic { set; get; }
-        public bool IsPublic { set; get; }
+        public ClassItemAccessLevel Level { set; get; }
         public CVar DefaultValue { set; get; }
     }
 }

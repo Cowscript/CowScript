@@ -7,6 +7,8 @@ namespace script.plugin
 {
     class Random : PluginInterface
     {
+        public string Name { get { return "random"; } }
+
         public void open(VariabelDatabase database, EnegyData data, Posision pos)
         {
             Class r = new Class("Random");
