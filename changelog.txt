@@ -33,7 +33,7 @@ Append config value "theread.use". When set to true (set true by default) the sy
 Redesigne Token system so it can be used in multi theard system
 Remove status in EnergyData class and put isError in it so it can be used in MultiTherad system.
 
-V0.6
+V0.6 Takes 26800,9781ms old test [approved to release]. new 29995,1321ms
  include more end one plugin in use. 'use "plugin", "plugin", "plugin";
  unset more end one variabel 'unset one, two, tree, four;'
  append option to load extra system plugin via dll files
