@@ -13,7 +13,7 @@ namespace script.variabel
 
         public ArrayVariabel(EnegyData data, VariabelDatabase db, Posision pos) : base(new ClassVariabel(new Class()), new Dictionary<string, PointerContainer>(), new Dictionary<string, MethodContainer>(), null, new System.Collections.ArrayList())
         {
-            Class c = new Class("array");
+            Class c = new Class("Array");
 
             Method length = new Method("length");
             length.SetBody(Length_caller);
