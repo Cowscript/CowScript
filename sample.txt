@@ -58,3 +58,11 @@ testFunc = func(text){
 
 asset(testFunc("CowScript") == "hallo CowScript", "Variabel func dont works");
 testFunc = null;
+
+c = class{
+  public function toString(){
+    return "test";
+  }
+}
+
+v = new c();
